@@ -78,8 +78,8 @@ function AddKV(p: { onAdd(k: string, v: string): void; keyPlaceholder?: string; 
     <div className="cx-kv-row cx-kv-new">
       <input className="cx-input" value={k} placeholder={p.keyPlaceholder ?? "name"} onChange={(e) => setK(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
       <input className="cx-input" value={v} placeholder={p.valuePlaceholder ?? "value"} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
-      <button className="cx-mini" onClick={add} title="Add">
-        +
+      <button className="cx-mini cx-confirm" onClick={add} title="Add this row" disabled={!k.trim()} data-testid="kv-add">
+        ✓
       </button>
     </div>
   );

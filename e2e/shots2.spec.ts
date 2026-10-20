@@ -1,0 +1,24 @@
+import { test } from "@playwright/test";
+import { boot } from "./helpers";
+const dir = process.env.SHOTS!;
+test.skip(!dir, "screenshots only on demand");
+test("cards", async ({ page }) => {
+  const theme = process.env.THEME ?? "dark";
+  await page.addInitScript((t) => localStorage.setItem("contextide:prefs", JSON.stringify({ theme: t })), theme);
+  await boot(page, "cards", { expand: false });
+  await page.getByTestId("new-version").click();
+  await page.locator(".cx-dialog select").first().selectOption("");
+  await page.getByTestId("new-version-ok").click();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${dir}/20-empty-${theme}.png` });
+  await page.locator(".cx-trailing > [data-testid=add-card]").click();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/21-plus-menu-${theme}.png` });
+  await page.keyboard.press("Escape");
+  await page.getByTestId("version-tab-A").click();
+  await page.locator(".cx-ins[data-fn=var]").first().click();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${dir}/22-var-picker-${theme}.png` });
+  await page.keyboard.press("Escape");
+  await page.screenshot({ path: `${dir}/23-cards-${theme}.png` });
+});

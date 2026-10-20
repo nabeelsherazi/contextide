@@ -29,6 +29,8 @@ export function forInsertion(fn: string): Insertable {
   return { mode: "inline", nodes: [schema.nodes.insertion.create({ fn, pos: JSON.stringify(info.defaults.pos), args: JSON.stringify(info.defaults.args) })] };
 }
 
+export const forVar = (name: string): Insertable => ({ mode: "inline", nodes: [schema.nodes.insertion.create({ fn: "var", pos: JSON.stringify([name]), args: "{}" })] });
+
 export const newDirective = (): Insertable => ({ mode: "card", node: schema.nodes.directive.create() });
 export const newSection = (): Insertable => ({ mode: "card", node: schema.nodes.section.create({ title: "" }, [schema.nodes.line.create()]) });
 

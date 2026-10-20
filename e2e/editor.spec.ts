@@ -20,7 +20,7 @@ test("typing autosaves to disk and styles markdown without hiding symbols", asyn
   await page.keyboard.type("# Notes");
   await page.keyboard.press("Enter");
   await page.keyboard.type("Be **very** careful.");
-  await expect(page.locator(".md-h1")).toHaveText("# Notes");
+  await expect(page.locator(".md-h1 .cx-text")).toHaveText("# Notes");
   await expect(page.locator(".md-bold").filter({ hasText: "very" })).toHaveText("very");
   await expect(page.locator(".md-bold.md-mark")).toHaveCount(2);
   await expectFile(page, A, (t) => !!t?.includes("# Notes\nBe **very** careful.\n"));
@@ -128,7 +128,7 @@ test("inline insertions: typed {{ }} becomes a pill, and the pill is configurabl
   await caretAfter(page, "Answer with one line per merchant");
   await page.keyboard.press("Enter");
   await page.keyboard.type('City: {{ var("city") }}');
-  await expect(page.locator(".cx-ins[data-fn=var]").last()).toHaveText(/New York City/);
+  await expect(page.locator(".cx-ins[data-fn=var]").last()).toHaveText(/city: New York City/);
   expect(await editorText(page)).toContain('City: {{ var("city") }}');
   await page.locator(".cx-ins[data-fn=now]").click();
   await page.getByTestId("ins-format").fill("YYYY");
@@ -165,7 +165,41 @@ test("lint hints point at problems", async ({ page }) => {
 test("there is always a line to type into after the last card", async ({ page }) => {
   await hook(page, "writeDisk", A, '---\ntitle: A\nflavor: general\n---\nIntro\n{% use "directive:tone/address-as-you" %}\n');
   await expect(page.locator(".cx-use")).toHaveCount(1);
-  await page.locator(".cx-message-body > .cx-line:last-child").click();
+  await page.locator(".cx-message-body > .cx-line:last-child").click({ position: { x: 40, y: 20 } });
   await page.keyboard.type("Typed after the chip.");
   await expectFile(page, A, (t) => !!t?.endsWith('{% use "directive:tone/address-as-you" %}\nTyped after the chip.\n'));
+});
+
+test("cards: sections float with bridges; the + opens the block menu", async ({ page }) => {
+  await expect(page.locator(".cx-message-body > .cx-section.cx-solo")).toHaveCount(3);
+  await expect(page.locator(".cx-message-body > .cx-has-next > .cx-tail.down").first()).toBeVisible();
+  // a fresh version is empty except for the +
+  await page.getByTestId("new-version").click();
+  await page.locator(".cx-dialog select").first().selectOption("");
+  await page.getByTestId("new-version-ok").click();
+  await expect(page.locator(".cx-empty-doc")).toBeVisible();
+  const plus = page.locator(".cx-trailing > [data-testid=add-card]");
+  await plus.click();
+  await expect(page.getByTestId("slash-menu")).toBeVisible();
+  await page.keyboard.press("Escape");
+  expect(await editorText(page)).toBe("\n"); // the "/" it typed is cleaned up
+  await plus.click();
+  await page.keyboard.type("Section");
+  await page.keyboard.press("Enter");
+  await expect.poll(() => editorText(page)).toContain("{% section %}");
+});
+
+test("variables: picker shows existing variables as bubbles; + new goes to settings", async ({ page }) => {
+  await caretAfter(page, "Answer with one line per merchant");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("Prices are in ");
+  await page.getByTestId("ins-var").click();
+  await expect(page.getByTestId("var-cluster")).toBeVisible();
+  await expect(page.getByTestId("var-cluster").locator(".cx-bubble")).toHaveCount(5); // 4 seeded + new
+  await page.getByTestId("var-currency").click();
+  await expect.poll(() => editorText(page)).toContain('Prices are in {{ var("currency") }}');
+  await expect(page.locator(".cx-ins[data-fn=var]").last()).toHaveText(/currency: USD/);
+  await page.locator(".cx-ins[data-fn=var]").last().click();
+  await page.getByTestId("var-add").click();
+  await expect(page.getByTestId("workspace-vars")).toBeVisible();
 });

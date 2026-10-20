@@ -1,5 +1,7 @@
 import { Command } from "cmdk";
-import { useStore, setProject, setVersion, toggle, openModal, currentVersion } from "../state/store";
+import { useStore, setProject, setVersion, toggle, openModal, currentVersion, setPrefs } from "../state/store";
+
+const toggleTheme = () => setPrefs({ theme: document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light" });
 import { activeEditor, runCommand } from "../editor/active";
 import * as cmd from "../editor/commands";
 import { allItems } from "./items";
@@ -41,6 +43,9 @@ export function Palette() {
             <Command.Item onSelect={act(() => useStore.setState({ left: false, right: false }))}>Focus mode ⌘.</Command.Item>
             <Command.Item onSelect={act(() => openModal({ t: "settings" }))}>Settings</Command.Item>
             <Command.Item onSelect={act(startTour)}>Replay tutorial</Command.Item>
+            <Command.Item value="toggle day night theme" onSelect={act(toggleTheme)}>
+              Switch to {document.documentElement.getAttribute("data-theme") === "light" ? "night" : "day"}
+            </Command.Item>
             <Command.Item onSelect={act(() => openModal({ t: "settings", tab: "endpoints" }))}>Settings: endpoints</Command.Item>
             <Command.Item onSelect={act(() => useStore.setState({ view: { t: "project" } }))}>Project settings & scoring</Command.Item>
           </Command.Group>

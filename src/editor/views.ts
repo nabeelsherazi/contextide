@@ -8,6 +8,7 @@ import { insertionInfo, describeInsertion } from "../core/insertions";
 import { pipeFromString } from "./convert";
 import { applyPipeline } from "../core/pipeline";
 import { setCardAttrs, removeMessage } from "./commands";
+import { openSlashAt } from "./plugins";
 
 export interface EditorCtx {
   ws(): Workspace;
@@ -52,6 +53,16 @@ function handle(view: EditorView, getPos: () => number | undefined, dom: HTMLEle
   return g;
 }
 
+/** The two halves of the bridge between neighbouring cards (shown by layout classes). */
+function tails(dom: HTMLElement) {
+  for (const dir of ["up", "down"]) {
+    const t = h("span", `cx-tail ${dir}`);
+    t.contentEditable = "false";
+    t.setAttribute("aria-hidden", "true");
+    dom.appendChild(t);
+  }
+}
+
 /** Let the browser (not ProseMirror) handle mouse/drag events that start on a card handle. */
 const isDrop = (e: Event) => e.type === "dragover" || e.type === "dragenter" || e.type === "dragleave" || e.type === "drop";
 const fromHandle = (e: Event) => !!(e.target as HTMLElement)?.closest?.(".cx-handle") && (e.type === "mousedown" || e.type === "dragstart" || e.type === "click");
@@ -89,6 +100,23 @@ class TextCardView implements NodeView {
       const b = h("span", "cx-badge");
       b.contentEditable = "false";
       this.dom.appendChild(b);
+    }
+    tails(this.dom);
+    if (kind === "line") {
+      // the floating "+" at the end of a message (shown on the trailing line)
+      const add = h("button", "cx-add");
+      add.contentEditable = "false";
+      add.type = "button";
+      add.title = "Add a block (or just start typing)";
+      add.setAttribute("data-testid", "add-card");
+      add.innerHTML = '<span class="cx-add-plus">+</span><span class="cx-add-hint">type, or choose a block</span>';
+      add.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const pos = getPos();
+        if (pos !== undefined) openSlashAt(view, pos);
+      });
+      this.dom.appendChild(add);
     }
     this.sync(node);
   }
@@ -230,6 +258,7 @@ class SectionView implements NodeView {
     head.append(handle(view, getPos, this.dom), this.title, this.from, h("span", "cx-spacer"), this.frame, this.list, this.mute, more);
     this.contentDOM = h("div", "cx-section-body");
     this.dom.append(head, this.contentDOM);
+    tails(this.dom);
     this.sync();
   }
   sync() {
@@ -273,6 +302,7 @@ abstract class ChipView implements NodeView {
     this.dom = h("div", `cx-card cx-chip cx-${kind}`);
     this.body = h("div", "cx-chip-body");
     this.dom.append(handle(view, getPos, this.dom), this.body);
+    tails(this.dom);
     this.dom.addEventListener("dblclick", () => this.activate());
     this.body.addEventListener("click", (e) => {
       if ((e.target as HTMLElement).closest("button,select,input")) return;

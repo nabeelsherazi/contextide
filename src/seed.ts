@@ -45,7 +45,7 @@ export const SEED: Record<string, string> = {
     name: "ContextIDE",
     flavors: ["general", "claude", "gemini", "gpt", "qwen", "gemma"],
     types: ["task", "safety", "tone", "format", "context", "examples"],
-    vars: { city: "New York City" },
+    vars: { city: "New York City", currency: "USD", locale: "en-US", timezone: "America/New_York" },
     endpoints: [
       { id: "lmstudio", name: "LM Studio", baseUrl: "http://localhost:1234/v1", style: "chat", headers: {}, extraBody: {} },
       { id: "llama", name: "llama-server", baseUrl: "http://localhost:8080/v1", style: "chat", headers: {}, extraBody: {} },

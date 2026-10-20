@@ -122,7 +122,7 @@ flavor, falling back to `general`. Switching a version's flavor swaps every word
 
 ## 3. Editor
 
-* A centered glass stage, one page per message (the message chrome is hidden for a single User message).
+* A notebook-style canvas: each section and each library or data card floats as its own card, and consecutive text lines share one card. Neighbouring cards are joined by a hairline bridge. A new version starts empty except for a floating **+**; each message ends with one. The message chrome is hidden for a single User message.
 * Click into empty space and type to write freeform text. Press `/` on an empty line to open an inline block picker.
 * Markdown is styled but never hidden: `# heading` renders larger with the `#` still shown;
   `**bold**`, `*italic*`, `` `code` ``, `> quote`, list markers and `<xml-ish>` tags are tinted.

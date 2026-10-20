@@ -56,7 +56,7 @@ function VersionPage() {
       </header>
       {s.rendered && <RenderedView />}
       {(
-        <div className="cx-paper" style={s.rendered ? { display: "none" } : undefined}>
+        <div className="cx-canvas" style={s.rendered ? { display: "none" } : undefined}>
           <Editor
             key={v.file}
             docKey={v.file}

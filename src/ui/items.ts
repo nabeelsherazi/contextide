@@ -1,7 +1,7 @@
 // Things you can insert: shared by the slash menu, the palette and the drawer.
-import type { Workspace, Block } from "../core/workspace";
+import { type Workspace, type Block, mergedVars } from "../core/workspace";
 import { INSERTIONS } from "../core/insertions";
-import { forBlock, forData, forInsertion, newDirective, newSection, type Insertable } from "../editor/blocks";
+import { forBlock, forData, forInsertion, forVar, newDirective, newSection, type Insertable } from "../editor/blocks";
 
 export interface MenuItem {
   id: string;
@@ -33,6 +33,9 @@ export function allItems(ws: Workspace, project: string | undefined, flavor: str
     { id: "new:directive", icon: "❯", label: "Directive", hint: "new, inline", group: "New", make: newDirective },
     { id: "new:section", icon: "▭", label: "Section", hint: "new, inline", group: "New", make: newSection },
   ];
+  const p0 = ws.projects.find((x) => x.name === project);
+  for (const [name, value] of Object.entries(mergedVars(ws, p0)))
+    items.push({ id: `var:${name}`, icon: "＄", label: name, hint: value.length > 30 ? value.slice(0, 29) + "…" : value, group: "Variable", keywords: `variable var ${value}`, make: () => forVar(name) });
   for (const ins of INSERTIONS) items.push({ id: `ins:${ins.fn}`, icon: ins.icon, label: ins.label, hint: ins.fn, group: "Insertion", keywords: ins.doc, make: () => forInsertion(ins.fn) });
   for (const b of visibleBlocks(ws, project, flavor).sort((a, b2) => a.kind.localeCompare(b2.kind) || a.fn.localeCompare(b2.fn)))
     items.push({

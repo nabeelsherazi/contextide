@@ -10,6 +10,7 @@ import { cardPositions, nodeToPM, trailingLineFixes } from "./convert";
 import { gapCursor } from "prosemirror-gapcursor";
 import * as cmd from "./commands";
 import { markdownPlugin } from "./markdown";
+import { layoutPlugin } from "./layout";
 import { parseBody } from "../core/doc";
 import { parsePipeline, fmtPipeline } from "../core/expr";
 import type { Analysis } from "../state/analysis";
@@ -93,6 +94,8 @@ export interface SlashState {
   open: boolean;
   from: number;
   query: string;
+  /** opened by the "+" button: dismissing it removes the "/" it typed */
+  auto?: boolean;
 }
 export const slashKey = new PluginKey<SlashState>("cx-slash");
 
@@ -111,12 +114,13 @@ export const slashPlugin = (bridge: SlashBridge) =>
         const meta = tr.getMeta(slashKey) as Partial<SlashState> | undefined;
         const next = meta ? { ...prev, ...meta } : { ...prev, from: tr.mapping.map(prev.from) };
         if (!next.open) return { open: false, from: 0, query: "" };
+        const auto = next.auto;
         // always derive the query from the document, so fast typing can't race the menu opening
         const { $head } = state.selection;
         const from = next.from;
         const text = $head.parent.isTextblock && from >= $head.start() && $head.pos >= from + 1 ? state.doc.textBetween(from, $head.pos) : "";
         if (!text.startsWith("/") || /\s/.test(text) || !state.selection.empty) return { open: false, from: 0, query: "" };
-        return { open: true, from, query: text.slice(1) };
+        return { open: true, from, query: text.slice(1), auto };
       },
     },
     view: () => ({
@@ -137,7 +141,9 @@ export const slashPlugin = (bridge: SlashBridge) =>
         const st = slashKey.getState(view.state);
         if (!st?.open) return false;
         if (e.key === "Escape") {
-          view.dispatch(view.state.tr.setMeta(slashKey, { open: false }));
+          const tr = view.state.tr;
+          if (st.auto) tr.delete(st.from, view.state.selection.head);
+          view.dispatch(tr.setMeta(slashKey, { open: false, auto: false }));
           return true;
         }
         if (["ArrowUp", "ArrowDown", "Enter", "Tab"].includes(e.key)) return bridge.onKey(e.key);
@@ -145,6 +151,15 @@ export const slashPlugin = (bridge: SlashBridge) =>
       },
     },
   });
+
+/** Open the block menu on an (empty) line at `pos`, as if "/" was typed there. */
+export function openSlashAt(view: EditorView, pos: number) {
+  const at = pos + 1;
+  const tr = view.state.tr.insertText("/", at).setMeta(slashKey, { open: true, from: at, query: "", auto: true });
+  tr.setSelection(TextSelection.create(tr.doc, at + 1));
+  view.dispatch(tr);
+  view.focus();
+}
 
 /** Remove the "/query" text and close the menu. */
 export function consumeSlash(view: EditorView): Transaction {
@@ -201,7 +216,7 @@ export const DRAG_MIME = "application/x-contextide";
 
 export type DragPayload = { type: "card"; node: unknown } | { type: "inline"; node: unknown };
 
-export const interactionPlugin = (onContextMenu: (view: EditorView, e: MouseEvent) => void) =>
+export const interactionPlugin = (onContextMenu: (view: EditorView, e: MouseEvent) => void, onInlineDrop?: (view: EditorView, pos: number) => void) =>
   new Plugin({
     props: {
       handleDrop(view, event) {
@@ -219,8 +234,10 @@ export const interactionPlugin = (onContextMenu: (view: EditorView, e: MouseEven
         const node = schema.nodeFromJSON(payload.node);
         if (payload.type === "inline") {
           const $p = view.state.doc.resolve(at.pos);
-          if ($p.parent.isTextblock) view.dispatch(view.state.tr.insert(at.pos, node).scrollIntoView());
-          else cmd.insertCard(schema.nodes.line.create(null, node), at.pos)(view.state, view.dispatch);
+          if ($p.parent.isTextblock) {
+            view.dispatch(view.state.tr.insert(at.pos, node).scrollIntoView());
+            onInlineDrop?.(view, at.pos);
+          } else cmd.insertCard(schema.nodes.line.create(null, node), at.pos)(view.state, view.dispatch);
         } else cmd.insertCard(node, at.pos)(view.state, view.dispatch);
         view.focus();
         return true;
@@ -291,10 +308,10 @@ const trailingLinePlugin = () =>
     },
   });
 
-export function basePlugins(o: { slash: SlashBridge; onContextMenu: (view: EditorView, e: MouseEvent) => void; analysis: AnalysisOpts; extraKeys?: Record<string, Command> }) {
+export function basePlugins(o: { slash: SlashBridge; onContextMenu: (view: EditorView, e: MouseEvent) => void; onInlineDrop?: (view: EditorView, pos: number) => void; analysis: AnalysisOpts; extraKeys?: Record<string, Command> }) {
   return [
     slashPlugin(o.slash),
-    interactionPlugin(o.onContextMenu),
+    interactionPlugin(o.onContextMenu, o.onInlineDrop),
     editorKeymap(o.extraKeys),
     keymap(baseKeymap),
     history(),
@@ -302,6 +319,7 @@ export function basePlugins(o: { slash: SlashBridge; onContextMenu: (view: Edito
     gapCursor(),
     trailingLinePlugin(),
     markdownPlugin(),
+    layoutPlugin(),
     analysisPlugin(o.analysis),
   ];
 }

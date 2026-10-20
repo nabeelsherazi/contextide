@@ -148,7 +148,7 @@ export function BlockPage() {
       {b.kind === "tool" || b.kind === "schema" ? (
         <JsonBody file={b.file} body={body} kind={b.kind} header={String(b.front.digestHeader ?? DEFAULT_DIGEST_HEADER)} />
       ) : (
-        <div className="cx-paper cx-paper-block">
+        <div className="cx-canvas cx-canvas-block">
           <Editor key={b.file} docKey={b.file} text={body} mode="block" flavor={b.flavor} onSave={(t) => updateBlockBody(b.file, t)} />
         </div>
       )}

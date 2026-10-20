@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useStore, closeModal, currentProject, currentVersion, setPrefs, setKey, getKey, closeWorkspace, type Modal } from "../../state/store";
+import { useStore, closeModal, openModal, currentProject, currentVersion, setPrefs, setKey, getKey, closeWorkspace, type Modal } from "../../state/store";
 import { createVersion, updateVersionMeta, deleteVersion, createProject, saveBlock, createDataSource, patchWorkspace, updateBlockBody, nextVersionId } from "../../state/actions";
 import { activeEditor } from "../../editor/active";
 import { replaceWithRef, detachRef, setCardAttrs, selectedCards } from "../../editor/commands";
@@ -11,6 +11,7 @@ import { evalInsertion, insertionInfo } from "../../core/insertions";
 import { Field, KeyValues, JsonField, Seg, NumField } from "../widgets";
 import { forgetWorkspace } from "../../fs/persist";
 import { startTour } from "../Tour";
+import { VarCluster } from "../VarCluster";
 
 function Dialog(p: { title: string; children: ReactNode; footer?: ReactNode; wide?: boolean; testid?: string }) {
   useEffect(() => {
@@ -56,7 +57,8 @@ function QuickPick(p: { value: string; options: string[]; onChange(v: string): v
 function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
   const s = useStore();
   const v = currentVersion(s);
-  const [kind, setKind] = useState<"directive" | "section">(m.kind);
+  // a single line saves as a directive; several cards (or a section) save as a section
+  const kind = m.kind;
   const [type, setType] = useState("");
   const [fn, setFn] = useState(m.title ?? "");
   const [flavor, setFlavor] = useState(v?.flavor ?? "general");
@@ -73,7 +75,7 @@ function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
   };
   return (
     <Dialog
-      title={`Save to ${scope}`}
+      title={`Save ${kind} to ${scope}`}
       testid="save-block"
       footer={
         <>
@@ -84,17 +86,9 @@ function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
         </>
       }
     >
-      <label>
-        kind
-        <Seg
-          value={kind}
-          options={[
-            ["directive", "Directive"],
-            ["section", "Section"],
-          ]}
-          onChange={setKind}
-        />
-      </label>
+      <p className="cx-fine" data-testid="save-kind">
+        {kind === "directive" ? "Saving this line as a directive." : "Saving these cards together as a section."}
+      </p>
       <label>
         type
         <QuickPick value={type} options={types} onChange={setType} placeholder="e.g. safety, tone, task instruction" testid="save-type" />
@@ -615,7 +609,8 @@ function Insertion({ pos }: { pos: number }) {
   const info = insertionInfo(fn);
   return (
     <Dialog
-      title={`${info?.icon ?? ""} ${info?.label ?? fn}`}
+      title={fn === "var" ? "Insert a variable" : `${info?.icon ?? ""} ${info?.label ?? fn}`}
+      wide={fn === "var" && Object.keys(mergedVars(s.ws, currentProject(s))).length > 6}
       testid="insertion-dialog"
       footer={
         <>
@@ -630,7 +625,7 @@ function Insertion({ pos }: { pos: number }) {
           </button>
           <span className="cx-spacer" />
           <Cancel />
-          <button
+          {fn !== "var" && (<button
             className="cx-btn primary"
             data-testid="insertion-ok"
             onClick={() => {
@@ -639,7 +634,7 @@ function Insertion({ pos }: { pos: number }) {
             }}
           >
             Apply
-          </button>
+          </button>)}
         </>
       }
     >
@@ -665,17 +660,15 @@ function Insertion({ pos }: { pos: number }) {
         </>
       )}
       {fn === "var" && (
-        <>
-          <label>
-            variable
-            <QuickPick value={String(posArgs[0] ?? "")} options={Object.keys(vars)} onChange={(v) => setPos([v])} testid="ins-var" />
-          </label>
-          <label>
-            default if unset
-            <input className="cx-input" value={String(args.default ?? "")} onChange={(e) => setArg("default", e.target.value)} />
-          </label>
-          <p className="cx-fine">Set variables in Settings (workspace) or the project page.</p>
-        </>
+        <VarCluster
+          vars={Object.entries(vars).map(([name, value]) => ({ name, value, scope: p?.settings.vars?.[name] !== undefined ? "project" : "workspace" }))}
+          value={String(posArgs[0] ?? "")}
+          onPick={(name) => {
+            setCardAttrs(pos, { pos: JSON.stringify([name]), args: "{}" })(ed.view.state, ed.view.dispatch);
+            closeModal();
+          }}
+          onAdd={() => openModal({ t: "settings", tab: "variables" })}
+        />
       )}
       {fn === "randint" && (
         <div className="cx-row2">
@@ -701,9 +694,9 @@ function Insertion({ pos }: { pos: number }) {
           <input className="cx-input" value={String(args.seed ?? "")} onChange={(e) => setArg("seed", e.target.value === "" ? undefined : isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value))} />
         </label>
       )}
-      <div className="cx-ins-preview">
+      {fn !== "var" && <div className="cx-ins-preview">
         renders as: <b data-testid="ins-preview">{preview.text || "∅"}</b> {preview.error && <span className="cx-danger">{preview.error}</span>}
-      </div>
+      </div>}
     </Dialog>
   );
 }

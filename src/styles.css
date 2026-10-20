@@ -2914,3 +2914,375 @@ input[type="range"] {
   background-size: 260px 260px, 310px 310px, 380px 380px, 290px 290px, 340px 340px, 100% 100%, 100% 100%;
   box-shadow: 20px 0 60px rgba(20, 40, 80, 0.25);
 }
+
+/* xml-ish tags in prompts read as structure */
+.md-xml {
+  font-family: "Fira Mono", var(--font-mono);
+  font-size: 0.74em;
+  letter-spacing: -0.01em;
+}
+.cx-confirm:not(:disabled) {
+  color: var(--good);
+}
+.cx-confirm:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* day: keep secondary text legible over the sky */
+:root[data-theme="light"] {
+  --ink-2: #3a332a;
+  --ink-3: #5d5448;
+  --ink-4: #8f8474;
+  --glass: rgba(251, 249, 244, 0.86);
+  --glass-strong: rgba(253, 252, 248, 0.97);
+  --rule: rgba(40, 50, 70, 0.12);
+  --rule-2: rgba(40, 50, 70, 0.2);
+}
+:root[data-theme="light"] .cx-topbar,
+:root[data-theme="light"] .cx-status {
+  background: rgba(251, 249, 244, 0.72);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+:root[data-theme="light"] .cx-page-head {
+  text-shadow: 0 1px 12px rgba(255, 255, 255, 0.6);
+}
+:root[data-theme="light"] .cx-page-sub,
+:root[data-theme="light"] .cx-page-actions .cx-btn.ghost {
+  color: #2f3a4a;
+}
+
+/* variable bubbles */
+.cx-cluster-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+.cx-cluster {
+  position: relative;
+}
+.cx-bubble {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--rule-2);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.09), transparent 55%),
+    var(--paper-2);
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px;
+  transform: scale(var(--s, 1));
+  transition: transform 0.35s var(--ease), border-color 0.2s, box-shadow 0.3s var(--ease);
+  animation: cx-bubble-in 0.5s var(--ease) both;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+.cx-bubble:hover {
+  transform: scale(calc(var(--s, 1) * 1.1));
+  z-index: 2;
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 0 26px rgba(232, 184, 120, 0.22), 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+.cx-bubble.on {
+  border-color: var(--accent);
+}
+.cx-bubble.project {
+  border-color: color-mix(in srgb, var(--sky) 45%, transparent);
+}
+.cx-bubble-name {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.05;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cx-bubble-name.long {
+  font-size: 13.5px;
+}
+.cx-bubble-value {
+  font-size: 10px;
+  color: var(--ink-3);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+}
+.cx-bubble.add {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+.cx-bubble-plus {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  line-height: 0.9;
+  color: var(--accent);
+}
+@keyframes cx-bubble-in {
+  from {
+    opacity: 0;
+    transform: scale(calc(var(--s, 1) * 0.6));
+  }
+}
+:root[data-theme="light"] .cx-bubble {
+  background: radial-gradient(circle at 35% 28%, #fff, rgba(255, 255, 255, 0.7) 60%);
+  box-shadow: 0 6px 16px rgba(30, 60, 110, 0.14);
+}
+
+/* =====================================================================
+   Notebook canvas: floating cards joined by bridges
+   ===================================================================== */
+
+:root {
+  --card: #17151b;
+  --card-2: #1b1920;
+  --card-edge: rgba(255, 255, 255, 0.075);
+  --card-hi: rgba(255, 255, 255, 0.05);
+  --card-drop: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 34px -14px rgba(0, 0, 0, 0.7);
+  --card-drop-last: 0 18px 30px -16px rgba(0, 0, 0, 0.75);
+  --bridge: 34px;
+  --tail-x: 50%;
+  --tail-w: 16px;
+  --neck: 3px;
+}
+:root[data-theme="light"] {
+  --card: #fffdf9;
+  --card-2: #fffefb;
+  --card-edge: rgba(40, 50, 70, 0.11);
+  --card-hi: rgba(255, 255, 255, 0.95);
+  --card-drop: 0 1px 2px rgba(30, 50, 80, 0.08), 0 16px 30px -14px rgba(30, 60, 110, 0.32);
+  --card-drop-last: 0 16px 28px -16px rgba(30, 60, 110, 0.35);
+}
+
+.cx-canvas {
+  max-width: var(--page-width);
+  padding: 6px 0 40px;
+}
+.cx-canvas .cx-editor {
+  min-height: 40vh;
+}
+.cx-canvas-block .cx-editor {
+  min-height: 120px;
+}
+
+/* text runs: consecutive lines share one card */
+.cx-message-body > .cx-tc {
+  background-color: var(--card);
+  border-left: 1px solid var(--card-edge);
+  border-right: 1px solid var(--card-edge);
+  padding-left: 28px;
+  padding-right: 28px;
+  margin: 0;
+}
+.cx-message-body > .cx-tc-first {
+  border-top: 1px solid var(--card-edge);
+  border-radius: 14px 14px 0 0;
+  padding-top: 18px;
+  box-shadow: inset 0 1px 0 var(--card-hi);
+}
+.cx-message-body > .cx-tc-last {
+  border-bottom: 1px solid var(--card-edge);
+  border-radius: 0 0 14px 14px;
+  padding-bottom: 18px;
+  box-shadow: var(--card-drop-last);
+}
+.cx-message-body > .cx-tc-first.cx-tc-last {
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 var(--card-hi), var(--card-drop-last);
+}
+.cx-message-body > .cx-tc.cx-directive {
+  padding-left: 46px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.cx-message-body > .cx-tc-first.cx-directive {
+  padding-top: 18px;
+}
+.cx-message-body > .cx-tc-last.cx-directive {
+  padding-bottom: 18px;
+}
+.cx-message-body > .cx-tc.cx-directive::before {
+  left: 28px;
+  top: calc(var(--page-size) * 0.3 + 5px);
+  bottom: calc(var(--page-size) * 0.3 + 5px);
+}
+.cx-message-body > .cx-tc-first.cx-directive::before {
+  top: calc(var(--page-size) * 0.3 + 18px);
+}
+.cx-message-body > .cx-tc-last.cx-directive::before {
+  bottom: calc(var(--page-size) * 0.3 + 18px);
+}
+
+/* sections and chips float on their own */
+.cx-message-body > .cx-solo {
+  margin: 0;
+  background-color: var(--card);
+  background-image: linear-gradient(180deg, var(--card-2), var(--card) 60%);
+  border: 1px solid var(--card-edge);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 var(--card-hi), var(--card-drop);
+}
+.cx-message-body > .cx-section.cx-solo {
+  padding: 14px 24px 18px;
+}
+.cx-message-body > .cx-chip.cx-solo {
+  padding: 12px 18px 13px 20px;
+  border-left: 3px solid var(--k-use);
+}
+.cx-message-body > .cx-chip.cx-data.cx-solo {
+  border-left-color: var(--k-data);
+}
+.cx-message-body > .cx-chip.cx-tool.cx-solo,
+.cx-message-body > .cx-chip.cx-schema.cx-solo {
+  border-left-color: var(--k-tool);
+}
+.cx-message-body > .cx-solo.cx-stable,
+.cx-message-body > .cx-tc.cx-stable {
+  background-image: linear-gradient(var(--stable), var(--stable));
+}
+
+/* spacing between cards is the bridge */
+.cx-message-body > .cx-has-prev {
+  margin-top: var(--bridge);
+}
+.cx-message-body > .cx-gap + .cx-has-prev {
+  margin-top: 0;
+}
+.cx-message-body > .cx-gap {
+  background: none;
+  padding: 0 28px;
+}
+.cx-message-body > .cx-gap-bridge {
+  background: linear-gradient(90deg, transparent calc(var(--tail-x) - var(--neck) / 2), var(--card) calc(var(--tail-x) - var(--neck) / 2), var(--card) calc(var(--tail-x) + var(--neck) / 2), transparent calc(var(--tail-x) + var(--neck) / 2));
+}
+
+/* the bridge: two speech-bubble tails that meet in the middle */
+.cx-tail {
+  display: none;
+  position: absolute;
+  left: calc(var(--tail-x) - var(--tail-w) / 2);
+  width: var(--tail-w);
+  height: calc(var(--bridge) / 2 + 1px);
+  background: var(--card);
+  z-index: 2;
+  pointer-events: none;
+}
+.cx-tail.down {
+  top: calc(100% - 0px);
+  -webkit-mask:
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 0 100%, transparent 98%, #000 100%) left / 50% 100% no-repeat,
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 100% 100%, transparent 98%, #000 100%) right / 50% 100% no-repeat;
+  mask:
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 0 100%, transparent 98%, #000 100%) left / 50% 100% no-repeat,
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 100% 100%, transparent 98%, #000 100%) right / 50% 100% no-repeat;
+}
+.cx-tail.up {
+  bottom: 100%;
+  -webkit-mask:
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 0 0, transparent 98%, #000 100%) left / 50% 100% no-repeat,
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 100% 0, transparent 98%, #000 100%) right / 50% 100% no-repeat;
+  mask:
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 0 0, transparent 98%, #000 100%) left / 50% 100% no-repeat,
+    radial-gradient(calc((var(--tail-w) - var(--neck)) / 2) calc(var(--bridge) / 2) at 100% 0, transparent 98%, #000 100%) right / 50% 100% no-repeat;
+}
+.cx-message-body > .cx-has-next > .cx-tail.down,
+.cx-message-body > .cx-has-prev > .cx-tail.up {
+  display: block;
+}
+
+/* the floating "+" at the end of a message */
+.cx-add {
+  display: none;
+}
+.cx-message-body > .cx-trailing {
+  margin-top: 20px;
+  min-height: 48px;
+  background: none;
+  padding: 0 28px;
+}
+.cx-message-body > .cx-trailing > .cx-handle {
+  display: none;
+}
+.cx-message-body > .cx-trailing > .cx-add {
+  display: inline-flex;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-3);
+  padding: 4px;
+  user-select: none;
+}
+.cx-add-plus {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--accent);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 0 0 rgba(232, 184, 120, 0), var(--card-drop);
+  transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease), border-color 0.2s;
+}
+.cx-add:hover .cx-add-plus {
+  transform: scale(1.08);
+  border-color: var(--accent);
+  box-shadow: 0 0 24px rgba(232, 184, 120, 0.3), var(--card-drop);
+}
+.cx-add-hint {
+  display: none;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+}
+.cx-message-body > .cx-empty-doc {
+  margin-top: 0;
+  min-height: 160px;
+}
+.cx-message-body > .cx-empty-doc > .cx-add {
+  flex-direction: column;
+}
+.cx-message-body > .cx-empty-doc .cx-add-plus {
+  width: 54px;
+  height: 54px;
+  font-size: 34px;
+}
+.cx-message-body > .cx-empty-doc .cx-add-hint {
+  display: block;
+}
+
+/* the bridge is a hairline tab, as if made to be torn: a tiny flare at each card, a perforation in the middle */
+.cx-tail.down::after,
+.cx-tail.up::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 9px;
+  height: 1px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(90deg, var(--ink-4) 0 1px, transparent 1px 3px);
+  opacity: 0.8;
+}
+.cx-tail.down::after {
+  bottom: 0;
+}
+.cx-tail.up::after {
+  display: none;
+}

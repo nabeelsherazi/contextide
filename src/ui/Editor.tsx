@@ -136,6 +136,7 @@ export function Editor(p: EditorProps) {
             },
           },
           onContextMenu: (_v, e) => useStore.setState({ menu: { x: e.clientX, y: e.clientY, kind: "editor" } }),
+          onInlineDrop: (v, pos) => configureIfUnset(v, pos),
           analysis: { tint: useStore.getState().prefs.prefixTint, gutter: useStore.getState().prefs.gutter },
           extraKeys: {
             "Mod-s": () => {
@@ -281,4 +282,11 @@ export function applyItem(view: EditorView, item: MenuItem) {
   if (ins.mode === "card") insertCard(ins.node)(view.state, view.dispatch);
   else for (const n of ins.nodes) insertInline(n)(view.state, view.dispatch);
   view.focus();
+  if (ins.mode === "inline") configureIfUnset(view, view.state.selection.from - 1);
+}
+
+/** A variable dropped in without a name opens the picker. */
+export function configureIfUnset(view: EditorView, pos: number) {
+  const n = view.state.doc.nodeAt(pos);
+  if (n?.type.name === "insertion" && n.attrs.fn === "var" && (n.attrs.pos === "[]" || n.attrs.pos === "")) openModal({ t: "insertion", pos });
 }

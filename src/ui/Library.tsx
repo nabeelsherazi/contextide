@@ -111,7 +111,19 @@ export function Library() {
               {expanded && kind === "insertion" && (
                 <div className="cx-type">
                   {INSERTIONS.map((ins) => (
-                    <DragRow key={ins.fn} make={() => forInsertion(ins.fn)} icon={ins.icon} label={ins.label} sub={ins.fn} title={ins.doc} testid={`ins-${ins.fn}`} />
+                    <DragRow
+                      key={ins.fn}
+                      make={() => forInsertion(ins.fn)}
+                      icon={ins.icon}
+                      label={ins.label}
+                      sub={ins.fn}
+                      title={`${ins.doc} — click to insert at the cursor, or drag`}
+                      testid={`ins-${ins.fn}`}
+                      onOpen={() => {
+                        const ed = activeEditor();
+                        if (ed) applyItem(ed.view, { id: "", icon: "", label: "", group: "", make: () => forInsertion(ins.fn) });
+                      }}
+                    />
                   ))}
                 </div>
               )}

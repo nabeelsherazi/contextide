@@ -18,7 +18,7 @@ export interface InsertionInfo {
 
 export const INSERTIONS: InsertionInfo[] = [
   { fn: "now", label: "Date / time", icon: "⌚", doc: "Current date/time with a format, timezone and offset; can be frozen", defaults: { pos: [], args: { format: "dddd, MMMM D, YYYY" } } },
-  { fn: "var", label: "Variable", icon: "＄", doc: "A workspace or project variable", defaults: { pos: ["name"], args: {} } },
+  { fn: "var", label: "Variable", icon: "＄", doc: "A workspace or project variable", defaults: { pos: [], args: {} } },
   { fn: "uuid", label: "UUID", icon: "#", doc: "Random UUID (seed it to make it stable)", defaults: { pos: [], args: {} } },
   { fn: "randint", label: "Random int", icon: "⚄", doc: "Random integer between min and max", defaults: { pos: [], args: { min: 1, max: 100 } } },
   { fn: "pick", label: "Random pick", icon: "⚂", doc: "Pick one of a list", defaults: { pos: [["a", "b", "c"]], args: {} } },
@@ -155,7 +155,9 @@ export function describeInsertion(fn: string, pos: Value[], args: Args, ctx: Ins
   if (fn === "var") {
     const name = str(pos[0] ?? args.name);
     const v = ctx.vars[name] ?? (args.default !== undefined ? str(args.default) : undefined);
-    return v === undefined ? `${name} (unset)` : v.length > 40 ? v.slice(0, 39) + "…" : v;
+    if (!name) return "choose a variable…";
+    if (v === undefined) return `${name}: (unset)`;
+    return `${name}: ${v.length > 40 ? v.slice(0, 39) + "…" : v}`;
   }
   if (fn === "pick") return `pick ${Array.isArray(pos[0]) ? pos[0].length : 0}`;
   const r = evalInsertion(fn, pos, args, { ...ctx, seed: ctx.seed }, "preview");

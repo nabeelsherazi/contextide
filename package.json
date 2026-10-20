@@ -15,6 +15,7 @@
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
     "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/fira-mono": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/libre-baskerville": "^5.3.0",

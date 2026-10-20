@@ -152,3 +152,29 @@ test("endpoint headers and extra body reach the request", async ({ page }) => {
   expect(seen.body.chat_template_kwargs).toEqual({ enable_thinking: false });
   expect(seen.body.model).toBe("some-model");
 });
+
+test("a single line saves only as a directive", async ({ page }) => {
+  await page.locator(".cx-text", { hasText: "Answer with one line" }).click({ button: "right" });
+  await page.getByTestId("menu-save-library").click();
+  await expect(page.getByTestId("save-kind")).toContainText("directive");
+  await expect(page.getByTestId("save-block").getByText("Section", { exact: true })).toHaveCount(0);
+});
+
+test("palette toggles day and night", async ({ page }) => {
+  await page.locator(".cx-text", { hasText: "You categorize" }).click();
+  await page.keyboard.press(`${mod}+k`);
+  await page.getByTestId("palette-input").fill("day night");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+});
+
+test("variables are added with a checkmark", async ({ page }) => {
+  await page.getByTestId("open-settings").click();
+  await page.getByTestId("settings-variables").click();
+  const kv = page.getByTestId("workspace-vars");
+  await expect(kv.getByTestId("kv-add")).toBeDisabled();
+  await kv.locator(".cx-kv-new input").first().fill("company");
+  await kv.locator(".cx-kv-new input").nth(1).fill("Acme");
+  await kv.getByTestId("kv-add").click();
+  await expectFile(page, "contextide.json", (t) => !!t?.includes('"company": "Acme"'));
+});
