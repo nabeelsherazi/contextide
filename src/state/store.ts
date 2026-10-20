@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toast as sonner } from "sonner";
 import { type Workspace, buildWorkspace, type Project, type Version } from "../core/workspace";
 import type { PromptDoc } from "../core/doc";
 import type { Vfs } from "../fs/vfs";
@@ -286,7 +287,7 @@ export function toggle(k: "left" | "right" | "rendered") {
 }
 
 export function toast(msg: string) {
-  set((s) => ({ toast: { msg, n: (s.toast?.n ?? 0) + 1 } }));
+  sonner(msg);
 }
 
 export const openModal = (m: Modal) => set({ modal: m });

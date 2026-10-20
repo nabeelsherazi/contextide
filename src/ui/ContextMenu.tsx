@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
 import { NodeSelection } from "prosemirror-state";
 import { useStore, openModal } from "../state/store";
 import { activeEditor, runCommand } from "../editor/active";
 import * as cmd from "../editor/commands";
 import { saveSelectionToLibrary } from "./modals/Modals";
 import { resolveBlock } from "../core/workspace";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface Item {
   label: string;
@@ -16,15 +16,6 @@ interface Item {
 
 export function ContextMenu() {
   const menu = useStore((s) => s.menu);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!menu) return;
-    const close = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) useStore.setState({ menu: null });
-    };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
-  }, [menu]);
   const ed = activeEditor();
   if (!menu || !ed) return null;
   const st = ed.view.state;
@@ -74,20 +65,30 @@ export function ContextMenu() {
     }
   }
   if (!items.length) return null;
-  const x = Math.min(menu.x, window.innerWidth - 240);
-  const y = Math.min(menu.y, window.innerHeight - items.length * 32 - 20);
   return (
-    <div ref={ref} className="cx-popover cx-menu" style={{ left: x, top: y }} data-testid="context-menu" onMouseDown={(e) => e.preventDefault()}>
-      {items.map((it, i) =>
-        it === "-" ? (
-          <div key={i} className="cx-menu-sep" />
-        ) : (
-          <button key={i} className={`cx-menu-item${it.danger ? " danger" : ""}`} onClick={it.run} data-testid={it.testid}>
-            <span className="cx-menu-label">{it.label}</span>
-            {it.keys && <span className="cx-menu-hint">{it.keys}</span>}
-          </button>
-        ),
-      )}
-    </div>
+    <DropdownMenu
+      open
+      modal={false}
+      onOpenChange={(o) => {
+        if (!o) close();
+      }}
+    >
+      {/* an invisible anchor at the click point */}
+      <DropdownMenuTrigger asChild>
+        <span aria-hidden style={{ position: "fixed", left: menu.x, top: menu.y, width: 1, height: 1 }} />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-[230px]" data-testid="context-menu" onCloseAutoFocus={(e) => e.preventDefault()}>
+        {items.map((it, i) =>
+          it === "-" ? (
+            <DropdownMenuSeparator key={i} />
+          ) : (
+            <DropdownMenuItem key={i} variant={it.danger ? "destructive" : "default"} onSelect={it.run} data-testid={it.testid}>
+              {it.label}
+              {it.keys && <DropdownMenuShortcut>{it.keys}</DropdownMenuShortcut>}
+            </DropdownMenuItem>
+          ),
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

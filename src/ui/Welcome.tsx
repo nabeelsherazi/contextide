@@ -3,6 +3,7 @@ import { openVfs } from "../state/store";
 import { handleVfs, fsAccessSupported, browserWorkspaceRoot } from "../fs/vfs";
 import { loadSaved, saveWorkspace, hasPermission, forgetWorkspace, type Saved } from "../fs/persist";
 import { SEED, EMPTY } from "../seed";
+import { Button } from "@/components/ui/button";
 
 async function seedIfEmpty(vfs: ReturnType<typeof handleVfs>, withSample: boolean) {
   const all = await vfs.readAll();
@@ -76,37 +77,37 @@ export function Welcome() {
             <p>
               <b>{pendingInit.name}</b> isn't a ContextIDE workspace yet. Set it up?
             </p>
-            <button className="cx-btn primary" onClick={() => init(true)} data-testid="init-sample">
+            <Button size="lg" onClick={() => init(true)} data-testid="init-sample">
               Starter library + sample project
-            </button>
-            <button className="cx-btn" onClick={() => init(false)}>
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => init(false)}>
               Empty workspace
-            </button>
-            <button className="cx-btn ghost" onClick={() => setPendingInit(null)}>
+            </Button>
+            <Button size="lg" variant="ghost" onClick={() => setPendingInit(null)}>
               Cancel
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="cx-welcome-actions">
             {saved?.kind === "folder" && (
-              <button className="cx-btn primary" onClick={reopen}>
+              <Button size="lg" onClick={reopen}>
                 Reopen “{saved.handle.name}”
-              </button>
+              </Button>
             )}
             {supported ? (
-              <button className={`cx-btn${saved?.kind === "folder" ? "" : " primary"}`} onClick={openFolder} data-testid="open-folder">
+              <Button size="lg" variant={saved?.kind === "folder" ? "outline" : "default"} onClick={openFolder} data-testid="open-folder">
                 Open a folder…
-              </button>
+              </Button>
             ) : (
               <p className="cx-warn">This browser can't open local folders. Use Chrome, Edge, Arc or Brave — or try a browser workspace below.</p>
             )}
-            <button className="cx-btn" onClick={browser} data-testid="browser-workspace">
+            <Button size="lg" variant="outline" onClick={browser} data-testid="browser-workspace">
               Try it in browser storage
-            </button>
+            </Button>
             {saved && (
-              <button className="cx-btn ghost" onClick={() => forgetWorkspace().then(() => setSaved(null))}>
+              <Button size="lg" variant="ghost" onClick={() => forgetWorkspace().then(() => setSaved(null))}>
                 Forget last workspace
-              </button>
+              </Button>
             )}
           </div>
         )}

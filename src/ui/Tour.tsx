@@ -1,6 +1,7 @@
 // First-launch tutorial: a short spotlight tour (~60 seconds). Replayable from Settings.
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { useStore } from "../state/store";
+import { Button } from "@/components/ui/button";
 
 const SEEN_KEY = "contextide:tutorial-seen";
 
@@ -210,22 +211,22 @@ export function Tour() {
         <h3>{s.title}</h3>
         <p>{s.body}</p>
         <div className="cx-tour-foot">
-          <button className="cx-btn ghost small" onClick={endTour} data-testid="tour-skip">
+          <Button variant="ghost" size="sm" onClick={endTour} data-testid="tour-skip">
             Skip
-          </button>
+          </Button>
           <span className="cx-tour-dots">
             {STEPS.map((_, i) => (
               <span key={i} className={i === step ? "on" : ""} />
             ))}
           </span>
           {step > 0 && (
-            <button className="cx-btn small" onClick={back}>
+            <Button variant="outline" size="sm" onClick={back}>
               Back
-            </button>
+            </Button>
           )}
-          <button className="cx-btn primary small" onClick={next} data-testid="tour-next" autoFocus>
+          <Button size="sm" onClick={next} data-testid="tour-next" autoFocus>
             {last ? "Start writing" : "Next"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -51,3 +51,9 @@ export async function mouseDrag(page: Page, from: { x: number; y: number }, to: 
   await page.mouse.move(to.x, to.y, { steps: 12 });
   await page.mouse.up();
 }
+
+/** Pick an option in a shadcn/Radix Select by its value. */
+export async function choose(page: Page, testid: string, value: string) {
+  await page.getByTestId(testid).click();
+  await page.locator(`[role=option][data-value="${value}"]`).click();
+}

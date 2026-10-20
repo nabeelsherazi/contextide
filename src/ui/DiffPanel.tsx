@@ -3,30 +3,24 @@ import { useStore, currentProject } from "../state/store";
 import type { RunRecord } from "../core/runs";
 import { ago, pct } from "./OutputsPanel";
 import { variance, ablationRanking, similarity } from "../run/compare";
-import { Seg } from "./widgets";
+import { Seg, Choice, Hint } from "./widgets";
+import { Fold } from "./OutputsPanel";
 import { jumpToCard } from "./StatusBar";
 
 function RunPick(p: { runs: RunRecord[]; value: string | null; index: number; onChange(id: string | null, index: number): void; testid: string }) {
   const r = p.runs.find((x) => x.id === p.value);
   return (
-    <div className="cx-runpick">
-      <select className="cx-select" value={p.value ?? ""} onChange={(e) => p.onChange(e.target.value || null, 0)} data-testid={p.testid}>
-        <option value="">choose a run…</option>
-        {p.runs.map((x) => (
-          <option key={x.id} value={x.id}>
-            {x.version} · {x.mode} · {ago(x.time)}
-            {x.accuracy !== undefined ? ` · ${pct(x.accuracy)}` : ""}
-          </option>
-        ))}
-      </select>
+    <div className="flex min-w-0 gap-1.5">
+      <Choice
+        value={p.value ?? ""}
+        placeholder="choose a run…"
+        onChange={(v) => p.onChange(v || null, 0)}
+        options={p.runs.map((x) => [x.id, `${x.version} · ${x.mode} · ${ago(x.time)}${x.accuracy !== undefined ? ` · ${pct(x.accuracy)}` : ""}`] as [string, string])}
+        className="min-w-0 flex-1"
+        testid={p.testid}
+      />
       {r && r.outputs.length > 1 && (
-        <select className="cx-select" value={p.index} onChange={(e) => p.onChange(p.value, Number(e.target.value))}>
-          {r.outputs.map((o, i) => (
-            <option key={i} value={i}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <Choice value={String(p.index)} onChange={(v) => p.onChange(p.value, Number(v))} options={r.outputs.map((o, i) => [String(i), o.label] as [string, string])} className="max-w-[45%] min-w-0" />
       )}
     </div>
   );
@@ -61,12 +55,9 @@ function Variance({ r }: { r: RunRecord }) {
         )}
       </p>
       {v.groups.slice(0, 4).map((g, i) => (
-        <details key={i} open={i === 0}>
-          <summary>
-            ×{g.length} {i === 0 ? "(most common)" : ""}
-          </summary>
+        <Fold key={i} defaultOpen={i === 0} title={`×${g.length} ${i === 0 ? "(most common)" : ""}`}>
           {i === 0 ? <pre className="cx-output cx-small">{r.outputs[g[0]].text}</pre> : <WordDiff a={r.outputs[v.groups[0][0]].text} b={r.outputs[g[0]].text} />}
-        </details>
+        </Fold>
       ))}
     </div>
   );
@@ -77,7 +68,7 @@ function Ablation({ r }: { r: RunRecord }) {
   return (
     <div className="cx-card-panel" data-testid="ablation">
       <h4>Ablation: what each card does</h4>
-      <p className="cx-fine">Each row muted one card. Bigger change = that card matters more. Click to jump to it.</p>
+      <Hint>Each row muted one card. Bigger change = that card matters more. Click to jump to it.</Hint>
       <table className="cx-table">
         <thead>
           <tr>
@@ -110,7 +101,7 @@ export function DiffPanel() {
   const rb = p.runs.find((x) => x.id === b);
   const textOf = (r: RunRecord, i: number) => (what === "output" ? (r.outputs[i]?.text ?? "") : (r.outputs[i]?.prompt ?? r.prompt));
   return (
-    <div className="cx-diffpanel" data-testid="diff-panel">
+    <div className="flex flex-col gap-2" data-testid="diff-panel">
       <RunPick runs={p.runs} value={a} index={ai} onChange={(id, i) => set({ a: id, ai: i })} testid="diff-a" />
       <RunPick runs={p.runs} value={b} index={bi} onChange={(id, i) => set({ b: id, bi: i })} testid="diff-b" />
       <Seg
@@ -135,20 +126,19 @@ export function DiffPanel() {
           </div>
           <WordDiff a={textOf(ra, ai)} b={textOf(rb, bi)} />
           {what === "output" && (
-            <details>
-              <summary>Side by side</summary>
-              <div className="cx-sbs">
+            <Fold title="Side by side">
+              <div className="grid grid-cols-2 gap-1.5">
                 <pre className="cx-output cx-small">{textOf(ra, ai)}</pre>
                 <pre className="cx-output cx-small">{textOf(rb, bi)}</pre>
               </div>
-            </details>
+            </Fold>
           )}
         </>
       )}
       {ra && !rb && ra.mode === "repeat" && <Variance r={ra} />}
       {ra && !rb && ra.mode === "ablation" && <Ablation r={ra} />}
-      {ra && !rb && ra.mode !== "repeat" && ra.mode !== "ablation" && <p className="cx-panel-empty">Pick a second run to diff against.</p>}
-      {!ra && <p className="cx-panel-empty">Pick a run. Repeat runs show their variance, ablation runs show which cards matter.</p>}
+      {ra && !rb && ra.mode !== "repeat" && ra.mode !== "ablation" && <Hint>Pick a second run to diff against.</Hint>}
+      {!ra && <Hint>Pick a run. Repeat runs show their variance, ablation runs show which cards matter.</Hint>}
     </div>
   );
 }

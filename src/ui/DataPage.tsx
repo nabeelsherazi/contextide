@@ -3,7 +3,12 @@ import { useStore, writeFile, removeFile, renameFile, openModal, currentProject 
 import { dataItems } from "../core/workspace";
 import { itemText } from "../core/data";
 import { patchProject } from "../state/actions";
-import { Seg, Field } from "./widgets";
+import { Seg, Field, Choice, FieldRow } from "./widgets";
+import { PageHeader } from "./PageHeader";
+import { Fold } from "./OutputsPanel";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Trash2 } from "lucide-react";
 import { slug } from "../core/doc";
 
 export function DataPage() {
@@ -37,15 +42,12 @@ export function DataPage() {
   const setOpts = (patch: Record<string, unknown>) => patchProject({ data: { ...(p.settings.data ?? {}), [d.name]: { ...(p.settings.data?.[d.name] ?? {}), ...patch } } });
   const isKey = p.settings.eval?.key === d.name;
   return (
-    <div className="cx-datapage" data-testid="data-page">
-      <header className="cx-page-head">
-        <button className="cx-btn small ghost" onClick={() => useStore.setState({ view: { t: "version" } })}>
-          ← {s.version ?? "back"}
-        </button>
-        <span className="cx-page-title static">
-          <span className="cx-page-kind">▤ data · {d.format}</span>
+    <div data-testid="data-page">
+      <PageHeader
+        kind={`▤ data · ${d.format}`}
+        title={
           <Field
-            className="cx-page-id cx-bare"
+            className="h-auto border-transparent bg-transparent px-0 font-serif text-[34px] focus-visible:ring-0"
             value={d.name}
             onCommit={(v) => {
               const n = slug(v);
@@ -55,49 +57,54 @@ export function DataPage() {
               }
             }}
           />
-        </span>
-      </header>
-      <div className="cx-block-meta">
+        }
+        right={isKey ? <Badge variant="outline">answer key</Badge> : null}
+      />
+      <div className="mb-3.5 flex max-w-[var(--page-width)] flex-wrap items-end gap-x-4 gap-y-2.5">
         {d.format === "text" && (
-          <label>
-            items are
-            <Seg value={d.opts.split ?? "lines"} options={[["lines", "lines"], ["paragraphs", "paragraphs"], ["whole", "one item"]]} onChange={(v) => setOpts({ split: v })} testid="data-split" />
-          </label>
+          <FieldRow label="items are">
+            <Seg
+              value={d.opts.split ?? "lines"}
+              options={[
+                ["lines", "lines"],
+                ["paragraphs", "paragraphs"],
+                ["whole", "one item"],
+              ]}
+              onChange={(v) => setOpts({ split: v })}
+              testid="data-split"
+            />
+          </FieldRow>
         )}
         {parsed.fields.length > 0 && (
-          <label>
-            id field
-            <select className="cx-select" value={d.opts.id ?? ""} onChange={(e) => setOpts({ id: e.target.value || undefined })}>
-              <option value="">(auto: id / name)</option>
-              {parsed.fields.map((f) => (
-                <option key={f}>{f}</option>
-              ))}
-            </select>
-          </label>
+          <FieldRow label="id field">
+            <Choice value={d.opts.id ?? ""} onChange={(v) => setOpts({ id: v || undefined })} options={[["", "(auto: id / name)"], ...parsed.fields]} />
+          </FieldRow>
         )}
-        <span className="cx-spacer" />
-        <span className={parsed.error ? "cx-danger" : "cx-muted-text"} data-testid="data-count">
+        <span className="flex-1" />
+        <span className={parsed.error ? "text-danger" : "text-ink-3"} data-testid="data-count">
           {parsed.error ? `parse error: ${parsed.error}` : `${parsed.items.length} items${parsed.fields.length ? ` · fields: ${parsed.fields.join(", ")}` : ""}`}
         </span>
-        {isKey ? <span className="cx-badge">answer key</span> : null}
       </div>
       <textarea className="cx-data-text" spellCheck={false} value={text} onChange={(e) => save(e.target.value)} placeholder="Paste your data here — one item per line, paragraphs, JSONL, CSV…" data-testid="data-text" />
       {parsed.items.length > 0 && (
-        <details className="cx-data-preview" open>
-          <summary>First items as parsed</summary>
-          <ol>
-            {parsed.items.slice(0, 6).map((it, i) => (
-              <li key={i}>
-                <code>{itemText(it).slice(0, 300)}</code>
-              </li>
-            ))}
-          </ol>
-        </details>
+        <div className="mt-3 max-w-[var(--page-width)] text-ink-2">
+          <Fold defaultOpen title="First items as parsed">
+            <ol className="my-1.5 pl-6">
+              {parsed.items.slice(0, 6).map((it, i) => (
+                <li key={i}>
+                  <code className="text-[11.5px]">{itemText(it).slice(0, 300)}</code>
+                </li>
+              ))}
+            </ol>
+          </Fold>
+        </div>
       )}
-      <footer className="cx-block-foot">
-        <span className="cx-muted-text">{d.file}</span>
-        <button
-          className="cx-btn small ghost danger"
+      <footer className="mt-[18px] flex max-w-[var(--page-width)] items-center justify-between text-[12px] text-ink-3">
+        <span>{d.file}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-danger"
           onClick={() =>
             openModal({
               t: "confirm",
@@ -111,8 +118,8 @@ export function DataPage() {
             })
           }
         >
-          Delete
-        </button>
+          <Trash2 className="size-3.5" /> Delete
+        </Button>
       </footer>
     </div>
   );

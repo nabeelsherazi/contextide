@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useStore, closeModal, openModal, currentProject, currentVersion, setPrefs, setKey, getKey, closeWorkspace, type Modal } from "../../state/store";
 import { createVersion, updateVersionMeta, deleteVersion, createProject, saveBlock, createDataSource, patchWorkspace, updateBlockBody, nextVersionId } from "../../state/actions";
 import { activeEditor } from "../../editor/active";
@@ -8,44 +8,50 @@ import { fmtBody, slug, type Node } from "../../core/doc";
 import { resolveBlock, variantsOf, dataItems, usages, type Endpoint, type BlockKind, mergedVars } from "../../core/workspace";
 import { applyPipeline, TRANSFORMS } from "../../core/pipeline";
 import { evalInsertion, insertionInfo } from "../../core/insertions";
-import { Field, KeyValues, JsonField, Seg, NumField } from "../widgets";
+import { Field, KeyValues, JsonField, Seg, NumField, Choice, CheckRow, FieldRow } from "../widgets";
+import { Dialog as UIDialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { forgetWorkspace } from "../../fs/persist";
 import { startTour } from "../Tour";
 import { VarCluster } from "../VarCluster";
 
 function Dialog(p: { title: string; children: ReactNode; footer?: ReactNode; wide?: boolean; testid?: string }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeModal();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
   return (
-    <div className="cx-overlay" onMouseDown={(e) => e.target === e.currentTarget && closeModal()}>
-      <div className={`cx-dialog${p.wide ? " wide" : ""}`} role="dialog" aria-label={p.title} data-testid={p.testid ?? "dialog"}>
-        <h2>{p.title}</h2>
-        <div className="cx-dialog-body">{p.children}</div>
-        {p.footer && <div className="cx-dialog-foot">{p.footer}</div>}
-      </div>
-    </div>
+    <UIDialog open onOpenChange={(o) => !o && closeModal()}>
+      <DialogContent showCloseButton={false} className={cn("max-h-[86vh] overflow-y-auto", p.wide ? "sm:max-w-[720px]" : "sm:max-w-[460px]")} data-testid={p.testid ?? "dialog"} aria-describedby={undefined}>
+        <DialogHeader>
+          <DialogTitle>{p.title}</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3">
+          {p.children}
+        </div>
+        {p.footer && <DialogFooter className="mt-1 items-center sm:justify-end">{p.footer}</DialogFooter>}
+      </DialogContent>
+    </UIDialog>
   );
 }
 
 const Cancel = () => (
-  <button className="cx-btn ghost" onClick={closeModal}>
+  <Button variant="ghost" onClick={closeModal}>
     Cancel
-  </button>
+  </Button>
 );
 
 /** Quick-pick chips plus free text. */
 function QuickPick(p: { value: string; options: string[]; onChange(v: string): void; placeholder?: string; testid?: string }) {
   return (
-    <div className="cx-quickpick">
-      <input className="cx-input" value={p.value} placeholder={p.placeholder} onChange={(e) => p.onChange(e.target.value)} data-testid={p.testid} />
-      <div className="cx-chips">
+    <div className="flex flex-col gap-1.5 not-italic">
+      <Input value={p.value} placeholder={p.placeholder} onChange={(e) => p.onChange(e.target.value)} data-testid={p.testid} />
+      <div className="flex flex-wrap gap-1">
         {p.options.map((o) => (
-          <button key={o} className={`cx-chip-btn${o === p.value ? " on" : ""}`} onClick={() => p.onChange(o)}>
+          <Button key={o} type="button" variant="outline" size="xs" className={cn("font-sans text-[11.5px]", o === p.value && "border-gold/60 bg-gold-soft text-gold")} onClick={() => p.onChange(o)}>
             {o}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -80,30 +86,26 @@ function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
       footer={
         <>
           <Cancel />
-          <button className="cx-btn primary" disabled={!can} onClick={save} data-testid="save-block-ok">
+          <Button disabled={!can} onClick={save} data-testid="save-block-ok">
             Save
-          </button>
+          </Button>
         </>
       }
     >
-      <p className="cx-fine" data-testid="save-kind">
+      <p className="font-serif text-[14px] text-ink-3 italic" data-testid="save-kind">
         {kind === "directive" ? "Saving this line as a directive." : "Saving these cards together as a section."}
       </p>
-      <label>
-        type
+      <FieldRow label="type">
         <QuickPick value={type} options={types} onChange={setType} placeholder="e.g. safety, tone, task instruction" testid="save-type" />
-      </label>
-      <label>
-        function
+      </FieldRow>
+      <FieldRow label="function">
         <QuickPick value={fn} options={fns} onChange={setFn} placeholder="e.g. Anti Prompt Injection" testid="save-fn" />
-        {fns.includes(fn) && <span className="cx-fine">Adds a {flavor} variant to the existing “{fn}”.</span>}
-      </label>
-      <label>
-        flavor
+        {fns.includes(fn) && <span className="font-serif text-[14px] text-ink-3 italic">Adds a {flavor} variant to the existing “{fn}”.</span>}
+      </FieldRow>
+      <FieldRow label="flavor">
         <QuickPick value={flavor} options={s.ws.settings.flavors} onChange={(f) => setFlavor(slug(f) === "untitled" ? "general" : f.toLowerCase())} testid="save-flavor" />
-      </label>
-      <label>
-        scope
+      </FieldRow>
+      <FieldRow label="scope">
         <Seg
           value={scope}
           options={[
@@ -112,10 +114,10 @@ function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
           ]}
           onChange={setScope}
         />
-      </label>
-      <label className="cx-check">
-        <input type="checkbox" checked={link} onChange={(e) => setLink(e.target.checked)} /> replace the selection with a live reference
-      </label>
+      </FieldRow>
+      <CheckRow checked={link} onChange={setLink}>
+        replace the selection with a live reference
+      </CheckRow>
       <pre className="cx-output cx-small">{m.text}</pre>
     </Dialog>
   );
@@ -139,8 +141,7 @@ function NewVersion({ fork }: { fork?: string }) {
       footer={
         <>
           <Cancel />
-          <button
-            className="cx-btn primary"
+          <Button
             disabled={!id.trim() || taken}
             onClick={async () => {
               closeModal();
@@ -149,39 +150,23 @@ function NewVersion({ fork }: { fork?: string }) {
             data-testid="new-version-ok"
           >
             Create
-          </button>
+          </Button>
         </>
       }
     >
-      <label>
-        name
-        <input className="cx-input" value={id} onChange={(e) => setId(e.target.value)} data-testid="version-id" />
-        {taken && <span className="cx-field-err">already exists</span>}
-      </label>
-      <label>
-        subtitle — the philosophy of this approach
-        <input className="cx-input" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="e.g. few-shot heavy, XML everything, terse" data-testid="version-subtitle" autoFocus />
-      </label>
-      <label>
-        start from
-        <select className="cx-select" value={from} onChange={(e) => setFrom(e.target.value)}>
-          <option value="">a blank page</option>
-          {p?.versions.map((v) => (
-            <option key={v.id} value={v.id}>
-              a copy of {v.title}
-              {v.subtitle ? ` · ${v.subtitle}` : ""}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        flavor
-        <select className="cx-select" value={flavor} onChange={(e) => setFlavor(e.target.value)}>
-          {s.ws.settings.flavors.map((f) => (
-            <option key={f}>{f}</option>
-          ))}
-        </select>
-      </label>
+      <FieldRow label="name">
+        <Input value={id} onChange={(e) => setId(e.target.value)} data-testid="version-id" />
+        {taken && <span className="text-[11.5px] text-danger not-italic">already exists</span>}
+      </FieldRow>
+      <FieldRow label="subtitle — the philosophy of this approach">
+        <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="e.g. few-shot heavy, XML everything, terse" data-testid="version-subtitle" autoFocus />
+      </FieldRow>
+      <FieldRow label="start from">
+        <Choice value={from} onChange={setFrom} options={[["", "a blank page"], ...(p?.versions ?? []).map((v) => [v.id, `a copy of ${v.title}${v.subtitle ? ` · ${v.subtitle}` : ""}`] as [string, string])]} testid="version-from" />
+      </FieldRow>
+      <FieldRow label="flavor">
+        <Choice value={flavor} onChange={setFlavor} options={s.ws.settings.flavors} />
+      </FieldRow>
     </Dialog>
   );
 }
@@ -204,24 +189,23 @@ function VersionSettings({ id }: { id: string }) {
         <>
           {p.versions.length > 1 &&
             (confirmDel ? (
-              <button
-                className="cx-btn danger"
+              <Button
+                variant="destructive"
                 onClick={() => {
                   closeModal();
                   deleteVersion(v.id);
                 }}
               >
                 Really delete {v.id}
-              </button>
+              </Button>
             ) : (
-              <button className="cx-btn ghost danger" onClick={() => setConfirmDel(true)}>
+              <Button variant="ghost" className="text-danger" onClick={() => setConfirmDel(true)}>
                 Delete…
-              </button>
+              </Button>
             ))}
-          <span className="cx-spacer" />
+          <span className="flex-1" />
           <Cancel />
-          <button
-            className="cx-btn primary"
+          <Button
             disabled={!name.trim() || taken}
             onClick={() => {
               closeModal();
@@ -230,27 +214,20 @@ function VersionSettings({ id }: { id: string }) {
             data-testid="version-settings-ok"
           >
             Save
-          </button>
+          </Button>
         </>
       }
     >
-      <label>
-        name
-        <input className="cx-input" value={name} onChange={(e) => setName(e.target.value)} />
-        {taken && <span className="cx-field-err">already exists</span>}
-      </label>
-      <label>
-        subtitle
-        <input className="cx-input" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} autoFocus />
-      </label>
-      <label>
-        flavor
-        <select className="cx-select" value={flavor} onChange={(e) => setFlavor(e.target.value)}>
-          {[...new Set([...s.ws.settings.flavors, v.flavor])].map((f) => (
-            <option key={f}>{f}</option>
-          ))}
-        </select>
-      </label>
+      <FieldRow label="name">
+        <Input value={name} onChange={(e) => setName(e.target.value)} />
+        {taken && <span className="text-[11.5px] text-danger not-italic">already exists</span>}
+      </FieldRow>
+      <FieldRow label="subtitle">
+        <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} autoFocus />
+      </FieldRow>
+      <FieldRow label="flavor">
+        <Choice value={flavor} onChange={setFlavor} options={[...new Set([...s.ws.settings.flavors, v.flavor])]} />
+      </FieldRow>
     </Dialog>
   );
 }
@@ -266,8 +243,7 @@ function NewProject() {
       footer={
         <>
           <Cancel />
-          <button
-            className="cx-btn primary"
+          <Button
             disabled={!name.trim() || exists}
             onClick={() => {
               closeModal();
@@ -276,20 +252,18 @@ function NewProject() {
             data-testid="new-project-ok"
           >
             Create
-          </button>
+          </Button>
         </>
       }
     >
-      <label>
-        name
-        <input className="cx-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. sentiment-triage" autoFocus data-testid="project-name" />
-        {name && <span className="cx-fine">folder: projects/{slug(name)}</span>}
-        {exists && <span className="cx-field-err">already exists</span>}
-      </label>
-      <label>
-        what is it for?
-        <textarea className="cx-input" rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} />
-      </label>
+      <FieldRow label="name">
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. sentiment-triage" autoFocus data-testid="project-name" />
+        {name && <span className="font-serif text-[14px] text-ink-3 italic">folder: projects/{slug(name)}</span>}
+        {exists && <span className="text-[11.5px] text-danger not-italic">already exists</span>}
+      </FieldRow>
+      <FieldRow label="what is it for?">
+        <Textarea rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} />
+      </FieldRow>
     </Dialog>
   );
 }
@@ -317,8 +291,7 @@ function NewBlock({ kind }: { kind: BlockKind }) {
       footer={
         <>
           <Cancel />
-          <button
-            className="cx-btn primary"
+          <Button
             disabled={!fn.trim()}
             data-testid="new-block-ok"
             onClick={async () => {
@@ -328,28 +301,24 @@ function NewBlock({ kind }: { kind: BlockKind }) {
             }}
           >
             Create
-          </button>
+          </Button>
         </>
       }
     >
       {!named && (
-        <label>
-          type
+        <FieldRow label="type">
           <QuickPick value={type} options={s.ws.settings.types} onChange={setType} placeholder="e.g. safety" testid="new-block-type" />
-        </label>
+        </FieldRow>
       )}
-      <label>
-        {named ? "name" : "function"}
-        <input className="cx-input" value={fn} onChange={(e) => setFn(e.target.value)} autoFocus data-testid="new-block-fn" />
-      </label>
+      <FieldRow label={named ? "name" : "function"}>
+        <Input value={fn} onChange={(e) => setFn(e.target.value)} autoFocus data-testid="new-block-fn" />
+      </FieldRow>
       {!named && (
-        <label>
-          flavor
+        <FieldRow label="flavor">
           <QuickPick value={flavor} options={s.ws.settings.flavors} onChange={(f) => setFlavor(f.toLowerCase())} />
-        </label>
+        </FieldRow>
       )}
-      <label>
-        scope
+      <FieldRow label="scope">
         <Seg
           value={scope}
           options={[
@@ -358,7 +327,7 @@ function NewBlock({ kind }: { kind: BlockKind }) {
           ]}
           onChange={setScope}
         />
-      </label>
+      </FieldRow>
     </Dialog>
   );
 }
@@ -375,8 +344,7 @@ function NewData() {
       footer={
         <>
           <Cancel />
-          <button
-            className="cx-btn primary"
+          <Button
             disabled={!slug(name) || slug(name) === "untitled"}
             data-testid="new-data-ok"
             onClick={async () => {
@@ -385,16 +353,14 @@ function NewData() {
             }}
           >
             Create
-          </button>
+          </Button>
         </>
       }
     >
-      <label>
-        name
-        <input className="cx-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. merchants, paragraphs-under-test" autoFocus data-testid="data-name" />
-      </label>
-      <label>
-        format
+      <FieldRow label="name">
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. merchants, paragraphs-under-test" autoFocus data-testid="data-name" />
+      </FieldRow>
+      <FieldRow label="format">
         <Seg
           value={fmt}
           options={[
@@ -406,8 +372,8 @@ function NewData() {
           ]}
           onChange={setFmt}
         />
-      </label>
-      <textarea className="cx-data-text small" placeholder="Paste data here (you can also do it later)" value={text} onChange={(e) => setText(e.target.value)} data-testid="new-data-text" />
+      </FieldRow>
+      <Textarea className="min-h-[200px] font-mono text-[12.5px]" placeholder="Paste data here (you can also do it later)" value={text} onChange={(e) => setText(e.target.value)} data-testid="new-data-text" />
     </Dialog>
   );
 }
@@ -440,15 +406,15 @@ function RefEdit({ pos }: { pos: number }) {
       footer={
         <>
           {block && (
-            <button className="cx-btn ghost" onClick={() => (closeModal(), useStore.setState({ view: { t: "block", key: block.key, flavor: block.flavor, file: block.file } }))}>
+            <Button variant="ghost" onClick={() => (closeModal(), useStore.setState({ view: { t: "block", key: block.key, flavor: block.flavor, file: block.file } }))}>
               Open in library
-            </button>
+            </Button>
           )}
-          <span className="cx-spacer" />
+          <span className="flex-1" />
           <Cancel />
           {block && (
-            <button
-              className="cx-btn"
+            <Button
+              variant="outline"
               data-testid="ref-detach"
               onClick={() => {
                 detachRef(pos, { kind: block.kind, body, fn: block.fn, front: block.front })(ed.view.state, ed.view.dispatch);
@@ -457,11 +423,10 @@ function RefEdit({ pos }: { pos: number }) {
               title="Replace the live reference with an editable copy that remembers where it came from"
             >
               Detach copy
-            </button>
+            </Button>
           )}
           {block && (
-            <button
-              className="cx-btn primary"
+            <Button
               disabled={!changed}
               data-testid="ref-update"
               onClick={async () => {
@@ -470,28 +435,26 @@ function RefEdit({ pos }: { pos: number }) {
               }}
             >
               Update library{used.length > 1 ? ` (${used.length} versions)` : ""}
-            </button>
+            </Button>
           )}
         </>
       }
     >
       {block ? (
         <>
-          <div className="cx-inline">
-            <span className="cx-muted-text">variant</span>
-            <select className="cx-select" value={pin ?? ""} onChange={(e) => setCardAttrs(pos, { flavor: e.target.value || null })(ed.view.state, ed.view.dispatch)} data-testid="ref-pin">
-              <option value="">follow version flavor ({block.flavor})</option>
-              {variants.map((x) => (
-                <option key={x.flavor} value={x.flavor}>
-                  pin: {x.flavor}
-                </option>
-              ))}
-            </select>
-            <span className="cx-spacer" />
-            <span className="cx-muted-text">used in {used.map((u) => `${u.project}/${u.version}`).join(", ") || "nothing"}</span>
+          <div className="flex items-center gap-2 not-italic">
+            <span className="text-ink-3">variant</span>
+            <Choice
+              value={pin ?? ""}
+              onChange={(f) => setCardAttrs(pos, { flavor: f || null })(ed.view.state, ed.view.dispatch)}
+              options={[["", `follow version flavor (${block.flavor})`], ...variants.map((x) => [x.flavor, `pin: ${x.flavor}`] as [string, string])]}
+              testid="ref-pin"
+            />
+            <span className="flex-1" />
+            <span className="text-ink-3">used in {used.map((u) => `${u.project}/${u.version}`).join(", ") || "nothing"}</span>
           </div>
-          <textarea className="cx-input cx-ref-body" rows={block.kind === "section" ? 10 : 4} value={body} onChange={(e) => setBody(e.target.value)} data-testid="ref-body" />
-          <p className="cx-fine">Editing here changes the shared library block for every version that uses it — or detach a local copy for just this version.</p>
+          <Textarea className="cx-ref-body font-serif text-[17px] leading-normal" rows={block.kind === "section" ? 10 : 4} value={body} onChange={(e) => setBody(e.target.value)} data-testid="ref-body" />
+          <p className="font-serif text-[14px] text-ink-3 italic">Editing here changes the shared library block for every version that uses it — or detach a local copy for just this version.</p>
         </>
       ) : (
         <p>This reference points at a block that doesn't exist. Delete the card or create the block.</p>
@@ -522,8 +485,7 @@ function DataPipe({ pos }: { pos: number }) {
       footer={
         <>
           <Cancel />
-          <button
-            className="cx-btn primary"
+          <Button
             disabled={!!parseErr}
             data-testid="data-pipe-ok"
             onClick={() => {
@@ -532,45 +494,39 @@ function DataPipe({ pos }: { pos: number }) {
             }}
           >
             Apply
-          </button>
+          </Button>
         </>
       }
     >
-      <div className="cx-row2">
-        <label>
-          source
-          <select className="cx-select" value={source} onChange={(e) => setSource(e.target.value)}>
-            {p?.data.map((d) => (
-              <option key={d.name}>{d.name}</option>
-            ))}
-          </select>
-        </label>
-        <label className="cx-check">
-          <input type="checkbox" checked={isStatic} onChange={(e) => setStatic(e.target.checked)} /> static (same every run — counts toward the cacheable prefix)
-        </label>
+      <div className="grid grid-cols-2 gap-2">
+        <FieldRow label="source">
+          <Choice value={source} onChange={setSource} options={(p?.data ?? []).map((d) => d.name)} className="w-full" />
+        </FieldRow>
+        <CheckRow checked={isStatic} onChange={setStatic}>
+          static — same every run, counts toward the cacheable prefix
+        </CheckRow>
       </div>
-      <label>
-        transforms
-        <input className="cx-input cx-mono" value={pipe} onChange={(e) => setPipe(e.target.value)} placeholder='shuffle(seed=1) | head(50) | template("{name}") | numbered' data-testid="pipe-input" />
-        {parseErr && <span className="cx-field-err">{parseErr}</span>}
-      </label>
-      <div className="cx-transforms">
+      <FieldRow label="transforms">
+        <Input className="font-mono text-[12px]" value={pipe} onChange={(e) => setPipe(e.target.value)} placeholder='shuffle(seed=1) | head(50) | template("{name}") | numbered' data-testid="pipe-input" />
+        {parseErr && <span className="text-[11.5px] text-danger not-italic">{parseErr}</span>}
+      </FieldRow>
+      <div className="flex flex-col gap-0.5">
         {(["select", "fields", "format", "cleanup"] as const).map((g) => (
           <div key={g}>
-            <span className="cx-type-label">{g}</span>
+            <span className="inline-block w-[60px] font-serif text-[13px] text-ink-3 italic">{g}</span>
             {TRANSFORMS.filter((t) => t.group === g).map((t) => (
-              <button key={t.name} className="cx-chip-btn" title={t.doc} onClick={() => setPipe((x) => (x.trim() ? `${x.trim()} | ${t.sig}` : t.sig))}>
+              <Button key={t.name} type="button" variant="outline" size="xs" className="m-0.5 font-sans text-[11.5px]" title={t.doc} onClick={() => setPipe((x) => (x.trim() ? `${x.trim()} | ${t.sig}` : t.sig))}>
                 {t.name}
-              </button>
+              </Button>
             ))}
           </div>
         ))}
       </div>
-      {src && <div className="cx-fine">fields: {dataItems(src).fields.join(", ") || "(text items)"} · use them as {"{field}"} in template()</div>}
+      {src && <div className="font-serif text-[14px] text-ink-3 italic">fields: {dataItems(src).fields.join(", ") || "(text items)"} · use them as {"{field}"} in template()</div>}
       {preview && (
         <>
-          <div className="cx-muted-text">
-            {preview.count} of {dataItems(src!).items.length} items {preview.errors.length > 0 && <span className="cx-danger">· {preview.errors.join("; ")}</span>}
+          <div className="text-ink-3">
+            {preview.count} of {dataItems(src!).items.length} items {preview.errors.length > 0 && <span className="text-danger">· {preview.errors.join("; ")}</span>}
           </div>
           <pre className="cx-output cx-small" data-testid="pipe-preview">
             {preview.text.slice(0, 4000)}
@@ -614,19 +570,19 @@ function Insertion({ pos }: { pos: number }) {
       testid="insertion-dialog"
       footer={
         <>
-          <button
-            className="cx-btn ghost danger"
+          <Button
+            variant="ghost"
+            className="text-danger"
             onClick={() => {
               ed.view.dispatch(ed.view.state.tr.delete(pos, pos + 1));
               closeModal();
             }}
           >
             Remove
-          </button>
-          <span className="cx-spacer" />
+          </Button>
+          <span className="flex-1" />
           <Cancel />
-          {fn !== "var" && (<button
-            className="cx-btn primary"
+          {fn !== "var" && (<Button
             data-testid="insertion-ok"
             onClick={() => {
               setCardAttrs(pos, { pos: JSON.stringify(posArgs), args: JSON.stringify(args) })(ed.view.state, ed.view.dispatch);
@@ -634,29 +590,26 @@ function Insertion({ pos }: { pos: number }) {
             }}
           >
             Apply
-          </button>)}
+          </Button>)}
         </>
       }
     >
       {fn === "now" && (
         <>
-          <label>
-            format
+          <FieldRow label="format">
             <QuickPick value={String(args.format ?? "")} options={DATE_FORMATS} onChange={(v) => setArg("format", v)} testid="ins-format" />
-            <span className="cx-fine">tokens: YYYY MMMM MMM MM DD D dddd ddd HH hh h mm ss A z, [literal]</span>
-          </label>
-          <label>
-            timezone
+            <span className="font-serif text-[14px] text-ink-3 italic">tokens: YYYY MMMM MMM MM DD D dddd ddd HH hh h mm ss A z, [literal]</span>
+          </FieldRow>
+          <FieldRow label="timezone">
             <QuickPick value={String(args.tz ?? "")} options={TZS} onChange={(v) => setArg("tz", v)} placeholder="local" />
-          </label>
-          <label>
-            offset
-            <input className="cx-input" value={String(args.offset ?? "")} onChange={(e) => setArg("offset", e.target.value)} placeholder="e.g. -1d (yesterday), +2h" />
-          </label>
-          <label className="cx-check">
-            <input type="checkbox" checked={args.frozen !== undefined} onChange={(e) => setArg("frozen", e.target.checked ? new Date().toISOString() : undefined)} data-testid="ins-frozen" /> freeze to a fixed time (reproducible, cache-friendly)
-          </label>
-          {args.frozen !== undefined && <input className="cx-input" value={String(args.frozen)} onChange={(e) => setArg("frozen", e.target.value)} />}
+          </FieldRow>
+          <FieldRow label="offset">
+            <Input value={String(args.offset ?? "")} onChange={(e) => setArg("offset", e.target.value)} placeholder="e.g. -1d (yesterday), +2h" />
+          </FieldRow>
+          <CheckRow checked={args.frozen !== undefined} onChange={(c) => setArg("frozen", c ? new Date().toISOString() : undefined)} testid="ins-frozen">
+            freeze to a fixed time (reproducible, cache-friendly)
+          </CheckRow>
+          {args.frozen !== undefined && <Input value={String(args.frozen)} onChange={(e) => setArg("frozen", e.target.value)} />}
         </>
       )}
       {fn === "var" && (
@@ -671,31 +624,27 @@ function Insertion({ pos }: { pos: number }) {
         />
       )}
       {fn === "randint" && (
-        <div className="cx-row2">
-          <label>
-            min
+        <div className="grid grid-cols-2 gap-2">
+          <FieldRow label="min">
             <NumField value={Number(args.min ?? 1)} onCommit={(v) => setArg("min", v)} />
-          </label>
-          <label>
-            max
+          </FieldRow>
+          <FieldRow label="max">
             <NumField value={Number(args.max ?? 100)} onCommit={(v) => setArg("max", v)} />
-          </label>
+          </FieldRow>
         </div>
       )}
       {fn === "pick" && (
-        <label>
-          options (one per line)
-          <textarea className="cx-input" rows={4} value={((posArgs[0] as string[]) ?? []).join("\n")} onChange={(e) => setPos([e.target.value.split("\n")])} />
-        </label>
+        <FieldRow label="options (one per line)">
+          <Textarea rows={4} value={((posArgs[0] as string[]) ?? []).join("\n")} onChange={(e) => setPos([e.target.value.split("\n")])} />
+        </FieldRow>
       )}
       {(fn === "uuid" || fn === "randint" || fn === "pick") && (
-        <label>
-          seed (optional — makes it stable between runs)
-          <input className="cx-input" value={String(args.seed ?? "")} onChange={(e) => setArg("seed", e.target.value === "" ? undefined : isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value))} />
-        </label>
+        <FieldRow label="seed (optional — makes it stable between runs)">
+          <Input value={String(args.seed ?? "")} onChange={(e) => setArg("seed", e.target.value === "" ? undefined : isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value))} />
+        </FieldRow>
       )}
-      {fn !== "var" && <div className="cx-ins-preview">
-        renders as: <b data-testid="ins-preview">{preview.text || "∅"}</b> {preview.error && <span className="cx-danger">{preview.error}</span>}
+      {fn !== "var" && <div className="rounded-lg bg-paper-2 px-2.5 py-2 text-[12.5px]">
+        renders as: <b data-testid="ins-preview">{preview.text || "∅"}</b> {preview.error && <span className="text-danger">{preview.error}</span>}
       </div>}
     </Dialog>
   );
@@ -710,13 +659,11 @@ function EndpointEditor({ e, onChange, onDelete }: { e: Endpoint; onChange(e: En
   const [key, setK] = useState(getKey(e.id));
   return (
     <div className="cx-card-panel" data-testid={`endpoint-${e.id}`}>
-      <div className="cx-row2">
-        <label>
-          name
+      <div className="grid grid-cols-2 gap-2">
+        <FieldRow label="name">
           <Field value={e.name} onCommit={(name) => onChange({ ...e, name })} />
-        </label>
-        <label>
-          API style
+        </FieldRow>
+        <FieldRow label="API style">
           <Seg
             value={e.style}
             options={[
@@ -725,21 +672,17 @@ function EndpointEditor({ e, onChange, onDelete }: { e: Endpoint; onChange(e: En
             ]}
             onChange={(style) => onChange({ ...e, style })}
           />
-        </label>
+        </FieldRow>
       </div>
-      <label>
-        base URL
+      <FieldRow label="base URL">
         <Field value={e.baseUrl} onCommit={(baseUrl) => onChange({ ...e, baseUrl })} placeholder="http://localhost:1234/v1" testid="endpoint-url" />
-      </label>
-      <div className="cx-row2">
-        <label>
-          default model
+      </FieldRow>
+      <div className="grid grid-cols-2 gap-2">
+        <FieldRow label="default model">
           <Field value={e.defaultModel ?? ""} onCommit={(m) => onChange({ ...e, defaultModel: m || undefined })} />
-        </label>
-        <label>
-          API key (kept in this browser only)
-          <input
-            className="cx-input"
+        </FieldRow>
+        <FieldRow label="API key (kept in this browser only)">
+          <Input
             type="password"
             value={key}
             onChange={(x) => {
@@ -749,19 +692,17 @@ function EndpointEditor({ e, onChange, onDelete }: { e: Endpoint; onChange(e: En
             placeholder="none"
             autoComplete="off"
           />
-        </label>
+        </FieldRow>
       </div>
-      <label>
-        headers
+      <FieldRow label="headers">
         <KeyValues value={e.headers} onChange={(headers) => onChange({ ...e, headers })} keyPlaceholder="header-name" />
-      </label>
-      <label>
-        extra JSON body (merged into every request)
+      </FieldRow>
+      <FieldRow label="extra JSON body (merged into every request)">
         <JsonField value={e.extraBody} onCommit={(extraBody) => onChange({ ...e, extraBody: extraBody as Record<string, unknown> })} rows={3} />
-      </label>
-      <button className="cx-btn small ghost danger" onClick={onDelete}>
+      </FieldRow>
+      <Button variant="ghost" size="sm" className="text-danger" onClick={onDelete}>
         Remove endpoint
-      </button>
+      </Button>
     </div>
   );
 }
@@ -778,17 +719,18 @@ function Settings({ tab: initial }: { tab?: string }) {
       testid="settings"
       footer={
         <>
-          <button className="cx-btn ghost" onClick={startTour} data-testid="replay-tutorial">
+          <Button variant="ghost" onClick={startTour} data-testid="replay-tutorial">
             Replay tutorial
-          </button>
-          <span className="cx-spacer" />
-          <button className="cx-btn primary" onClick={closeModal}>
+          </Button>
+          <span className="flex-1" />
+          <Button onClick={closeModal}>
             Done
-          </button>
+          </Button>
         </>
       }
     >
-      <div className="cx-drawer-tabs">
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="h-auto flex-wrap gap-1 bg-transparent p-0">
         {[
           ["appearance", "Appearance"],
           ["endpoints", "Endpoints"],
@@ -796,44 +738,32 @@ function Settings({ tab: initial }: { tab?: string }) {
           ["taxonomy", "Types & flavors"],
           ["workspace", "Workspace"],
         ].map(([t, l]) => (
-          <button key={t} className={tab === t ? "on" : ""} onClick={() => setTab(t)} data-testid={`settings-${t}`}>
+          <TabsTrigger key={t} value={t} className="h-8 flex-none" data-testid={`settings-${t}`}>
             {l}
-          </button>
+          </TabsTrigger>
         ))}
-      </div>
+        </TabsList>
+      </Tabs>
       {tab === "appearance" && (
-        <div className="cx-form">
-          <label>
-            page font
-            <select className="cx-select" value={s.prefs.font} onChange={(e) => setPrefs({ font: e.target.value })} data-testid="pref-font">
-              {FONTS.map((f) => (
-                <option key={f} style={{ fontFamily: f }}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            data / code font
-            <select className="cx-select" value={s.prefs.mono} onChange={(e) => setPrefs({ mono: e.target.value })}>
-              {MONOS.map((f) => (
-                <option key={f}>{f}</option>
-              ))}
-            </select>
-          </label>
-          <div className="cx-row2">
-            <label>
-              size <input type="range" min={15} max={28} value={s.prefs.fontSize} onChange={(e) => setPrefs({ fontSize: Number(e.target.value) })} /> {s.prefs.fontSize}px
-            </label>
-            <label>
-              line height <input type="range" min={1.2} max={2.1} step={0.05} value={s.prefs.lineHeight} onChange={(e) => setPrefs({ lineHeight: Number(e.target.value) })} /> {s.prefs.lineHeight.toFixed(2)}
-            </label>
+        <div className="flex flex-col gap-3">
+          <FieldRow label="page font">
+            <Choice value={s.prefs.font} onChange={(f) => setPrefs({ font: f })} options={FONTS.map((f) => [f, <span style={{ fontFamily: f }}>{f}</span>] as [string, ReactNode])} testid="pref-font" />
+          </FieldRow>
+          <FieldRow label="data / code font">
+            <Choice value={s.prefs.mono} onChange={(f) => setPrefs({ mono: f })} options={MONOS} />
+          </FieldRow>
+          <div className="grid grid-cols-2 gap-2">
+            <FieldRow label={`size · ${s.prefs.fontSize}px`}>
+              <Slider className="my-2" min={15} max={28} step={1} value={[s.prefs.fontSize]} onValueChange={([v]) => setPrefs({ fontSize: v })} />
+            </FieldRow>
+            <FieldRow label={`line height · ${s.prefs.lineHeight.toFixed(2)}`}>
+              <Slider className="my-2" min={1.2} max={2.1} step={0.05} value={[s.prefs.lineHeight]} onValueChange={([v]) => setPrefs({ lineHeight: v })} />
+            </FieldRow>
           </div>
-          <label>
-            page width <input type="range" min={520} max={1100} step={10} value={s.prefs.pageWidth} onChange={(e) => setPrefs({ pageWidth: Number(e.target.value) })} /> {s.prefs.pageWidth}px
-          </label>
-          <label>
-            theme
+          <FieldRow label="page width · {s.prefs.pageWidth}px">
+            <Slider className="my-2" min={520} max={1100} step={10} value={[s.prefs.pageWidth]} onValueChange={([v]) => setPrefs({ pageWidth: v })} />
+          </FieldRow>
+          <FieldRow label="theme">
             <Seg
               value={s.prefs.theme}
               options={[
@@ -844,21 +774,21 @@ function Settings({ tab: initial }: { tab?: string }) {
               onChange={(theme) => setPrefs({ theme })}
               testid="pref-theme"
             />
-          </label>
-          <label className="cx-check">
-            <input type="checkbox" checked={s.prefs.prefixTint} onChange={(e) => setPrefs({ prefixTint: e.target.checked })} /> tint the stable (cacheable) prefix
-          </label>
-          <label className="cx-check">
-            <input type="checkbox" checked={s.prefs.gutter} onChange={(e) => setPrefs({ gutter: e.target.checked })} /> token counts in the margin
-          </label>
-          <label className="cx-check">
-            <input type="checkbox" checked={s.prefs.showWhitespace} onChange={(e) => setPrefs({ showWhitespace: e.target.checked })} /> show whitespace in the rendered view
-          </label>
+          </FieldRow>
+          <CheckRow checked={s.prefs.prefixTint} onChange={(c) => setPrefs({ prefixTint: c })}>
+            tint the stable (cacheable) prefix
+          </CheckRow>
+          <CheckRow checked={s.prefs.gutter} onChange={(c) => setPrefs({ gutter: c })}>
+            token counts in the margin
+          </CheckRow>
+          <CheckRow checked={s.prefs.showWhitespace} onChange={(c) => setPrefs({ showWhitespace: c })}>
+            show whitespace in the rendered view
+          </CheckRow>
         </div>
       )}
       {tab === "endpoints" && (
-        <div className="cx-form">
-          <p className="cx-fine">Any OpenAI-compatible server: LM Studio, llama-server, Ollama, vLLM, OpenRouter, OpenAI… The server must allow CORS from this page.</p>
+        <div className="flex flex-col gap-3">
+          <p className="font-serif text-[14px] text-ink-3 italic">Any OpenAI-compatible server: LM Studio, llama-server, Ollama, vLLM, OpenRouter, OpenAI… The server must allow CORS from this page.</p>
           {st.endpoints.map((e, i) => (
             <EndpointEditor
               key={e.id}
@@ -867,42 +797,40 @@ function Settings({ tab: initial }: { tab?: string }) {
               onDelete={() => setEndpoints(st.endpoints.filter((_, j) => j !== i))}
             />
           ))}
-          <button
-            className="cx-btn"
+          <Button
+            variant="outline"
             onClick={() => setEndpoints([...st.endpoints, { id: `ep${Date.now().toString(36)}`, name: "New endpoint", baseUrl: "http://localhost:1234/v1", style: "chat", headers: {}, extraBody: {} }])}
             data-testid="add-endpoint"
           >
             + Add endpoint
-          </button>
+          </Button>
         </div>
       )}
       {tab === "variables" && (
-        <div className="cx-form">
-          <p className="cx-fine">
+        <div className="flex flex-col gap-3">
+          <p className="font-serif text-[14px] text-ink-3 italic">
             Workspace variables, available everywhere as <code>{'{{ var("name") }}'}</code>. A browser can't read your hostname, so set it here if you need it. Projects can override these.
           </p>
           <KeyValues value={st.vars} onChange={(vars) => patchWorkspace({ vars })} testid="workspace-vars" />
         </div>
       )}
       {tab === "taxonomy" && (
-        <div className="cx-form">
-          <label>
-            block types (comma separated)
+        <div className="flex flex-col gap-3">
+          <FieldRow label="block types (comma separated)">
             <Field value={st.types.join(", ")} onCommit={(v) => patchWorkspace({ types: v.split(",").map((x) => x.trim()).filter(Boolean) })} />
-          </label>
-          <label>
-            flavors (comma separated; “general” is the fallback)
+          </FieldRow>
+          <FieldRow label="flavors (comma separated; “general” is the fallback)">
             <Field value={st.flavors.join(", ")} onCommit={(v) => patchWorkspace({ flavors: [...new Set(["general", ...v.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean)])] })} />
-          </label>
+          </FieldRow>
         </div>
       )}
       {tab === "workspace" && (
-        <div className="cx-form">
+        <div className="flex flex-col gap-3">
           <p>
             Open: <b>{s.vfs?.name}</b> ({s.vfs?.kind === "browser" ? "browser storage" : "folder on disk"})
           </p>
-          <button
-            className="cx-btn"
+          <Button
+            variant="outline"
             onClick={async () => {
               closeModal();
               await forgetWorkspace();
@@ -910,7 +838,7 @@ function Settings({ tab: initial }: { tab?: string }) {
             }}
           >
             Close workspace
-          </button>
+          </Button>
         </div>
       )}
     </Dialog>
@@ -925,8 +853,7 @@ function Confirm({ m }: { m: Extract<Modal, { t: "confirm" }> }) {
       footer={
         <>
           <Cancel />
-          <button
-            className="cx-btn primary"
+          <Button
             onClick={() => {
               closeModal();
               m.onOk();
@@ -934,7 +861,7 @@ function Confirm({ m }: { m: Extract<Modal, { t: "confirm" }> }) {
             data-testid="confirm-ok"
           >
             {m.ok}
-          </button>
+          </Button>
         </>
       }
     >

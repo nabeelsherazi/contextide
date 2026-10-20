@@ -26,7 +26,11 @@ npm run build        # static PWA in dist/
 | `src/run/` | Run orchestration (whole / fan-out / repeat / ablation) and comparison helpers. |
 | `src/fs/` | Virtual filesystem over a directory handle (real folder or OPFS) + an in-memory one for tests. |
 | `src/state/` | Zustand store, workspace actions, live analysis. |
-| `src/ui/` | React shell: drawers, pages, panels, modals, palette. |
+| `src/ui/` | React shell: drawers, pages, panels, modals, palette — built from shadcn/ui primitives (`src/ui/widgets.tsx` holds the thin app wrappers: `Field`, `Choice`, `Seg`, `FieldRow`, `CheckRow`…). |
+| `src/components/ui/` | shadcn/ui components (Radix + Tailwind), restyled to the night/day look. Add more with `npx shadcn@latest add <name>`. |
+| `src/app.css` | Tailwind entry: maps shadcn's tokens onto ContextIDE's palette and imports the two custom layers below. |
+| `src/theme.css` | The truly custom look: night/day tokens, sky + stars + grain, welcome rope, tour, variable bubbles. |
+| `src/editor.css` | The editor: ProseMirror cards, bridges, chips, markdown styling, stable-prefix/rope decorations. |
 | `e2e/` | Playwright specs. `window.__contextide` exposes read-mostly hooks (files, editor text, rendered prompt, caret/selection helpers). |
 
 ### Testing notes

@@ -14,6 +14,7 @@ import { mergedVars } from "../core/workspace";
 import { insertCard, insertInline } from "../editor/commands";
 import { slashItems, type MenuItem } from "./items";
 import { onTokenizerReady } from "../tokens/tokens";
+import { cn } from "@/lib/utils";
 
 export interface EditorProps {
   /** identity of the document (path); a change re-creates the editor */
@@ -256,18 +257,23 @@ export function Editor(p: EditorProps) {
     <div className="cx-editor-host" data-testid="editor">
       <div ref={host} />
       {slash && (
-        <div className="cx-popover cx-slash" style={{ left: slash.x, top: slash.y }} data-testid="slash-menu" onMouseDown={(e) => e.preventDefault()}>
-          {items.length === 0 && <div className="cx-menu-empty">No matches</div>}
+        <div
+          className="fixed z-50 max-h-[330px] min-w-[260px] overflow-y-auto rounded-xl border border-rule-2 bg-popover p-1.5 text-popover-foreground shadow-[var(--shadow-pop)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95"
+          style={{ left: slash.x, top: slash.y }}
+          data-testid="slash-menu"
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {items.length === 0 && <div className="px-2.5 py-2 font-serif text-ink-3 italic">No matches</div>}
           {items.slice(0, 40).map((it, i) => (
             <button
               key={it.id}
-              className={`cx-menu-item${i === slashRef.current.index ? " active" : ""}`}
+              className={cn("flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left", i === slashRef.current.index && "bg-paper-2")}
               onMouseEnter={() => setSlashIndex(i)}
               onClick={() => chooseRef.current(it)}
             >
-              <span className="cx-menu-icon">{it.icon}</span>
-              <span className="cx-menu-label">{it.label}</span>
-              {it.hint && <span className="cx-menu-hint">{it.hint}</span>}
+              <span className="w-[18px] flex-none text-center text-ink-3">{it.icon}</span>
+              <span className="min-w-0 flex-1 truncate font-serif text-[15.5px]">{it.label}</span>
+              {it.hint && <span className="font-sans text-[11px] whitespace-nowrap text-ink-3">{it.hint}</span>}
             </button>
           ))}
         </div>

@@ -2,7 +2,7 @@ import { useStore, currentProject } from "../state/store";
 import { patchProject } from "../state/actions";
 import type { EvalConfig, ParserCfg } from "../core/scoring";
 import { dataItems } from "../core/workspace";
-import { Field, Seg } from "./widgets";
+import { Field, Seg, Choice, FieldRow, Hint } from "./widgets";
 
 const PARSERS: [ParserCfg["type"], string][] = [
   ["kv", "name -> answer lines"],
@@ -22,62 +22,36 @@ export function EvalForm() {
   const keyFields = keySrc ? dataItems(keySrc).fields : [];
   const otherFields = [...new Set(p.data.filter((d) => d.name !== ev?.key).flatMap((d) => dataItems(d).fields))];
   return (
-    <div className="cx-eval" data-testid="eval-form">
-      <label>
-        answer key
-        <select className="cx-select" value={ev?.key ?? ""} onChange={(e) => (e.target.value ? set({ key: e.target.value }) : set(null))} data-testid="eval-key">
-          <option value="">(no scoring)</option>
-          {p.data.map((d) => (
-            <option key={d.name}>{d.name}</option>
-          ))}
-        </select>
-      </label>
+    <div className="flex flex-col gap-3" data-testid="eval-form">
+      <FieldRow label="answer key">
+        <Choice value={ev?.key ?? ""} onChange={(k) => (k ? set({ key: k }) : set(null))} options={[["", "(no scoring)"], ...p.data.map((d) => d.name)]} testid="eval-key" />
+      </FieldRow>
       {ev && (
         <>
-          {keyFields.length > 0 && (
-            <div className="cx-row2">
-              <label>
-                key id field
-                <select className="cx-select" value={ev.keyId} onChange={(e) => set({ keyId: e.target.value })}>
-                  {keyFields.map((f) => (
-                    <option key={f}>{f}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                key answer field
-                <select className="cx-select" value={ev.keyAnswer} onChange={(e) => set({ keyAnswer: e.target.value })}>
-                  {keyFields.map((f) => (
-                    <option key={f}>{f}</option>
-                  ))}
-                </select>
-              </label>
+          {keyFields.length > 0 ? (
+            <div className="grid grid-cols-2 gap-2">
+              <FieldRow label="key id field">
+                <Choice value={ev.keyId} onChange={(f) => set({ keyId: f })} options={keyFields} className="w-full" />
+              </FieldRow>
+              <FieldRow label="key answer field">
+                <Choice value={ev.keyAnswer} onChange={(f) => set({ keyAnswer: f })} options={keyFields} className="w-full" />
+              </FieldRow>
             </div>
+          ) : (
+            <Hint>
+              Text keys use lines like <code>item -&gt; answer</code>; separate acceptable answers with <code>|</code>.
+            </Hint>
           )}
-          {!keyFields.length && <p className="cx-fine">Text keys use lines like <code>item -&gt; answer</code>; separate acceptable answers with <code>|</code>.</p>}
           {otherFields.length > 0 && (
-            <label>
-              item id field (in the data shown)
-              <select className="cx-select" value={ev.itemId ?? ""} onChange={(e) => set({ itemId: e.target.value || undefined })}>
-                <option value="">(auto)</option>
-                {otherFields.map((f) => (
-                  <option key={f}>{f}</option>
-                ))}
-              </select>
-            </label>
+            <FieldRow label="item id field (in the data shown)">
+              <Choice value={ev.itemId ?? ""} onChange={(f) => set({ itemId: f || undefined })} options={[["", "(auto)"], ...otherFields]} />
+            </FieldRow>
           )}
-          <label>
-            read the output as
-            <select className="cx-select" value={ev.parser.type} onChange={(e) => set({ parser: { type: e.target.value } as ParserCfg })} data-testid="eval-parser">
-              {PARSERS.map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </label>
+          <FieldRow label="read the output as">
+            <Choice value={ev.parser.type} onChange={(t) => set({ parser: { type: t } as ParserCfg })} options={PARSERS} testid="eval-parser" />
+          </FieldRow>
           {ev.parser.type === "json" && (
-            <div className="cx-row2">
+            <div className="grid grid-cols-3 gap-2">
               <Field value={ev.parser.path ?? ""} placeholder="path (e.g. labels)" onCommit={(v) => set({ parser: { ...ev.parser, path: v || undefined } as ParserCfg })} />
               <Field value={ev.parser.id ?? ""} placeholder="id field" onCommit={(v) => set({ parser: { ...ev.parser, id: v || undefined } as ParserCfg })} />
               <Field value={ev.parser.answer ?? ""} placeholder="answer field" onCommit={(v) => set({ parser: { ...ev.parser, answer: v || undefined } as ParserCfg })} />
@@ -85,10 +59,17 @@ export function EvalForm() {
           )}
           {ev.parser.type === "whole" && <Field value={ev.parser.field ?? ""} placeholder="JSON field (optional, e.g. category)" onCommit={(v) => set({ parser: { type: "whole", field: v || undefined } })} />}
           {ev.parser.type === "regex" && <Field value={ev.parser.pattern ?? ""} placeholder="^(?<id>.+?) -> (?<answer>.+)$" onCommit={(v) => set({ parser: { type: "regex", pattern: v } })} />}
-          <label>
-            match
-            <Seg value={ev.match} options={[["exact", "exact"], ["ci", "ignore case"], ["loose", "loose"]]} onChange={(v) => set({ match: v })} />
-          </label>
+          <FieldRow label="match">
+            <Seg
+              value={ev.match}
+              options={[
+                ["exact", "exact"],
+                ["ci", "ignore case"],
+                ["loose", "loose"],
+              ]}
+              onChange={(m) => set({ match: m })}
+            />
+          </FieldRow>
         </>
       )}
     </div>

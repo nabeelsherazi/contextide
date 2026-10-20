@@ -7,6 +7,8 @@ import { DataPage } from "./DataPage";
 import { ProjectPage } from "./ProjectPage";
 import { runCommand } from "../editor/active";
 import { addMessage } from "../editor/commands";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 function VersionPage() {
   const s = useStore();
@@ -14,42 +16,38 @@ function VersionPage() {
   const v = currentVersion(s);
   if (!p)
     return (
-      <div className="cx-empty-page">
-        <p>No projects yet.</p>
-        <button className="cx-btn primary" onClick={() => openModal({ t: "new-project" })}>
-          New project
-        </button>
+      <div className="py-20 text-center font-serif text-[20px] text-ink-2">
+        <p className="mb-4">No projects yet.</p>
+        <Button onClick={() => openModal({ t: "new-project" })}>New project</Button>
       </div>
     );
   if (!v)
     return (
-      <div className="cx-empty-page">
-        <p>This project has no versions.</p>
-        <button className="cx-btn primary" onClick={() => openModal({ t: "new-version" })}>
-          New version
-        </button>
+      <div className="py-20 text-center font-serif text-[20px] text-ink-2">
+        <p className="mb-4">This project has no versions.</p>
+        <Button onClick={() => openModal({ t: "new-version" })}>New version</Button>
       </div>
     );
   const text = s.files.get(v.file) ?? "";
   const roles = (s.liveDoc?.messages ?? v.doc.messages).map((m) => m.role);
   return (
     <>
-      <header className="cx-page-head">
-        <button className="cx-page-title" onClick={() => openModal({ t: "version-settings", id: v.id })} title="Rename, change subtitle or flavor">
-          <span className="cx-page-id">{v.title}</span>
-          {v.subtitle && <span className="cx-page-sub">{v.subtitle}</span>}
+      <header className="mb-[18px] flex min-h-[34px] flex-wrap items-baseline gap-2.5 day:[text-shadow:0_1px_12px_rgba(255,255,255,0.6)]">
+        <button className="flex cursor-pointer items-baseline gap-3 text-left" onClick={() => openModal({ t: "version-settings", id: v.id })} title="Rename, change subtitle or flavor">
+          <span className="font-serif text-[34px] font-normal">{v.title}</span>
+          {v.subtitle && <span className="font-serif text-[21px] text-ink-3 italic day:text-[#2f3a4a]">{v.subtitle}</span>}
         </button>
         {!s.rendered && (
-          <span className="cx-page-actions">
+          <span className="ml-auto flex gap-1 opacity-60 transition-opacity hover:opacity-100">
             {!roles.includes("system") && (
-              <button className="cx-btn small ghost" onClick={() => runCommand(addMessage("system"))} data-testid="add-system">
-                + System message
-              </button>
+              <Button variant="ghost" size="sm" onClick={() => runCommand(addMessage("system"))} data-testid="add-system">
+                <Plus className="size-3.5" /> System message
+              </Button>
             )}
             {roles[roles.length - 1] !== "assistant" && (
-              <button className="cx-btn small ghost" onClick={() => runCommand(addMessage("assistant"))} data-testid="add-prefill">
-                + Assistant prefill
-              </button>
+              <Button variant="ghost" size="sm" onClick={() => runCommand(addMessage("assistant"))} data-testid="add-prefill">
+                <Plus className="size-3.5" /> Assistant prefill
+              </Button>
             )}
           </span>
         )}
@@ -80,8 +78,8 @@ export function Page() {
     ref.current?.scrollTo({ top: 0 });
   }, [viewKey]);
   return (
-    <main className="cx-page" data-testid="page" ref={ref}>
-      <div className="cx-page-inner">
+    <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto [scroll-padding:80px]" data-testid="page" ref={ref}>
+      <div className="mx-auto max-w-[calc(var(--page-width)+128px)] px-16 pt-[34px] pb-[180px] max-[1100px]:px-9">
         {view.t === "version" && <VersionPage />}
         {view.t === "block" && <BlockPage />}
         {view.t === "data" && <DataPage />}

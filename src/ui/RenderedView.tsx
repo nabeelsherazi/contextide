@@ -1,4 +1,6 @@
-import { useStore } from "../state/store";
+import { useStore, toast } from "../state/store";
+import { Button } from "@/components/ui/button";
+import { CheckRow } from "./widgets";
 import { useState } from "react";
 import { promptText } from "../core/render";
 import { buildRequest, curlFor, tsLiteralFor } from "../core/request";
@@ -9,7 +11,7 @@ const ws = (t: string, on: boolean) => (on ? t.replace(/ /g, "·").replace(/\t/g
 
 export function copy(text: string, what = "Copied") {
   navigator.clipboard?.writeText(text).then(
-    () => useStore.setState((s) => ({ toast: { msg: what, n: (s.toast?.n ?? 0) + 1 } })),
+    () => toast(what),
     () => {},
   );
 }
@@ -29,24 +31,24 @@ export function RenderedView() {
   return (
     <div className="cx-paper cx-rendered" data-testid="rendered">
       <div className="cx-rendered-tools">
-        <label>
-          <input type="checkbox" checked={showWs} onChange={(e) => setShowWs(e.target.checked)} /> show whitespace
-        </label>
+        <CheckRow checked={showWs} onChange={setShowWs}>
+          show whitespace
+        </CheckRow>
         <span className="cx-spacer" />
-        <button className="cx-btn small ghost" onClick={() => copy(promptText(r), "Copied prompt")}>
+        <Button variant="ghost" size="sm" onClick={() => copy(promptText(r), "Copied prompt")}>
           Copy text
-        </button>
+        </Button>
         {req && (
           <>
-            <button className="cx-btn small ghost" onClick={() => copy(JSON.stringify(req.body, null, 2), "Copied request JSON")}>
+            <Button variant="ghost" size="sm" onClick={() => copy(JSON.stringify(req.body, null, 2), "Copied request JSON")}>
               Copy JSON
-            </button>
-            <button className="cx-btn small ghost" onClick={() => copy(curlFor(req), "Copied curl")}>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => copy(curlFor(req), "Copied curl")}>
               Copy curl
-            </button>
-            <button className="cx-btn small ghost" onClick={() => copy(tsLiteralFor(r), "Copied TS")}>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => copy(tsLiteralFor(r), "Copied TS")}>
               Copy TS
-            </button>
+            </Button>
           </>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-import { boot } from "./helpers";
+import { boot, choose } from "./helpers";
 const dir = process.env.SHOTS!;
 test.skip(!dir, "screenshots only on demand");
 test("cards", async ({ page }) => {
@@ -7,7 +7,7 @@ test("cards", async ({ page }) => {
   await page.addInitScript((t) => localStorage.setItem("contextide:prefs", JSON.stringify({ theme: t })), theme);
   await boot(page, "cards", { expand: false });
   await page.getByTestId("new-version").click();
-  await page.locator(".cx-dialog select").first().selectOption("");
+  await choose(page, "version-from", "");
   await page.getByTestId("new-version-ok").click();
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${dir}/20-empty-${theme}.png` });

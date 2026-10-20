@@ -9,7 +9,8 @@ import { StatusBar } from "./StatusBar";
 import { Modals } from "./modals/Modals";
 import { Palette } from "./Palette";
 import { ContextMenu } from "./ContextMenu";
-import { Toast } from "./Toast";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tour } from "./Tour";
 import { loadTokenizer } from "../tokens/tokens";
 import { startRunFromPanel } from "./RunPanel";
@@ -84,8 +85,15 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (!vfs) return <Welcome />;
+  if (!vfs)
+    return (
+      <>
+        <Welcome />
+        <Toaster />
+      </>
+    );
   return (
+    <TooltipProvider delayDuration={400}>
     <div className={`cx-app${left ? " has-left" : ""}${right ? " has-right" : ""}`}>
       <TopBar />
       <div className="cx-main">
@@ -97,8 +105,9 @@ export function App() {
       <Modals />
       <Palette />
       <ContextMenu />
-      <Toast />
+      <Toaster />
       <Tour />
     </div>
+    </TooltipProvider>
   );
 }

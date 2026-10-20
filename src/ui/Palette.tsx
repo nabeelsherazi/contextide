@@ -1,4 +1,4 @@
-import { Command } from "cmdk";
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from "@/components/ui/command";
 import { useStore, setProject, setVersion, toggle, openModal, currentVersion, setPrefs } from "../state/store";
 
 const toggleTheme = () => setPrefs({ theme: document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light" });
@@ -23,78 +23,76 @@ export function Palette() {
   const ed = activeEditor();
   const p = s.ws.projects.find((x) => x.name === s.project);
   return (
-    <div className="cx-overlay" onMouseDown={(e) => e.target === e.currentTarget && close()}>
-      <Command className="cx-palette" label="Command palette" loop data-testid="palette" onKeyDown={(e) => e.key === "Escape" && close()}>
-        <Command.Input autoFocus placeholder="Type a command, block, version…" data-testid="palette-input" />
-        <Command.List>
-          <Command.Empty>Nothing found.</Command.Empty>
-          <Command.Group heading="Actions">
-            <Command.Item onSelect={act(() => startRunFromPanel())}>Run current version ⌘↵</Command.Item>
-            <Command.Item onSelect={act(() => toggle("rendered"))}>Toggle rendered view ⌘⇧R</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "new-version", fork: s.version ?? undefined }))}>New version (fork)</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "new-project" }))}>New project</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "new-data" }))}>New data source</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "new-block", kind: "directive" }))}>New library directive</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "new-block", kind: "section" }))}>New library section</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "new-block", kind: "schema" }))}>New output schema</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "new-block", kind: "tool" }))}>New tool</Command.Item>
-            <Command.Item onSelect={act(() => toggle("left"))}>Toggle library drawer ⌘\</Command.Item>
-            <Command.Item onSelect={act(() => toggle("right"))}>Toggle run panel ⌘⇧\</Command.Item>
-            <Command.Item onSelect={act(() => useStore.setState({ left: false, right: false }))}>Focus mode ⌘.</Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "settings" }))}>Settings</Command.Item>
-            <Command.Item onSelect={act(startTour)}>Replay tutorial</Command.Item>
-            <Command.Item value="toggle day night theme" onSelect={act(toggleTheme)}>
+    <CommandDialog open onOpenChange={(o) => !o && close()} title="Command palette" description="Run a command, insert a block, or jump somewhere" className="top-[12vh] translate-y-0 sm:max-w-[620px]" showCloseButton={false}>
+        <CommandInput autoFocus placeholder="Type a command, block, version…" data-testid="palette-input" />
+        <CommandList data-testid="palette">
+          <CommandEmpty>Nothing found.</CommandEmpty>
+          <CommandGroup heading="Actions">
+            <CommandItem onSelect={act(() => startRunFromPanel())}>Run current version<CommandShortcut>⌘↵</CommandShortcut></CommandItem>
+            <CommandItem onSelect={act(() => toggle("rendered"))}>Toggle rendered view<CommandShortcut>⌘⇧R</CommandShortcut></CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-version", fork: s.version ?? undefined }))}>New version (fork)</CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-project" }))}>New project</CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-data" }))}>New data source</CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-block", kind: "directive" }))}>New library directive</CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-block", kind: "section" }))}>New library section</CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-block", kind: "schema" }))}>New output schema</CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-block", kind: "tool" }))}>New tool</CommandItem>
+            <CommandItem onSelect={act(() => toggle("left"))}>Toggle library drawer<CommandShortcut>⌘\</CommandShortcut></CommandItem>
+            <CommandItem onSelect={act(() => toggle("right"))}>Toggle run panel<CommandShortcut>⌘⇧\</CommandShortcut></CommandItem>
+            <CommandItem onSelect={act(() => useStore.setState({ left: false, right: false }))}>Focus mode<CommandShortcut>⌘.</CommandShortcut></CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "settings" }))}>Settings</CommandItem>
+            <CommandItem onSelect={act(startTour)}>Replay tutorial</CommandItem>
+            <CommandItem value="toggle day night theme" onSelect={act(toggleTheme)}>
               Switch to {document.documentElement.getAttribute("data-theme") === "light" ? "night" : "day"}
-            </Command.Item>
-            <Command.Item onSelect={act(() => openModal({ t: "settings", tab: "endpoints" }))}>Settings: endpoints</Command.Item>
-            <Command.Item onSelect={act(() => useStore.setState({ view: { t: "project" } }))}>Project settings & scoring</Command.Item>
-          </Command.Group>
+            </CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "settings", tab: "endpoints" }))}>Settings: endpoints</CommandItem>
+            <CommandItem onSelect={act(() => useStore.setState({ view: { t: "project" } }))}>Project settings & scoring</CommandItem>
+          </CommandGroup>
           {ed && (
-            <Command.Group heading="Edit">
-              <Command.Item onSelect={act(() => runCommand(cmd.makeDirective))}>Make directive ⌘⇧D</Command.Item>
-              <Command.Item onSelect={act(() => runCommand(cmd.groupAsSection("")))}>Group as section ⌘⇧G</Command.Item>
-              <Command.Item onSelect={act(() => runCommand(cmd.ungroupSection))}>Ungroup section</Command.Item>
-              <Command.Item onSelect={act(() => runCommand(cmd.toggleMute))}>Mute / unmute card ⌘⇧M</Command.Item>
-              <Command.Item onSelect={act(() => saveSelectionToLibrary("library"))}>Save selection to library…</Command.Item>
-              <Command.Item onSelect={act(() => runCommand(cmd.addMessage("system")))}>Add system message</Command.Item>
-              <Command.Item onSelect={act(() => runCommand(cmd.addMessage("assistant")))}>Add assistant prefill</Command.Item>
-            </Command.Group>
+            <CommandGroup heading="Edit">
+              <CommandItem onSelect={act(() => runCommand(cmd.makeDirective))}>Make directive<CommandShortcut>⌘⇧D</CommandShortcut></CommandItem>
+              <CommandItem onSelect={act(() => runCommand(cmd.groupAsSection("")))}>Group as section<CommandShortcut>⌘⇧G</CommandShortcut></CommandItem>
+              <CommandItem onSelect={act(() => runCommand(cmd.ungroupSection))}>Ungroup section</CommandItem>
+              <CommandItem onSelect={act(() => runCommand(cmd.toggleMute))}>Mute / unmute card<CommandShortcut>⌘⇧M</CommandShortcut></CommandItem>
+              <CommandItem onSelect={act(() => saveSelectionToLibrary("library"))}>Save selection to library…</CommandItem>
+              <CommandItem onSelect={act(() => runCommand(cmd.addMessage("system")))}>Add system message</CommandItem>
+              <CommandItem onSelect={act(() => runCommand(cmd.addMessage("assistant")))}>Add assistant prefill</CommandItem>
+            </CommandGroup>
           )}
           {ed && (
-            <Command.Group heading="Insert">
+            <CommandGroup heading="Insert">
               {allItems(s.ws, s.project ?? undefined, flavor).map((it) => (
-                <Command.Item key={it.id} value={`insert ${it.group} ${it.label} ${it.hint ?? ""}`} onSelect={act(() => applyItem(activeEditor()!.view, it))}>
-                  <span className="cx-menu-icon">{it.icon}</span> {it.label} <span className="cx-menu-hint">{it.group}</span>
-                </Command.Item>
+                <CommandItem key={it.id} value={`insert ${it.group} ${it.label} ${it.hint ?? ""}`} onSelect={act(() => applyItem(activeEditor()!.view, it))}>
+                  <span className="w-[18px] text-center text-ink-3">{it.icon}</span> {it.label} <CommandShortcut>{it.group}</CommandShortcut>
+                </CommandItem>
               ))}
-            </Command.Group>
+            </CommandGroup>
           )}
-          <Command.Group heading="Go to">
+          <CommandGroup heading="Go to">
             {p?.versions.map((x) => (
-              <Command.Item key={x.id} value={`version ${x.id} ${x.subtitle}`} onSelect={act(() => setVersion(x.id))}>
-                Version {x.title} <span className="cx-menu-hint">{x.subtitle}</span>
-              </Command.Item>
+              <CommandItem key={x.id} value={`version ${x.id} ${x.subtitle}`} onSelect={act(() => setVersion(x.id))}>
+                Version {x.title} <CommandShortcut>{x.subtitle}</CommandShortcut>
+              </CommandItem>
             ))}
             {s.ws.projects.map((x) => (
-              <Command.Item key={x.name} value={`project ${x.name}`} onSelect={act(() => setProject(x.name))}>
+              <CommandItem key={x.name} value={`project ${x.name}`} onSelect={act(() => setProject(x.name))}>
                 Project {x.name}
-              </Command.Item>
+              </CommandItem>
             ))}
             {p?.data.map((d) => (
-              <Command.Item key={d.name} value={`data ${d.name}`} onSelect={act(() => useStore.setState({ view: { t: "data", name: d.name } }))}>
+              <CommandItem key={d.name} value={`data ${d.name}`} onSelect={act(() => useStore.setState({ view: { t: "data", name: d.name } }))}>
                 Data {d.name}
-              </Command.Item>
+              </CommandItem>
             ))}
             {s.ws.blocks
               .filter((b) => b.scope === "library" || b.project === s.project)
               .map((b) => (
-                <Command.Item key={b.file} value={`open ${b.kind} ${b.type} ${b.fn} ${b.flavor}`} onSelect={act(() => useStore.setState({ view: { t: "block", key: b.key, flavor: b.flavor, file: b.file } }))}>
-                  Open {b.kind}: {b.fn} <span className="cx-menu-hint">{b.flavor}</span>
-                </Command.Item>
+                <CommandItem key={b.file} value={`open ${b.kind} ${b.type} ${b.fn} ${b.flavor}`} onSelect={act(() => useStore.setState({ view: { t: "block", key: b.key, flavor: b.flavor, file: b.file } }))}>
+                  Open {b.kind}: {b.fn} <CommandShortcut>{b.flavor}</CommandShortcut>
+                </CommandItem>
               ))}
-          </Command.Group>
-        </Command.List>
-      </Command>
-    </div>
+          </CommandGroup>
+        </CommandList>
+    </CommandDialog>
   );
 }

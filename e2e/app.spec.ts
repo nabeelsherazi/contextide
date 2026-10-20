@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { boot, editorText, expectFile, hook, mod, file } from "./helpers";
+import { boot, choose, editorText, expectFile, hook, mod, file } from "./helpers";
 
 test.beforeEach(async ({ page }) => boot(page));
 
@@ -47,8 +47,8 @@ test("run, score, rate and note a run", async ({ page }) => {
 test("fan-out sends chunks and still scores", async ({ page }) => {
   const calls = await mockLLM(page);
   await page.getByTestId("run-mode").locator("[data-value=fanout]").click();
-  await page.locator(".cx-run label", { hasText: "rows per call" }).locator("input").fill("4");
-  await page.locator(".cx-run label", { hasText: "rows per call" }).locator("input").blur();
+  await page.getByTestId("fan-size").fill("4");
+  await page.getByTestId("fan-size").blur();
   await page.getByTestId("run").click();
   await expect.poll(() => calls.length).toBe(4);
   await page.getByTestId("tab-outputs").click();
@@ -67,7 +67,7 @@ test("ablation ranks the cards that matter", async ({ page }) => {
 
 test("compare versions side by side", async ({ page }) => {
   await mockLLM(page);
-  await page.getByTestId("compare").selectOption("B");
+  await choose(page, "compare", "B");
   await expect(page.getByTestId("diff-panel")).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("word-diff")).toBeVisible();
 });
@@ -112,10 +112,10 @@ test("new library block via the drawer, with a flavor variant", async ({ page })
   await page.getByTestId("new-block-fn").fill("Be brief");
   await page.getByTestId("new-block-ok").click();
   await expect(page.getByTestId("block-page")).toBeVisible();
-  await page.locator(".cx-blockpage .ProseMirror").click();
+  await page.getByTestId("block-page").locator(".ProseMirror").click();
   await page.keyboard.type("Answer in as few words as possible.");
   await expectFile(page, "library/directives/tone/be-brief.md", (t) => !!t?.includes("Answer in as few words as possible."));
-  await page.getByTestId("add-variant").selectOption("gemini");
+  await choose(page, "add-variant", "gemini");
   await expectFile(page, "library/directives/tone/be-brief.gemini.md", (t) => !!t?.includes("flavor: gemini"));
 });
 
@@ -129,7 +129,7 @@ test("palette runs commands", async ({ page }) => {
 
 test("settings: theme and font persist", async ({ page }) => {
   await page.getByTestId("open-settings").click();
-  await page.getByTestId("pref-font").selectOption("Libre Baskerville");
+  await choose(page, "pref-font", "Libre Baskerville");
   await page.getByTestId("pref-theme").locator("[data-value=dark]").click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const font = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--font-page"));
@@ -145,7 +145,7 @@ test("endpoint headers and extra body reach the request", async ({ page }) => {
     seen = { headers: route.request().headers(), body: route.request().postDataJSON() };
     await route.fulfill({ status: 200, headers: { "access-control-allow-origin": "*", "content-type": "application/json" }, body: JSON.stringify({ choices: [{ message: { content: "ok" } }] }) });
   });
-  await page.getByTestId("run-endpoint").selectOption("gw");
+  await choose(page, "run-endpoint", "gw");
   await page.getByTestId("run").click();
   await expect.poll(() => seen).not.toBeNull();
   expect(seen.headers["x-client"]).toBe("contextide");

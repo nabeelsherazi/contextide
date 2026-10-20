@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+/* ContextIDE's own layers sit under the utilities, so shadcn/Tailwind classes always win on chrome */
+@import "./theme.css" layer(components);
+@import "./editor.css" layer(components);
+
+/* shadcn/ui tokens, mapped onto ContextIDE's night/day palette (defined in styles.css) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant day (&:where([data-theme="light"], [data-theme="light"] *));
+
+:root {
+  --radius: 0.7rem;
+  --background: var(--glass-strong);
+  --foreground: var(--ink);
+  --card-foreground: var(--ink);
+  --popover: var(--glass-strong);
+  --popover-foreground: var(--ink);
+  --primary: var(--gold);
+  --primary-foreground: var(--gold-ink);
+  --secondary: var(--paper-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-2);
+  --muted-foreground: var(--ink-3);
+  --accent: var(--paper-2);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--rule);
+  --input: var(--rule-2);
+  --ring: color-mix(in srgb, var(--gold) 65%, transparent);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  /* ContextIDE's own palette, usable as utilities (text-ink-3, bg-paper-2, text-gold…) */
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-field: var(--field);
+  --color-rule: var(--rule);
+  --color-rule-2: var(--rule-2);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-sky: var(--sky);
+  --color-good: var(--good);
+  --color-danger: var(--danger);
+  --color-glass: var(--glass);
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "EB Garamond", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  ol {
+    list-style: decimal;
+  }
+  ul.list-disc {
+    list-style: disc;
+  }
+}

@@ -50,7 +50,7 @@ test("screens", async ({ page }) => {
   await page.getByTestId("toggle-rendered").click();
   await shot(page, `08-rendered-run-${theme}`);
   await page.getByTestId("toggle-rendered").click();
-  await page.getByRole("button", { name: "← runs" }).click();
+  await page.getByRole("button", { name: "runs" }).first().click();
   await page.getByTestId("tab-run").click();
   await page.getByTestId("run-mode").locator("[data-value=ablation]").click();
   await page.getByTestId("run").click();
@@ -61,7 +61,7 @@ test("screens", async ({ page }) => {
   await shot(page, `10-block-${theme}`);
   await page.getByTestId("data-merchants").click();
   await shot(page, `11-data-${theme}`);
-  await page.locator(".cx-icon-btn", { hasText: "⚙︎" }).first().click();
+  await page.getByRole("button", { name: "Project settings" }).click();
   await shot(page, `12-project-${theme}`);
   await page.getByTestId("version-tab-A").click();
   await page.locator(".cx-data", { hasText: "merchants" }).dblclick();
