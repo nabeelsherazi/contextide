@@ -9,6 +9,8 @@ test("first launch shows the tutorial once; it can be replayed from settings", a
   const titles: string[] = [];
   for (let i = 0; i < 8; i++) {
     titles.push((await tour.locator("h3").textContent()) ?? "");
+    // every step after the welcome spotlights a real element
+    if (i > 0) await expect(tour.locator(".cx-tour-spot"), `step ${i + 1} has a spotlight`).toBeVisible();
     await page.getByTestId("tour-next").click();
   }
   expect(titles).toEqual(["Welcome to ContextIDE", "Projects and versions", "The page", "Directives and sections", "The library", "Data, insertions, tools", "Know your context", "Run and compare"]);

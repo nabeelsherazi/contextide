@@ -605,57 +605,6 @@
   letter-spacing: 0.2em;
 }
 
-.cx-r-text .cx-seg.cx-stable {
-  background: var(--stable);
-  padding: 0.18em 0;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-
-.cx-r-text .cx-seg-sep.cx-stable {
-  background: none;
-}
-
-.cx-data-text {
-  width: 100%;
-  max-width: var(--page-width);
-  min-height: 46vh;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  line-height: 1.55;
-  background: var(--paper);
-  border: 0;
-  box-shadow: var(--shadow);
-  border-radius: 10px;
-  padding: 20px 24px;
-  outline: none;
-  resize: vertical;
-  white-space: pre;
-  tab-size: 4;
-}
-
-.cx-data-text.small {
-  min-height: 200px;
-  box-shadow: none;
-  border: 1px solid var(--rule-2);
-}
-
-.cx-card-panel {
-  background: var(--paper);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  padding: 14px 18px;
-  margin-bottom: 14px;
-  max-width: var(--page-width);
-}
-
-.cx-card-panel h3, .cx-card-panel h4 {
-  margin: 0 0 8px;
-  font-family: var(--font-page);
-  font-weight: 600;
-  font-size: 18px;
-}
-
 .cx-diff .cx-add {
   background: var(--add);
   border-radius: 2px;
@@ -738,32 +687,6 @@
 .cx-flavor.on {
   color: var(--gold);
   background: var(--gold-soft);
-}
-
-.cx-paper, .cx-card-panel, .cx-code, .cx-data-text {
-  background: var(--stage);
-  border: 1px solid var(--stage-edge);
-  box-shadow: var(--shadow);
-  border-radius: 16px;
-}
-
-.cx-card-panel {
-  padding: 18px 22px;
-}
-
-.cx-card-panel h3, .cx-card-panel h4 {
-  font-weight: 400;
-  font-size: 20px;
-}
-
-.cx-data-text {
-  color: var(--ink);
-  padding: 22px 26px;
-}
-
-.cx-data-text.small {
-  border: 1px solid var(--rule);
-  background: var(--field);
 }
 
 /* cards */
@@ -880,24 +803,11 @@
   font-size: 10.5px;
 }
 
-.cx-r-text .cx-seg.cx-stable {
-  background: var(--stable);
-}
-
 /* form fields speak plainly; labels carry the voice */
 .cx-select {
   font-style: normal;
   font-family: var(--font-ui);
   font-size: 13px;
-}
-
-.cx-select:focus-visible, .ProseMirror:focus-visible, .cx-section-title:focus-visible, .cx-data-text:focus-visible {
-  outline: none;
-}
-
-.cx-r-text .cx-seg.cx-stable {
-  background: var(--stable);
-  padding: 0;
 }
 
 /* xml-ish tags in prompts read as structure */

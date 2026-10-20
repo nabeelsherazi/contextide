@@ -107,7 +107,6 @@ export interface State {
   progress: RunProgress;
   selectedRun: string | null;
   diff: { a: string | null; b: string | null; what: "output" | "prompt"; ai: number; bi: number };
-  toast: { msg: string; n: number } | null;
   menu: { x: number; y: number; kind: "editor" | "section"; pos?: number } | null;
   analysis: import("./analysis").Analysis | null;
   runOverride: boolean;
@@ -140,7 +139,6 @@ export const useStore = create<State>(() => ({
   progress: { running: false, done: 0, total: 0, label: "", live: "" },
   selectedRun: null,
   diff: { a: null, b: null, what: "output", ai: 0, bi: 0 },
-  toast: null,
   menu: null,
   analysis: null,
   runOverride: false,

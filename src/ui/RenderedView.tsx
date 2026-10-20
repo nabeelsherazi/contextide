@@ -20,7 +20,7 @@ export function RenderedView() {
   const s = useStore();
   const a = s.analysis;
   const [showWs, setShowWs] = useState(s.prefs.showWhitespace);
-  if (!a) return <div className="cx-paper cx-rendered">Nothing rendered yet.</div>;
+  if (!a) return <div className="cx-stage cx-rendered">Nothing rendered yet.</div>;
   const r = a.rendered;
   const p = currentProject(s);
   const v = currentVersion(s);
@@ -29,7 +29,7 @@ export function RenderedView() {
   const req = ep ? buildRequest(r, settings, ep) : null;
   let cutDone = false;
   return (
-    <div className="cx-paper cx-rendered" data-testid="rendered">
+    <div className="cx-stage cx-rendered" data-testid="rendered">
       <div className="cx-rendered-tools">
         <CheckRow checked={showWs} onChange={setShowWs}>
           show whitespace

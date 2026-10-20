@@ -204,7 +204,7 @@ export function Editor(p: EditorProps) {
       viewRef.current = null;
       useStore.setState({ analysis: null });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // re-create the view only for a different document; later prop changes flow through refs
   }, [p.docKey, p.mode]);
 
   // re-analyze when flavor changes

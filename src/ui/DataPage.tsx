@@ -24,11 +24,11 @@ export function DataPage() {
       setText(d.text);
       lastSaved.current = d.text;
     }
-  }, [d?.text]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [d?.text]); // pick up external edits, but not echoes of our own saves
   useEffect(() => {
     setText(d?.text ?? "");
     lastSaved.current = d?.text ?? "";
-  }, [d?.file]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [d?.file]); // switching data sources resets the editor
   if (!p || !d) return <div className="cx-empty-page">That data source no longer exists.</div>;
   const parsed = dataItems({ ...d, text });
   const save = (t: string) => {

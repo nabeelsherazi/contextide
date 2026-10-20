@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 function JsonBody(p: { file: string; body: string; kind: "tool" | "schema"; header: string }) {
   const src = (/```(?:json)?\s*\n([\s\S]*?)\n```/.exec(p.body)?.[1] ?? p.body).trim();
   const [t, setT] = useState(src);
-  useEffect(() => setT(src), [p.file]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => setT(src), [p.file]); // reset only when switching files, not while the body echoes our own saves
   const parsed = extractJson("```json\n" + t + "\n```");
   return (
     <div className="max-w-[var(--page-width)]">

@@ -42,8 +42,8 @@ export function WordDiff({ a, b }: { a: string; b: string }) {
 function Variance({ r }: { r: RunRecord }) {
   const v = variance(r);
   return (
-    <div className="cx-card-panel" data-testid="variance">
-      <h4>Repeat variance</h4>
+    <div className="rounded-xl border border-rule bg-paper p-3" data-testid="variance">
+      <h4 className="mb-1.5 font-serif text-[18px] font-normal">Repeat variance</h4>
       <p>
         {v.n} outputs · <b>{v.unique}</b> distinct · top answer {pct(v.agreement)} of runs · mean similarity {pct(v.meanSimilarity)}
         {v.mean !== undefined && (
@@ -66,8 +66,8 @@ function Variance({ r }: { r: RunRecord }) {
 function Ablation({ r }: { r: RunRecord }) {
   const rows = ablationRanking(r);
   return (
-    <div className="cx-card-panel" data-testid="ablation">
-      <h4>Ablation: what each card does</h4>
+    <div className="rounded-xl border border-rule bg-paper p-3" data-testid="ablation">
+      <h4 className="mb-1.5 font-serif text-[18px] font-normal">Ablation: what each card does</h4>
       <Hint>Each row muted one card. Bigger change = that card matters more. Click to jump to it.</Hint>
       <table className="cx-table">
         <thead>

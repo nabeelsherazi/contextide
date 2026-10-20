@@ -51,7 +51,7 @@ const STEPS: Step[] = [
     body: <>A project is one workflow. Each tab is an alternative version of its prompt — A, B, C — with a subtitle for the idea behind it. Fork one with + to try something new.</>,
   },
   {
-    target: ".cx-paper",
+    target: ".cx-canvas",
     place: "right",
     title: "The page",
     body: (
@@ -61,7 +61,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    target: ".cx-paper .cx-section:has(.cx-directive, .cx-use)",
+    target: ".cx-canvas .cx-section:has(.cx-directive, .cx-use)",
     place: "right",
     title: "Directives and sections",
     body: (

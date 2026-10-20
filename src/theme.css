@@ -2,7 +2,7 @@
    UI chrome is Tailwind + shadcn/ui (see app.css and components/ui). */
 
 /* ContextIDE — night & day.
-   Night (default): a warm-black sky with faint stars; the page is a dark glass stage.
+   Night (default): a warm-black sky with faint stars; cards float on it as dark glass.
    Day: an open sky; the page is cloud-glass. The golden rope marks where the known
    (stable prefix, lit like daylight) meets the unknown (what changes between runs). */
 
@@ -63,8 +63,6 @@
   --page-width: 760px;
   color-scheme: dark;
 }
-
-
 
 /* day: open sky, cloud-glass */
 :root[data-theme="light"] {
@@ -253,15 +251,6 @@ pre {
   min-width: 0;
 }
 
-.cx-paper {
-  background: var(--paper);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  padding: 34px 48px 44px;
-  min-height: 60vh;
-  max-width: var(--page-width);
-}
-
 /* rendered view */
 .cx-rendered {
   font-family: var(--font-page);
@@ -345,18 +334,6 @@ pre {
   color: var(--ink);
 }
 
-.cx-code {
-  min-height: 300px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  background: var(--paper);
-  box-shadow: var(--shadow);
-  border: 0;
-  border-radius: 10px;
-  padding: 18px 20px;
-  max-width: var(--page-width);
-}
-
 .cx-kv-new input {
   opacity: 0.7;
 }
@@ -409,12 +386,6 @@ pre {
   font-family: var(--font-page);
   font-size: 17px;
   line-height: 1.5;
-}
-
-@media (max-width: 1100px) {
-  .cx-paper {
-    padding: 26px 32px 36px;
-  }
 }
 
 @keyframes cx-blink {
@@ -512,8 +483,6 @@ pre {
   width: 14px;
 }
 
-
-
 /* =====================================================================
    Night & Day skin
    ===================================================================== */
@@ -526,7 +495,6 @@ body {
   background-attachment: fixed;
   font-size: 13px;
 }
-
 
 /* a still field of faint stars */
 body::before {
@@ -546,7 +514,6 @@ body::before {
   background-size: 340px 340px, 280px 280px, 410px 410px, 300px 300px, 520px 520px, 230px 230px, 370px 370px;
 }
 
-
 /* canvas grain, like an old oil painting */
 body::after {
   content: "";
@@ -558,7 +525,6 @@ body::after {
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.45  0 0 0 0 0.4  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
-
 
 /* day: soft clouds instead of stars */
 :root[data-theme="light"] body::before {
@@ -712,23 +678,6 @@ body::after {
   }
 }
 
-.cx-paper {
-  padding: 44px 56px 56px;
-  position: relative;
-}
-
-/* a faint sheen along the top edge of the stage */
-.cx-paper::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 45%, transparent), transparent);
-  opacity: 0.6;
-}
-
 /* ---------- popovers, dialogs, palette ---------- */
 
 .cx-tour-card {
@@ -868,7 +817,6 @@ input[type="range"] {
   }
 }
 
-
 /* in day, the far side of the rope is night */
 :root[data-theme="light"] .cx-welcome::before {
   background:
@@ -882,8 +830,6 @@ input[type="range"] {
   background-size: 260px 260px, 310px 310px, 380px 380px, 290px 290px, 340px 340px, 100% 100%, 100% 100%;
   box-shadow: 20px 0 60px rgba(20, 40, 80, 0.25);
 }
-
-
 
 /* day: keep secondary text legible over the sky */
 :root[data-theme="light"] {
@@ -1008,8 +954,6 @@ input[type="range"] {
   box-shadow: 0 6px 16px rgba(30, 60, 110, 0.14);
 }
 
-
-
 /* =====================================================================
    Notebook canvas: floating cards joined by bridges
    ===================================================================== */
@@ -1039,4 +983,78 @@ input[type="range"] {
 /* progress along a length of rope */
 .cx-rope-fill {
   background: repeating-linear-gradient(-58deg, var(--gold) 0 3px, color-mix(in srgb, var(--gold) 55%, transparent) 3px 6px);
+}
+
+
+/* rendered view: exactly what the model receives */
+.cx-r-text .cx-seg.cx-stable {
+  background: var(--stable);
+  padding: 0.18em 0;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.cx-r-text .cx-seg-sep.cx-stable {
+  background: none;
+}
+
+.cx-r-text .cx-seg.cx-stable {
+  background: var(--stable);
+}
+
+.cx-r-text .cx-seg.cx-stable {
+  background: var(--stable);
+  padding: 0;
+}
+
+/* ---------- surfaces (one definition each) ---------- */
+
+/* the stage: a single dark-glass card, used by the rendered view */
+.cx-stage,
+.cx-card-panel,
+.cx-code,
+.cx-data-text {
+  background: var(--stage);
+  border: 1px solid var(--stage-edge);
+  box-shadow: var(--shadow);
+  border-radius: 16px;
+}
+.cx-stage {
+  position: relative;
+  max-width: var(--page-width);
+  min-height: 60vh;
+  padding: 44px 56px 56px;
+}
+/* a faint sheen along the top edge of the stage */
+.cx-stage::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 45%, transparent), transparent);
+  opacity: 0.6;
+}
+.cx-card-panel {
+  padding: 18px 22px;
+}
+.cx-data-text {
+  width: 100%;
+  max-width: var(--page-width);
+  min-height: 46vh;
+  padding: 22px 26px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre;
+  tab-size: 4;
+  resize: vertical;
+  outline: none;
+}
+@media (max-width: 1100px) {
+  .cx-stage {
+    padding: 26px 32px 36px;
+  }
 }

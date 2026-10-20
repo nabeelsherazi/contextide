@@ -13,7 +13,7 @@ const run = (s: EditorState, c: Command) => {
   if (!ok) throw new Error("command returned false");
   return next;
 };
-/** Select a substring (first occurrence), or place the cursor at its start when collapse=true. */
+/** Select from the first occurrence of `text` to the end of `toText` (or just `text`). */
 const sel = (s: EditorState, text: string, toText?: string) => {
   let from = -1;
   let to = -1;

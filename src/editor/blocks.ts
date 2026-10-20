@@ -36,7 +36,7 @@ export const newSection = (): Insertable => ({ mode: "card", node: schema.nodes.
 
 export function dragPayload(i: Insertable): string {
   if (i.mode === "card") return JSON.stringify({ type: "card", node: i.node.toJSON() });
-  // multiple inline nodes: wrap into a line when dropped between cards; we send the first node set as a line
+  // one inline node drops inline; several (an insertion preset with text) travel as a line card
   if (i.nodes.length === 1) return JSON.stringify({ type: "inline", node: i.nodes[0].toJSON() });
   return JSON.stringify({ type: "card", node: schema.nodes.line.create(null, i.nodes).toJSON() });
 }

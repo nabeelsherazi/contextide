@@ -4,7 +4,7 @@
 @import "./theme.css" layer(components);
 @import "./editor.css" layer(components);
 
-/* shadcn/ui tokens, mapped onto ContextIDE's night/day palette (defined in styles.css) */
+/* shadcn/ui tokens, mapped onto ContextIDE's night/day palette (defined in theme.css) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 @custom-variant day (&:where([data-theme="light"], [data-theme="light"] *));
 

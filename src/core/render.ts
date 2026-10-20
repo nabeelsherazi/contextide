@@ -253,7 +253,7 @@ export function promptText(r: Rendered): string {
   return r.messages.map((m) => `[${m.role}]\n${m.text}`).join("\n\n");
 }
 
-/** Token count per card id (sum of its segments). */
+/** The rendered text of each card id (its segments joined), for per-card token counts. */
 export function cardTexts(r: Rendered): Map<string, string> {
   const map = new Map<string, string>();
   for (const m of r.messages)
