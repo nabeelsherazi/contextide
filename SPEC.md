@@ -1,6 +1,6 @@
 # ContextIDE — v1 spec
 
-A centered, paper-like editor for composing LLM prompts out of reusable **Blocks**, A/B testing
+A centered, writing-stage editor for composing LLM prompts out of reusable **Blocks**, A/B testing
 alternative **Versions**, and test-running them against local or cloud OpenAI-compatible endpoints.
 Static Vite + TypeScript + React PWA, Chromium-only, working directly on a folder via the File
 System Access API. Everything on disk is plain text.
@@ -122,7 +122,7 @@ flavor, falling back to `general`. Switching a version's flavor swaps every word
 
 ## 3. Editor
 
-* A centered paper card, one page per message (the message chrome is hidden for a single User message).
+* A centered glass stage, one page per message (the message chrome is hidden for a single User message).
 * Click into empty space and type to write freeform text. Press `/` on an empty line to open an inline block picker.
 * Markdown is styled but never hidden: `# heading` renders larger with the `#` still shown;
   `**bold**`, `*italic*`, `` `code` ``, `> quote`, list markers and `<xml-ish>` tags are tinted.
@@ -155,14 +155,14 @@ flavor, falling back to `general`. Switching a version's flavor swaps every word
 
 ```
 ┌ project ▾   [A · terse] [B · few-shot] [+ fork]                     ⌘K   ⚙ ┐
-│ BLOCKS  (search, flavor filter,  │      paper page      │ RUN / OUTPUTS / DIFF │
+│ BLOCKS  (search, flavor filter,  │        stage         │ RUN / OUTPUTS / DIFF │
 │ type tree, data, tools, schemas) │                      │                      │
 └ status: tokens · stable prefix · flavor · lint count ──────────────────────────┘
 ```
 
 * Both drawers collapse (focus mode).
 * Fonts: EB Garamond by default, changeable in settings. Font size, line height, page width and a monospace font for data are also settings.
-* Themes: warm paper (light) and charcoal ink (dark). Follows the OS by default, overridable.
+* Themes: **night** (default) — a warm-black sky with faint stars and canvas grain, the page a dark glass stage; and **day** — an open sky with a cloud-glass page. Can also follow the OS. The motif is a golden rope: the stable prefix is lit like daylight, and a rope line marks where the parts that change between runs begin.
 * Command palette (⌘K) for every action: switch project or version, insert block, run, toggle the rendered view, settings.
 * Library blocks show "used in N versions" backlinks. Versions can be forked, renamed, given a subtitle, or deleted.
 

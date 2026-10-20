@@ -21,7 +21,7 @@ export const DEFAULT_PREFS: Prefs = {
   fontSize: 21,
   lineHeight: 1.6,
   pageWidth: 760,
-  theme: "system",
+  theme: "dark",
   showWhitespace: false,
   gutter: true,
   prefixTint: true,

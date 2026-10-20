@@ -844,9 +844,9 @@ function Settings({ tab: initial }: { tab?: string }) {
             <Seg
               value={s.prefs.theme}
               options={[
+                ["dark", "night"],
+                ["light", "day"],
                 ["system", "follow system"],
-                ["light", "paper"],
-                ["dark", "ink"],
               ]}
               onChange={(theme) => setPrefs({ theme })}
               testid="pref-theme"

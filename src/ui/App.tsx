@@ -18,14 +18,17 @@ function useTheme() {
   const prefs = useStore((s) => s.prefs);
   useEffect(() => {
     const r = document.documentElement;
-    if (prefs.theme === "system") r.removeAttribute("data-theme");
-    else r.setAttribute("data-theme", prefs.theme);
+    const mql = window.matchMedia("(prefers-color-scheme: light)");
+    const apply = () => r.setAttribute("data-theme", prefs.theme === "system" ? (mql.matches ? "light" : "dark") : prefs.theme);
+    apply();
+    mql.addEventListener("change", apply);
     r.style.setProperty("--font-page", `"${prefs.font}", "EB Garamond", Georgia, serif`);
     r.style.setProperty("--font-mono", `"${prefs.mono}", ui-monospace, Menlo, monospace`);
     r.style.setProperty("--page-size", `${prefs.fontSize}px`);
     r.style.setProperty("--page-leading", String(prefs.lineHeight));
     r.style.setProperty("--page-width", `${prefs.pageWidth}px`);
     r.classList.toggle("cx-show-ws", prefs.showWhitespace);
+    return () => mql.removeEventListener("change", apply);
   }, [prefs]);
 }
 

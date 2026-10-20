@@ -48,7 +48,7 @@ export function ablationTargets(messages: Message[]): { id: string; label: strin
         : n.k === "section"
           ? `section ${n.title || "untitled"}`
           : n.k === "use"
-            ? n.ref
+            ? `${n.ref.split(":")[0]} ${(n.ref.split("/").pop() ?? n.ref).replace(/-/g, " ")}`
             : n.k === "data"
               ? `data ${n.source}`
               : `${n.k} ${n.name}`;

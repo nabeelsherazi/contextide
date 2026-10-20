@@ -1,106 +1,111 @@
-/* ContextIDE — paper & ink */
+/* ContextIDE — night & day.
+   Night (default): a warm-black sky with faint stars; the page is a dark glass stage.
+   Day: an open sky; the page is cloud-glass. The golden rope marks where the known
+   (stable prefix, lit like daylight) meets the unknown (what changes between runs). */
 
 :root {
-  --desk: #ece5d8;
-  --desk-2: #e4dccd;
-  --paper: #fffdf8;
-  --paper-2: #f8f3ea;
-  --ink: #2a251f;
-  --ink-2: #5f564b;
-  --ink-3: #978c7d;
-  --ink-4: #c4b9a8;
-  --rule: #e6dccb;
-  --rule-2: #d8ccb8;
-  --accent: #a8502b;
-  --accent-soft: #f3e1d6;
-  --good: #3f6e57;
-  --danger: #b03a2e;
-  --stable: rgba(63, 110, 87, 0.065);
-  --stable-edge: rgba(63, 110, 87, 0.35);
-  --cut: #c46a2e;
-  --k-line: #b7ab98;
-  --k-directive: #8a6a37;
-  --k-section: #6c6458;
-  --k-use: #4d6491;
-  --k-data: #7a5797;
-  --k-tool: #3f6e57;
-  --k-ins: #a8502b;
-  --add: rgba(63, 140, 87, 0.18);
-  --del: rgba(190, 60, 46, 0.16);
-  --shadow: 0 1px 2px rgba(60, 45, 25, 0.06), 0 8px 28px rgba(60, 45, 25, 0.08);
-  --shadow-pop: 0 4px 12px rgba(40, 30, 15, 0.12), 0 20px 50px rgba(40, 30, 15, 0.14);
+  /* night */
+  --sky-top: #0b0a0e;
+  --sky-bottom: #050406;
+  --glow-a: rgba(74, 110, 170, 0.16);
+  --glow-b: rgba(232, 184, 120, 0.06);
+  --star: rgba(255, 246, 228, 0.7);
+  --star-dim: rgba(220, 228, 255, 0.4);
+  --sparkle: 0.85;
+  --grain-opacity: 0.05;
+
+  --desk: transparent;
+  --desk-2: rgba(255, 255, 255, 0.03);
+  --glass: rgba(14, 13, 17, 0.72);
+  --glass-strong: rgba(17, 16, 21, 0.94);
+  --stage: linear-gradient(180deg, rgba(22, 20, 26, 0.94), rgba(13, 12, 16, 0.96));
+  --stage-edge: rgba(232, 184, 120, 0.11);
+  --paper: rgba(255, 255, 255, 0.035);
+  --paper-2: rgba(255, 255, 255, 0.06);
+  --field: rgba(255, 255, 255, 0.04);
+  --ink: #ece4d4;
+  --ink-2: #b9b0a1;
+  --ink-3: #847c70;
+  --ink-4: #4f4a43;
+  --rule: rgba(255, 255, 255, 0.07);
+  --rule-2: rgba(255, 255, 255, 0.12);
+  --accent: #e8b878; /* the rope / skin-warm gold */
+  --accent-ink: #1a130b;
+  --accent-soft: rgba(232, 184, 120, 0.13);
+  --sky: #8fb3e6;
+  --sky-soft: rgba(143, 179, 230, 0.1);
+  --good: #9cc9a7;
+  --danger: #ec8a7a;
+  --stable: rgba(143, 179, 230, 0.045);
+  --stable-edge: rgba(143, 179, 230, 0.35);
+  --cut: #e8b878;
+  --k-line: #6d665c;
+  --k-directive: #e8b878;
+  --k-section: #a59a89;
+  --k-use: #8fb3e6;
+  --k-data: #b9a8e8;
+  --k-tool: #9cc9a7;
+  --k-ins: #f0a877;
+  --add: rgba(156, 201, 167, 0.18);
+  --del: rgba(236, 138, 122, 0.18);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 120px rgba(160, 175, 200, 0.04);
+  --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --font-ui: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "EB Garamond", Georgia, serif;
   --font-page: "EB Garamond", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
   --page-size: 21px;
   --page-leading: 1.6;
   --page-width: 760px;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --desk: #161513;
-    --desk-2: #1d1b18;
-    --paper: #23211d;
-    --paper-2: #2a2723;
-    --ink: #ebe4d7;
-    --ink-2: #b7ad9e;
-    --ink-3: #857b6d;
-    --ink-4: #5a5248;
-    --rule: #34302a;
-    --rule-2: #433d35;
-    --accent: #e08a5c;
-    --accent-soft: #3d2c22;
-    --good: #7fb596;
-    --danger: #e57a6c;
-    --stable: rgba(127, 181, 150, 0.07);
-    --stable-edge: rgba(127, 181, 150, 0.4);
-    --cut: #e08a5c;
-    --k-line: #6b6357;
-    --k-directive: #c9a268;
-    --k-section: #a59a89;
-    --k-use: #8aa3d6;
-    --k-data: #b896d6;
-    --k-tool: #7fb596;
-    --k-ins: #e08a5c;
-    --add: rgba(110, 190, 140, 0.2);
-    --del: rgba(230, 110, 95, 0.2);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px rgba(0, 0, 0, 0.3);
-    --shadow-pop: 0 4px 12px rgba(0, 0, 0, 0.4), 0 20px 50px rgba(0, 0, 0, 0.5);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --desk: #161513;
-  --desk-2: #1d1b18;
-  --paper: #23211d;
-  --paper-2: #2a2723;
-  --ink: #ebe4d7;
-  --ink-2: #b7ad9e;
-  --ink-3: #857b6d;
-  --ink-4: #5a5248;
-  --rule: #34302a;
-  --rule-2: #433d35;
-  --accent: #e08a5c;
-  --accent-soft: #3d2c22;
-  --good: #7fb596;
-  --danger: #e57a6c;
-  --stable: rgba(127, 181, 150, 0.07);
-  --stable-edge: rgba(127, 181, 150, 0.4);
-  --cut: #e08a5c;
-  --k-line: #6b6357;
-  --k-directive: #c9a268;
-  --k-section: #a59a89;
-  --k-use: #8aa3d6;
-  --k-data: #b896d6;
-  --k-tool: #7fb596;
-  --k-ins: #e08a5c;
-  --add: rgba(110, 190, 140, 0.2);
-  --del: rgba(230, 110, 95, 0.2);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px rgba(0, 0, 0, 0.3);
-  --shadow-pop: 0 4px 12px rgba(0, 0, 0, 0.4), 0 20px 50px rgba(0, 0, 0, 0.5);
-  color-scheme: dark;
+/* day: open sky, cloud-glass */
+:root[data-theme="light"] {
+  --sky-top: #6f9bd6;
+  --sky-bottom: #c9dbef;
+  --glow-a: rgba(255, 255, 255, 0.55);
+  --glow-b: rgba(255, 236, 205, 0.35);
+  --star: rgba(255, 255, 255, 0);
+  --star-dim: rgba(255, 255, 255, 0);
+  --sparkle: 0;
+  --grain-opacity: 0.06;
+  --glass: rgba(250, 247, 240, 0.62);
+  --glass-strong: rgba(252, 250, 245, 0.96);
+  --stage: linear-gradient(180deg, rgba(255, 253, 248, 0.92), rgba(250, 246, 238, 0.9));
+  --stage-edge: rgba(255, 255, 255, 0.8);
+  --paper: rgba(255, 255, 255, 0.55);
+  --paper-2: rgba(40, 60, 90, 0.06);
+  --field: rgba(255, 255, 255, 0.7);
+  --ink: #1f1b16;
+  --ink-2: #4f483e;
+  --ink-3: #857c6f;
+  --ink-4: #bdb3a4;
+  --rule: rgba(40, 50, 70, 0.1);
+  --rule-2: rgba(40, 50, 70, 0.18);
+  --accent: #a8622a;
+  --accent-ink: #fff8ee;
+  --accent-soft: rgba(168, 98, 42, 0.12);
+  --sky: #3f6fb0;
+  --sky-soft: rgba(63, 111, 176, 0.09);
+  --good: #3f7a55;
+  --danger: #b23c2c;
+  --stable: rgba(63, 111, 176, 0.07);
+  --stable-edge: rgba(63, 111, 176, 0.35);
+  --cut: #b06a2c;
+  --k-line: #b9ae9e;
+  --k-directive: #b06a2c;
+  --k-section: #6c6458;
+  --k-use: #3f6fb0;
+  --k-data: #7356a8;
+  --k-tool: #3f7a55;
+  --k-ins: #b8562a;
+  --add: rgba(63, 140, 87, 0.18);
+  --del: rgba(190, 60, 46, 0.16);
+  --shadow: 0 1px 2px rgba(30, 50, 80, 0.06), 0 24px 70px rgba(30, 60, 110, 0.18);
+  --shadow-pop: 0 20px 60px rgba(30, 60, 110, 0.25), 0 0 0 1px rgba(40, 50, 70, 0.08);
+  color-scheme: light;
 }
 
 * {
@@ -1925,10 +1930,7 @@ pre {
 .ProseMirror-focused .ProseMirror-gapcursor {
   display: block;
 }
-/* the editor's always-present trailing line is quiet */
-.cx-message-body > .cx-line:last-child.cx-empty:not(:focus-within) {
-  min-height: calc(var(--page-size) * var(--page-leading) * 1.2);
-}
+
 
 /* tutorial */
 .cx-tour {
@@ -2007,4 +2009,908 @@ pre {
 .cx-tour-dots span.on {
   background: var(--accent);
   width: 14px;
+}
+
+/* =====================================================================
+   Night & Day skin
+   ===================================================================== */
+
+body {
+  background:
+    radial-gradient(ellipse 70% 55% at 12% -12%, var(--glow-a), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 92% 112%, var(--glow-b), transparent 60%),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+  background-attachment: fixed;
+  font-size: 13px;
+}
+/* a still field of faint stars */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, var(--star), transparent),
+    radial-gradient(1px 1px at 37% 72%, var(--star-dim), transparent),
+    radial-gradient(1px 1px at 63% 31%, var(--star), transparent),
+    radial-gradient(1px 1px at 81% 84%, var(--star-dim), transparent),
+    radial-gradient(1.5px 1.5px at 90% 12%, var(--star), transparent),
+    radial-gradient(1px 1px at 24% 55%, var(--star-dim), transparent),
+    radial-gradient(1px 1px at 55% 92%, var(--star-dim), transparent);
+  background-size: 340px 340px, 280px 280px, 410px 410px, 300px 300px, 520px 520px, 230px 230px, 370px 370px;
+}
+/* canvas grain, like an old oil painting */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.45  0 0 0 0 0.4  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+/* day: soft clouds instead of stars */
+:root[data-theme="light"] body::before {
+  background-image:
+    radial-gradient(ellipse 34% 14% at 18% 22%, rgba(255, 255, 255, 0.75), transparent 70%),
+    radial-gradient(ellipse 22% 10% at 30% 28%, rgba(255, 255, 255, 0.6), transparent 70%),
+    radial-gradient(ellipse 30% 12% at 84% 70%, rgba(255, 255, 255, 0.7), transparent 70%),
+    radial-gradient(ellipse 18% 8% at 72% 76%, rgba(255, 252, 245, 0.55), transparent 70%),
+    radial-gradient(ellipse 40% 16% at 50% 104%, rgba(255, 255, 255, 0.8), transparent 70%);
+  background-size: 100% 100%;
+}
+#root {
+  position: relative;
+  z-index: 1;
+}
+::selection {
+  background: rgba(232, 184, 120, 0.28);
+}
+
+/* ---------- controls ---------- */
+
+.cx-btn {
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  line-height: 1.25;
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  color: var(--ink);
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease), box-shadow 0.25s var(--ease), color 0.25s var(--ease);
+}
+.cx-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--rule-2));
+}
+.cx-btn.small {
+  padding: 3px 12px;
+  font-size: 14px;
+}
+.cx-btn.primary {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent), color-mix(in srgb, var(--accent) 6%, transparent));
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  color: var(--ink);
+  box-shadow: 0 0 22px rgba(232, 184, 120, 0.16);
+}
+.cx-btn.primary:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 12%, transparent));
+  border-color: var(--accent);
+  box-shadow: 0 0 30px rgba(232, 184, 120, 0.26);
+}
+.cx-btn.primary:disabled {
+  opacity: 0.35;
+  box-shadow: none;
+  background: transparent;
+}
+:root[data-theme="light"] .cx-btn.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 6px 18px rgba(168, 98, 42, 0.25);
+}
+.cx-btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink-2);
+  font-style: italic;
+}
+.cx-btn.ghost:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+.cx-btn.on {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  color: var(--accent);
+  font-style: normal;
+}
+.cx-icon-btn {
+  border-radius: 999px;
+  color: var(--ink-3);
+  transition: color 0.2s, background 0.2s;
+}
+.cx-icon-btn:hover,
+.cx-icon-btn.on {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+.cx-mini {
+  border-radius: 999px;
+}
+.cx-input,
+.cx-select,
+.cx-search {
+  background: var(--field);
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  padding: 6px 10px;
+  color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.cx-select {
+  padding: 5px 8px;
+}
+.cx-select option {
+  background: var(--glass-strong);
+  color: var(--ink);
+}
+.cx-input:focus,
+.cx-select:focus,
+.cx-search:focus {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.cx-search {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+.cx-search::placeholder,
+.cx-input::placeholder {
+  font-style: italic;
+  color: var(--ink-3);
+}
+.cx-seg-ctl {
+  border-radius: 999px;
+  border-color: var(--rule);
+  background: var(--field);
+  padding: 2px;
+  gap: 2px;
+}
+.cx-seg-ctl button {
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-3);
+  padding: 4px 11px;
+  transition: background 0.2s, color 0.2s;
+}
+.cx-seg-ctl button + button {
+  border-left: 0;
+}
+.cx-seg-ctl button:hover {
+  color: var(--ink);
+}
+.cx-seg-ctl button.on {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.cx-chip-btn {
+  background: var(--field);
+  border-color: var(--rule);
+}
+.cx-chip-btn.on {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--accent);
+}
+.cx-badge {
+  border-color: var(--rule-2);
+}
+.cx-flavor {
+  background: var(--paper-2);
+  border-radius: 999px;
+  padding: 0 7px;
+}
+.cx-flavor.on {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.cx-link {
+  color: var(--accent);
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 3px;
+}
+.cx-fine {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* ---------- welcome: day meets night along a golden rope ---------- */
+
+.cx-welcome {
+  position: relative;
+  overflow: hidden;
+  place-items: center start;
+  padding: 0 0 0 calc(38vw + 64px);
+}
+.cx-welcome::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38vw;
+  background:
+    radial-gradient(ellipse 60% 18% at 30% 30%, rgba(255, 255, 255, 0.5), transparent 70%),
+    radial-gradient(ellipse 45% 14% at 62% 38%, rgba(255, 255, 255, 0.38), transparent 70%),
+    radial-gradient(ellipse 70% 20% at 40% 70%, rgba(255, 252, 244, 0.45), transparent 70%),
+    radial-gradient(ellipse 40% 12% at 72% 78%, rgba(255, 255, 255, 0.32), transparent 70%),
+    linear-gradient(180deg, #4f7fc2, #7ea6d8 55%, #a9c3e3);
+  box-shadow: 30px 0 80px rgba(0, 0, 0, 0.45);
+}
+.cx-welcome::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(38vw - 2px);
+  width: 4px;
+  background: repeating-linear-gradient(-58deg, #c8955c 0 3px, #8a5f34 3px 5px, #e3b47c 5px 7px);
+  box-shadow: 0 0 18px rgba(232, 184, 120, 0.35);
+}
+.cx-welcome-card {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  animation: cx-rise 0.9s var(--ease) both;
+}
+.cx-welcome h1 {
+  font-size: 68px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  margin: 0 0 14px;
+}
+.cx-welcome h1::before {
+  content: "context engineering";
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 18px;
+}
+.cx-lede {
+  font-size: 21px;
+  font-style: italic;
+  color: var(--ink-2);
+}
+.cx-welcome-actions {
+  margin: 34px 0 26px;
+  gap: 10px;
+}
+.cx-welcome-actions .cx-btn {
+  font-size: 17px;
+  padding: 9px 22px;
+}
+@keyframes cx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (max-width: 860px) {
+  .cx-welcome {
+    padding: 24px;
+    place-items: center;
+  }
+  .cx-welcome::before,
+  .cx-welcome::after {
+    display: none;
+  }
+}
+
+/* ---------- chrome ---------- */
+
+.cx-topbar {
+  background: transparent;
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 14px;
+  gap: 8px;
+}
+.cx-project-select {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+.cx-project-select option {
+  background: var(--glass-strong);
+}
+.cx-tab {
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-family: var(--font-serif);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.cx-tab b {
+  font-size: 17px;
+  font-weight: 500;
+}
+.cx-tab-sub {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14.5px;
+}
+.cx-tab.active {
+  background: var(--paper-2);
+  border-color: var(--rule-2);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.cx-drawer {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+.cx-left {
+  border-right: 1px solid var(--rule);
+}
+.cx-right {
+  border-left: 1px solid var(--rule);
+}
+.cx-drawer-head {
+  padding: 14px 14px 8px;
+  gap: 8px;
+}
+.cx-drawer-body {
+  padding: 4px 14px 40px;
+}
+.cx-drawer-tabs {
+  padding: 12px 14px 6px;
+  gap: 4px;
+}
+.cx-drawer-tabs button {
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ink-3);
+  font-style: italic;
+}
+.cx-drawer-tabs button.on {
+  background: var(--paper-2);
+  color: var(--ink);
+  font-style: normal;
+  box-shadow: none;
+}
+.cx-group {
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--rule);
+  padding: 4px 0;
+}
+.cx-group:last-child {
+  border-bottom: 0;
+}
+.cx-group-toggle {
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: var(--ink-3);
+  padding: 9px 0;
+  transition: color 0.2s;
+}
+.cx-group-toggle:hover {
+  color: var(--ink);
+}
+.cx-type-label {
+  color: var(--ink-3);
+  margin: 10px 0 3px 6px;
+}
+.cx-row {
+  border-radius: 9px;
+  padding: 5px 8px;
+  transition: background 0.15s;
+}
+.cx-row:hover {
+  background: var(--paper-2);
+}
+.cx-row.active {
+  background: var(--paper-2);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.cx-row-label {
+  font-size: 16px;
+}
+.cx-status {
+  background: transparent;
+  border-top: 1px solid var(--rule);
+  padding: 5px 16px;
+  color: var(--ink-3);
+}
+.cx-kindbar {
+  background: var(--rule);
+}
+.cx-status-flavor select {
+  font-family: var(--font-serif);
+  font-size: 14px;
+}
+
+/* ---------- the stage ---------- */
+
+.cx-page-inner {
+  padding: 34px 64px 180px;
+}
+.cx-page-id {
+  font-weight: 400;
+  font-size: 34px;
+}
+.cx-page-sub {
+  font-size: 21px;
+  color: var(--ink-3);
+}
+.cx-page-kind {
+  letter-spacing: 0.22em;
+  font-size: 10.5px;
+}
+.cx-page-head {
+  margin-bottom: 18px;
+}
+.cx-paper,
+.cx-card-panel,
+.cx-code,
+.cx-data-text {
+  background: var(--stage);
+  border: 1px solid var(--stage-edge);
+  box-shadow: var(--shadow);
+  border-radius: 16px;
+}
+.cx-paper {
+  padding: 44px 56px 56px;
+  position: relative;
+}
+/* a faint sheen along the top edge of the stage */
+.cx-paper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 45%, transparent), transparent);
+  opacity: 0.6;
+}
+.cx-card-panel {
+  padding: 18px 22px;
+}
+.cx-card-panel h3,
+.cx-card-panel h4 {
+  font-weight: 400;
+  font-size: 20px;
+}
+.cx-right .cx-card-panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: none;
+}
+.cx-data-text {
+  color: var(--ink);
+  padding: 22px 26px;
+}
+.cx-data-text.small {
+  border: 1px solid var(--rule);
+  background: var(--field);
+}
+
+/* cards */
+.cx-handle:hover {
+  background: var(--paper-2);
+}
+/* directives hang on a short length of rope */
+.cx-directive::before {
+  width: 3px;
+  opacity: 0.75;
+  background: repeating-linear-gradient(-58deg, var(--k-directive) 0 2px, color-mix(in srgb, var(--k-directive) 45%, transparent) 2px 4px);
+}
+.cx-section {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 13px;
+}
+.cx-section-title {
+  font-weight: 500;
+}
+.cx-section-head .cx-select {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+}
+.cx-chip {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--k-use);
+  border-radius: 11px;
+}
+.cx-chip-kind {
+  letter-spacing: 0.16em;
+  font-size: 10px;
+}
+.cx-chip-title {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  font-weight: 500;
+}
+.cx-pipe {
+  background: color-mix(in srgb, var(--k-data) 10%, transparent);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.cx-static {
+  border-radius: 999px;
+}
+.cx-ins {
+  background: color-mix(in srgb, var(--k-ins) 14%, transparent);
+  color: var(--k-ins);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--k-ins) 25%, transparent);
+}
+.md-code {
+  background: var(--paper-2);
+}
+.md-xml {
+  color: var(--sky);
+}
+
+/* the known (stable prefix) is lit like daylight; the rope marks where the night begins */
+.cx-stable {
+  background-image: linear-gradient(var(--stable), var(--stable));
+}
+.cx-cut-top::after {
+  content: "the known ends here";
+  border-top: 0;
+  height: 3px;
+  top: -6px;
+  left: -10px;
+  right: -10px;
+  background: repeating-linear-gradient(32deg, var(--cut) 0 2px, color-mix(in srgb, var(--cut) 40%, transparent) 2px 4px);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cut) 45%, transparent);
+  border-radius: 2px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12.5px;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 0;
+  padding-top: 0;
+  text-indent: 0;
+  color: var(--cut);
+}
+.cx-cutmark {
+  width: 3px;
+  border-left: 0;
+  background: repeating-linear-gradient(-58deg, var(--cut) 0 2px, color-mix(in srgb, var(--cut) 40%, transparent) 2px 4px);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--cut) 55%, transparent);
+  border-radius: 2px;
+  margin: 0 3px;
+}
+.cx-cutmark::before {
+  display: none;
+}
+[data-tokens]::after {
+  color: var(--ink-4);
+  font-size: 10.5px;
+}
+
+/* ---------- popovers, dialogs, palette ---------- */
+
+.cx-popover,
+.cx-palette,
+.cx-dialog,
+.cx-tour-card,
+.cx-toast {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid var(--rule-2);
+  box-shadow: var(--shadow-pop);
+  color: var(--ink);
+}
+.cx-popover {
+  border-radius: 13px;
+  padding: 6px;
+}
+.cx-menu-item {
+  border-radius: 8px;
+  padding: 7px 11px;
+}
+.cx-menu-item:hover,
+.cx-menu-item.active {
+  background: var(--paper-2);
+}
+.cx-menu-label {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+}
+.cx-overlay {
+  background: rgba(4, 3, 6, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+:root[data-theme="light"] .cx-overlay {
+  background: rgba(60, 90, 130, 0.22);
+}
+.cx-dialog {
+  border-radius: 18px;
+  padding: 26px 28px 20px;
+  animation: cx-pop 0.4s var(--ease) both;
+}
+.cx-dialog h2 {
+  font-weight: 400;
+  font-size: 28px;
+}
+.cx-dialog-body label,
+.cx-form label,
+.cx-eval label {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14.5px;
+  color: var(--ink-2);
+  gap: 5px;
+}
+.cx-check {
+  font-style: normal !important;
+}
+.cx-palette {
+  border-radius: 16px;
+  animation: cx-pop 0.35s var(--ease) both;
+}
+.cx-palette [cmdk-input] {
+  font-size: 19px;
+  padding: 16px 20px;
+  color: var(--ink);
+  border-bottom-color: var(--rule);
+}
+.cx-palette [cmdk-input]::placeholder {
+  font-style: italic;
+  color: var(--ink-3);
+}
+.cx-palette [cmdk-item] {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  border-radius: 9px;
+}
+.cx-palette [cmdk-item][data-selected="true"] {
+  background: var(--paper-2);
+}
+.cx-palette [cmdk-group-heading] {
+  letter-spacing: 0.22em;
+}
+.cx-toast {
+  border-radius: 999px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 15px;
+  padding: 8px 18px;
+}
+@keyframes cx-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+/* ---------- run / outputs / diff ---------- */
+
+.cx-r-json,
+.cx-output,
+.cx-live {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+:root[data-theme="light"] .cx-r-json,
+:root[data-theme="light"] .cx-output,
+:root[data-theme="light"] .cx-live {
+  background: rgba(255, 255, 255, 0.6);
+}
+.cx-run-actions .cx-btn.primary {
+  font-size: 17px;
+  padding: 9px;
+  font-weight: 400;
+}
+.cx-run-row {
+  border-radius: 10px;
+}
+.cx-run-row:hover {
+  background: var(--paper-2);
+}
+.cx-run-v {
+  font-weight: 500;
+  font-size: 18px;
+}
+.cx-score {
+  color: var(--good);
+  font-family: var(--font-serif);
+  font-size: 15px;
+}
+.cx-progress-bar span {
+  background: repeating-linear-gradient(-58deg, var(--accent) 0 3px, color-mix(in srgb, var(--accent) 55%, transparent) 3px 6px);
+}
+.cx-run-error {
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+}
+.cx-form {
+  border-bottom: 1px solid var(--rule);
+  padding: 10px 0 16px;
+  gap: 11px;
+}
+.cx-r-text .cx-seg.cx-stable {
+  background: var(--stable);
+}
+.cx-rendered-tools {
+  margin: -22px -26px 20px;
+}
+
+/* ---------- tour ---------- */
+
+.cx-tour-dim {
+  background: rgba(4, 3, 6, 0.6);
+}
+.cx-tour-spot {
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(4, 3, 6, 0.6), 0 0 30px rgba(232, 184, 120, 0.25);
+  outline: 1.5px solid color-mix(in srgb, var(--accent) 80%, transparent);
+}
+:root[data-theme="light"] .cx-tour-spot {
+  box-shadow: 0 0 0 9999px rgba(40, 70, 110, 0.35);
+}
+.cx-tour-card {
+  border-radius: 16px;
+  padding: 18px 20px 14px;
+}
+.cx-tour-card h3 {
+  font-weight: 400;
+  font-size: 25px;
+}
+.cx-tour-step {
+  letter-spacing: 0.22em;
+}
+.cx-tour-dots span.on {
+  background: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-welcome-card,
+  .cx-dialog,
+  .cx-palette {
+    animation: none;
+  }
+}
+
+/* form fields speak plainly; labels carry the voice */
+.cx-input,
+.cx-select,
+.cx-dialog-body textarea,
+.cx-form textarea {
+  font-style: normal;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+.cx-input.cx-mono,
+.cx-mono {
+  font-family: var(--font-mono);
+}
+.cx-ref-body {
+  font-family: var(--font-page) !important;
+  font-size: 17px !important;
+}
+.cx-seg-ctl button {
+  font-style: normal;
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+input[type="checkbox"],
+input[type="range"] {
+  accent-color: var(--accent);
+}
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 2px;
+}
+.cx-input:focus-visible,
+.cx-select:focus-visible,
+.cx-search:focus-visible,
+.ProseMirror:focus-visible,
+.cx-section-title:focus-visible,
+.cx-data-text:focus-visible,
+.cx-palette [cmdk-input]:focus-visible {
+  outline: none;
+}
+.cx-r-text .cx-seg.cx-stable {
+  background: var(--stable);
+  padding: 0;
+}
+
+/* a few brighter stars with soft spikes, like a long exposure */
+.cx-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: var(--sparkle);
+  background-repeat: no-repeat;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><g fill='%23fff6e4'><circle cx='11' cy='11' r='1.4'/><path d='M11 1 L11.5 10.5 L21 11 L11.5 11.5 L11 21 L10.5 11.5 L1 11 L10.5 10.5Z' opacity='.55'/></g></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><g fill='%23e4ebff'><circle cx='8' cy='8' r='1.1'/><path d='M8 1 L8.4 7.6 L15 8 L8.4 8.4 L8 15 L7.6 8.4 L1 8 L7.6 7.6Z' opacity='.5'/></g></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><g fill='%23fff1dc'><circle cx='9' cy='9' r='1.2'/><path d='M9 1 L9.45 8.55 L17 9 L9.45 9.45 L9 17 L8.55 9.45 L1 9 L8.55 8.55Z' opacity='.5'/></g></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><g fill='%23ffffff'><circle cx='7' cy='7' r='1'/><path d='M7 1 L7.35 6.65 L13 7 L7.35 7.35 L7 13 L6.65 7.35 L1 7 L6.65 6.65Z' opacity='.45'/></g></svg>");
+  background-position: 21% 7%, 96% 38%, 3% 63%, 74% 95%;
+  animation: cx-twinkle 7s ease-in-out infinite;
+}
+.cx-welcome::before {
+  z-index: 0;
+}
+@keyframes cx-twinkle {
+  50% {
+    opacity: calc(var(--sparkle) * 0.55);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-app::before {
+    animation: none;
+  }
+}
+
+.cx-chip-btn {
+  font-style: normal;
+  font-family: var(--font-ui);
+}
+.cx-paper-block {
+  min-height: 0;
+}
+.cx-paper-block .cx-editor {
+  min-height: 160px;
+}
+.cx-blockpage .cx-page-head,
+.cx-datapage .cx-page-head,
+.cx-projectpage .cx-page-head {
+  gap: 18px;
+  align-items: center;
+}
+.cx-blockpage .cx-page-title,
+.cx-datapage .cx-page-title,
+.cx-projectpage .cx-page-title {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.cx-runpick .cx-select:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cx-runpick .cx-select + .cx-select {
+  flex: 0 1 40%;
+  min-width: 0;
+}
+/* in day, the far side of the rope is night */
+:root[data-theme="light"] .cx-welcome::before {
+  background:
+    radial-gradient(1px 1px at 22% 18%, rgba(255, 246, 228, 0.85), transparent),
+    radial-gradient(1px 1px at 64% 34%, rgba(220, 228, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 40% 62%, rgba(255, 246, 228, 0.8), transparent),
+    radial-gradient(1px 1px at 78% 80%, rgba(220, 228, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 12% 88%, rgba(255, 246, 228, 0.6), transparent),
+    radial-gradient(ellipse 80% 50% at 30% 20%, rgba(74, 110, 170, 0.18), transparent 70%),
+    linear-gradient(180deg, #0b0a0e, #050406);
+  background-size: 260px 260px, 310px 310px, 380px 380px, 290px 290px, 340px 340px, 100% 100%, 100% 100%;
+  box-shadow: 20px 0 60px rgba(20, 40, 80, 0.25);
 }
