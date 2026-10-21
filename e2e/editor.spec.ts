@@ -7,8 +7,8 @@ test("loads the sample workspace with versions, library and metrics", async ({ p
   await expect(page.getByTestId("version-tab-A")).toBeVisible();
   await expect(page.getByTestId("version-tab-B")).toBeVisible();
   await expect(page.getByTestId("block-directive:safety/anti-prompt-injection")).toBeVisible();
-  await expect(page.getByTestId("token-count")).toHaveText(/~\d+ tok/);
-  await expect(page.getByTestId("prefix-count")).toHaveText(/stable prefix \d+ \(\d+%\)/);
+  await expect(page.getByTestId("token-count")).toHaveText(/^[\d,]+ tokens$/);
+  await expect(page.getByTestId("prefix-count")).toHaveText(/^[\d,]+ stable · \d+%$/);
   expect(await rendered(page)).toContain("1. SQ *JOE COFFEE COMPANY (MCC 5814)");
   const a = await hook<any>(page, "analysis");
   expect(a.firstDynamicId).toBe("0/3");

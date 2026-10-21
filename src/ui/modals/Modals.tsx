@@ -20,17 +20,22 @@ import { forgetWorkspace } from "../../fs/persist";
 import { startTour } from "../Tour";
 import { VarCluster } from "../VarCluster";
 
-function Dialog(p: { title: string; children: ReactNode; footer?: ReactNode; wide?: boolean; testid?: string }) {
+/** A dialog in three parts: the title (and tabs), a body that scrolls, and a footer that stays put. */
+function Dialog(p: { title: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean; tall?: boolean; tabs?: ReactNode; testid?: string }) {
   return (
     <UIDialog open onOpenChange={(o) => !o && closeModal()}>
-      <DialogContent showCloseButton={false} className={cn("max-h-[86vh] overflow-y-auto", p.wide ? "sm:max-w-[720px]" : "sm:max-w-[460px]")} data-testid={p.testid ?? "dialog"} aria-describedby={undefined}>
-        <DialogHeader>
+      <DialogContent
+        showCloseButton={false}
+        className={cn("flex max-h-[86vh] flex-col gap-0", p.wide ? "sm:max-w-[760px]" : "sm:max-w-[500px]", p.tall && "h-[min(660px,86vh)]")}
+        data-testid={p.testid ?? "dialog"}
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="gap-5 pb-6">
           <DialogTitle>{p.title}</DialogTitle>
+          {p.tabs}
         </DialogHeader>
-        <div className="flex flex-col gap-3">
-          {p.children}
-        </div>
-        {p.footer && <DialogFooter className="mt-1 items-center sm:justify-end">{p.footer}</DialogFooter>}
+        <div className="-mx-9 flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-9 pb-1">{p.children}</div>
+        {p.footer && <DialogFooter className="mt-6 items-center border-t border-rule pt-5 sm:justify-end">{p.footer}</DialogFooter>}
       </DialogContent>
     </UIDialog>
   );
@@ -49,7 +54,7 @@ function QuickPick(p: { value: string; options: string[]; onChange(v: string): v
       <Input value={p.value} placeholder={p.placeholder} onChange={(e) => p.onChange(e.target.value)} data-testid={p.testid} />
       <div className="flex flex-wrap gap-1">
         {p.options.map((o) => (
-          <Button key={o} type="button" variant="outline" size="xs" className={cn("font-sans text-[11.5px]", o === p.value && "border-gold/60 bg-gold-soft text-gold")} onClick={() => p.onChange(o)}>
+          <Button key={o} type="button" variant="outline" size="xs" className={cn("h-[26px] px-2.5 text-[14.5px]", o === p.value && "border-gold/60 bg-gold-soft text-gold")} onClick={() => p.onChange(o)}>
             {o}
           </Button>
         ))}
@@ -498,40 +503,49 @@ function DataPipe({ pos }: { pos: number }) {
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-2">
-        <FieldRow label="source">
+      <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
+        <FieldRow label="source" className="w-[260px]">
           <Choice value={source} onChange={setSource} options={(p?.data ?? []).map((d) => d.name)} className="w-full" />
         </FieldRow>
-        <CheckRow checked={isStatic} onChange={setStatic}>
-          static — same every run, counts toward the cacheable prefix
-        </CheckRow>
+        <div className="pb-2">
+          <CheckRow checked={isStatic} onChange={setStatic}>
+            static <span className="text-ink-3 italic">— the same every run, so it stays in the cacheable prefix</span>
+          </CheckRow>
+        </div>
       </div>
       <FieldRow label="transforms">
-        <Input className="font-mono text-[12px]" value={pipe} onChange={(e) => setPipe(e.target.value)} placeholder='shuffle(seed=1) | head(50) | template("{name}") | numbered' data-testid="pipe-input" />
+        <Input className="font-mono text-[12.5px]" value={pipe} onChange={(e) => setPipe(e.target.value)} placeholder='shuffle(seed=1) | head(50) | template("{name}") | numbered' data-testid="pipe-input" />
         {parseErr && <span className="text-[11.5px] text-danger not-italic">{parseErr}</span>}
       </FieldRow>
-      <div className="flex flex-col gap-0.5">
+      <div className="-mt-1 flex flex-col gap-1.5">
         {(["select", "fields", "format", "cleanup"] as const).map((g) => (
-          <div key={g}>
-            <span className="inline-block w-[60px] font-serif text-[13px] text-ink-3 italic">{g}</span>
+          <div key={g} className="flex flex-wrap items-center gap-1">
+            <span className="w-[68px] flex-none pl-0.5 font-serif text-[14px] text-ink-3 italic">{g}</span>
             {TRANSFORMS.filter((t) => t.group === g).map((t) => (
-              <Button key={t.name} type="button" variant="outline" size="xs" className="m-0.5 font-sans text-[11.5px]" title={t.doc} onClick={() => setPipe((x) => (x.trim() ? `${x.trim()} | ${t.sig}` : t.sig))}>
+              <Button key={t.name} type="button" variant="outline" size="xs" className="h-[24px] px-2.5 font-mono text-[10.5px]" title={t.doc} onClick={() => setPipe((x) => (x.trim() ? `${x.trim()} | ${t.sig}` : t.sig))}>
                 {t.name}
               </Button>
             ))}
           </div>
         ))}
       </div>
-      {src && <div className="font-serif text-[14px] text-ink-3 italic">fields: {dataItems(src).fields.join(", ") || "(text items)"} · use them as {"{field}"} in template()</div>}
+      {src && (
+        <div className="font-serif text-[14.5px] text-ink-3 italic">
+          fields <span className="font-mono text-[11.5px] text-ink-2 not-italic">{dataItems(src).fields.join(", ") || "(text items)"}</span> — use them as <span className="font-mono text-[11.5px] text-ink-2 not-italic">{"{field}"}</span> in template()
+        </div>
+      )}
       {preview && (
-        <>
-          <div className="text-ink-3">
-            {preview.count} of {dataItems(src!).items.length} items {preview.errors.length > 0 && <span className="text-danger">· {preview.errors.join("; ")}</span>}
+        <div>
+          <div className="flex items-baseline justify-between">
+            <span className="font-serif text-[14.5px] text-ink-3 italic">preview</span>
+            <span className="font-mono text-[10.5px] text-ink-3">
+              {preview.count} of {dataItems(src!).items.length} items {preview.errors.length > 0 && <span className="text-danger">· {preview.errors.join("; ")}</span>}
+            </span>
           </div>
           <pre className="cx-output cx-small" data-testid="pipe-preview">
             {preview.text.slice(0, 4000)}
           </pre>
-        </>
+        </div>
       )}
     </Dialog>
   );
@@ -598,7 +612,9 @@ function Insertion({ pos }: { pos: number }) {
         <>
           <FieldRow label="format">
             <QuickPick value={String(args.format ?? "")} options={DATE_FORMATS} onChange={(v) => setArg("format", v)} testid="ins-format" />
-            <span className="font-serif text-[14px] text-ink-3 italic">tokens: YYYY MMMM MMM MM DD D dddd ddd HH hh h mm ss A z, [literal]</span>
+            <span className="font-serif text-[14px] text-ink-3 italic">
+              tokens <span className="font-mono text-[10.5px] not-italic">YYYY MMMM MMM MM DD D dddd ddd HH hh h mm ss A z [literal]</span>
+            </span>
           </FieldRow>
           <FieldRow label="timezone">
             <QuickPick value={String(args.tz ?? "")} options={TZS} onChange={(v) => setArg("tz", v)} placeholder="local" />
@@ -643,9 +659,15 @@ function Insertion({ pos }: { pos: number }) {
           <Input value={String(args.seed ?? "")} onChange={(e) => setArg("seed", e.target.value === "" ? undefined : isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value))} />
         </FieldRow>
       )}
-      {fn !== "var" && <div className="rounded-lg bg-paper-2 px-2.5 py-2 text-[12.5px]">
-        renders as: <b data-testid="ins-preview">{preview.text || "∅"}</b> {preview.error && <span className="text-danger">{preview.error}</span>}
-      </div>}
+      {fn !== "var" && (
+        <div className="flex items-baseline gap-3 rounded-xl border border-rule bg-paper px-3.5 py-2.5">
+          <span className="font-serif text-[14.5px] text-ink-3 italic">renders as</span>
+          <b className="font-serif text-[17px] font-normal" data-testid="ins-preview">
+            {preview.text || "∅"}
+          </b>
+          {preview.error && <span className="text-danger">{preview.error}</span>}
+        </div>
+      )}
     </Dialog>
   );
 }
@@ -658,8 +680,8 @@ const MONOS = ["JetBrains Mono", "SF Mono", "Menlo", "Consolas"];
 function EndpointEditor({ e, onChange, onDelete }: { e: Endpoint; onChange(e: Endpoint): void; onDelete(): void }) {
   const [key, setK] = useState(getKey(e.id));
   return (
-    <div className="cx-card-panel" data-testid={`endpoint-${e.id}`}>
-      <div className="grid grid-cols-2 gap-2">
+    <div className="cx-card-panel flex flex-col gap-3.5" data-testid={`endpoint-${e.id}`}>
+      <div className="grid grid-cols-2 gap-3">
         <FieldRow label="name">
           <Field value={e.name} onCommit={(name) => onChange({ ...e, name })} />
         </FieldRow>
@@ -667,19 +689,19 @@ function EndpointEditor({ e, onChange, onDelete }: { e: Endpoint; onChange(e: En
           <Seg
             value={e.style}
             options={[
-              ["chat", "/chat/completions"],
-              ["completions", "/completions"],
+              ["chat", <span className="font-mono text-[11px] not-italic">/chat/completions</span>],
+              ["completions", <span className="font-mono text-[11px] not-italic">/completions</span>],
             ]}
             onChange={(style) => onChange({ ...e, style })}
           />
         </FieldRow>
       </div>
       <FieldRow label="base URL">
-        <Field value={e.baseUrl} onCommit={(baseUrl) => onChange({ ...e, baseUrl })} placeholder="http://localhost:1234/v1" testid="endpoint-url" />
+        <Field value={e.baseUrl} onCommit={(baseUrl) => onChange({ ...e, baseUrl })} placeholder="http://localhost:1234/v1" className="font-mono text-[12.5px]" testid="endpoint-url" />
       </FieldRow>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <FieldRow label="default model">
-          <Field value={e.defaultModel ?? ""} onCommit={(m) => onChange({ ...e, defaultModel: m || undefined })} />
+          <Field value={e.defaultModel ?? ""} placeholder="none" onCommit={(m) => onChange({ ...e, defaultModel: m || undefined })} className="font-mono text-[12.5px] placeholder:font-serif" />
         </FieldRow>
         <FieldRow label="API key (kept in this browser only)">
           <Input
@@ -691,6 +713,7 @@ function EndpointEditor({ e, onChange, onDelete }: { e: Endpoint; onChange(e: En
             }}
             placeholder="none"
             autoComplete="off"
+            className="font-mono text-[12.5px] placeholder:font-serif"
           />
         </FieldRow>
       </div>
@@ -700,7 +723,7 @@ function EndpointEditor({ e, onChange, onDelete }: { e: Endpoint; onChange(e: En
       <FieldRow label="extra JSON body (merged into every request)">
         <JsonField value={e.extraBody} onCommit={(extraBody) => onChange({ ...e, extraBody: extraBody as Record<string, unknown> })} rows={3} />
       </FieldRow>
-      <Button variant="ghost" size="sm" className="text-danger" onClick={onDelete}>
+      <Button variant="ghost" size="sm" className="-ml-2 self-start text-danger" onClick={onDelete}>
         Remove endpoint
       </Button>
     </div>
@@ -716,7 +739,26 @@ function Settings({ tab: initial }: { tab?: string }) {
     <Dialog
       title="Settings"
       wide
+      tall
       testid="settings"
+      tabs={
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList className="-mx-1 h-10 w-[calc(100%+8px)] justify-start gap-0 rounded-none border-b border-rule bg-transparent p-0">
+            {[
+              ["appearance", "Appearance"],
+              ["endpoints", "Endpoints"],
+              ["variables", "Variables"],
+              ["taxonomy", "Types & flavors"],
+              ["workspace", "Workspace"],
+            ].map(([t, l]) => (
+              <TabsTrigger key={t} value={t} className="group/st h-full flex-none rounded-none border-0 px-3 text-[16.5px] data-[state=active]:bg-transparent" data-testid={`settings-${t}`}>
+                {l}
+                <span className="cx-rope-h pointer-events-none absolute inset-x-3 bottom-[-1px] h-[2px] scale-x-0 transition-transform duration-300 ease-[var(--ease)] group-data-[state=active]/st:scale-x-100" aria-hidden />
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      }
       footer={
         <>
           <Button variant="ghost" onClick={startTour} data-testid="replay-tutorial">
@@ -729,40 +771,24 @@ function Settings({ tab: initial }: { tab?: string }) {
         </>
       }
     >
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="h-auto flex-wrap gap-1 bg-transparent p-0">
-        {[
-          ["appearance", "Appearance"],
-          ["endpoints", "Endpoints"],
-          ["variables", "Variables"],
-          ["taxonomy", "Types & flavors"],
-          ["workspace", "Workspace"],
-        ].map(([t, l]) => (
-          <TabsTrigger key={t} value={t} className="h-8 flex-none" data-testid={`settings-${t}`}>
-            {l}
-          </TabsTrigger>
-        ))}
-        </TabsList>
-      </Tabs>
       {tab === "appearance" && (
-        <div className="flex flex-col gap-3">
-          <FieldRow label="page font">
-            <Choice value={s.prefs.font} onChange={(f) => setPrefs({ font: f })} options={FONTS.map((f) => [f, <span style={{ fontFamily: f }}>{f}</span>] as [string, ReactNode])} testid="pref-font" />
-          </FieldRow>
-          <FieldRow label="data / code font">
-            <Choice value={s.prefs.mono} onChange={(f) => setPrefs({ mono: f })} options={MONOS} />
-          </FieldRow>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-col gap-4 pt-1">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+            <FieldRow label="page font">
+              <Choice value={s.prefs.font} onChange={(f) => setPrefs({ font: f })} options={FONTS.map((f) => [f, <span style={{ fontFamily: f }}>{f}</span>] as [string, ReactNode])} className="w-full" testid="pref-font" />
+            </FieldRow>
+            <FieldRow label="data / code font">
+              <Choice value={s.prefs.mono} onChange={(f) => setPrefs({ mono: f })} options={MONOS.map((f) => [f, <span className="text-[13px]" style={{ fontFamily: f }}>{f}</span>] as [string, ReactNode])} className="w-full" />
+            </FieldRow>
             <FieldRow label={`size · ${s.prefs.fontSize}px`}>
               <Slider className="my-2" min={15} max={28} step={1} value={[s.prefs.fontSize]} onValueChange={([v]) => setPrefs({ fontSize: v })} />
             </FieldRow>
             <FieldRow label={`line height · ${s.prefs.lineHeight.toFixed(2)}`}>
               <Slider className="my-2" min={1.2} max={2.1} step={0.05} value={[s.prefs.lineHeight]} onValueChange={([v]) => setPrefs({ lineHeight: v })} />
             </FieldRow>
-          </div>
-          <FieldRow label="page width · {s.prefs.pageWidth}px">
-            <Slider className="my-2" min={520} max={1100} step={10} value={[s.prefs.pageWidth]} onValueChange={([v]) => setPrefs({ pageWidth: v })} />
-          </FieldRow>
+            <FieldRow label={`page width · ${s.prefs.pageWidth}px`}>
+              <Slider className="my-2" min={520} max={1100} step={10} value={[s.prefs.pageWidth]} onValueChange={([v]) => setPrefs({ pageWidth: v })} />
+            </FieldRow>
           <FieldRow label="theme">
             <Seg
               value={s.prefs.theme}
@@ -775,6 +801,8 @@ function Settings({ tab: initial }: { tab?: string }) {
               testid="pref-theme"
             />
           </FieldRow>
+          </div>
+          <div className="flex flex-col gap-2.5 border-t border-rule pt-4">
           <CheckRow checked={s.prefs.prefixTint} onChange={(c) => setPrefs({ prefixTint: c })}>
             tint the stable (cacheable) prefix
           </CheckRow>
@@ -784,11 +812,12 @@ function Settings({ tab: initial }: { tab?: string }) {
           <CheckRow checked={s.prefs.showWhitespace} onChange={(c) => setPrefs({ showWhitespace: c })}>
             show whitespace in the rendered view
           </CheckRow>
+          </div>
         </div>
       )}
       {tab === "endpoints" && (
-        <div className="flex flex-col gap-3">
-          <p className="font-serif text-[14px] text-ink-3 italic">Any OpenAI-compatible server: LM Studio, llama-server, Ollama, vLLM, OpenRouter, OpenAI… The server must allow CORS from this page.</p>
+        <div className="flex flex-col gap-3 pt-1">
+          <p className="font-serif text-[15px] text-ink-3 italic">Any OpenAI-compatible server: LM Studio, llama-server, Ollama, vLLM, OpenRouter, OpenAI… The server must allow CORS from this page.</p>
           {st.endpoints.map((e, i) => (
             <EndpointEditor
               key={e.id}
@@ -807,15 +836,15 @@ function Settings({ tab: initial }: { tab?: string }) {
         </div>
       )}
       {tab === "variables" && (
-        <div className="flex flex-col gap-3">
-          <p className="font-serif text-[14px] text-ink-3 italic">
+        <div className="flex flex-col gap-3 pt-1">
+          <p className="font-serif text-[15px] text-ink-3 italic">
             Workspace variables, available everywhere as <code>{'{{ var("name") }}'}</code>. A browser can't read your hostname, so set it here if you need it. Projects can override these.
           </p>
           <KeyValues value={st.vars} onChange={(vars) => patchWorkspace({ vars })} testid="workspace-vars" />
         </div>
       )}
       {tab === "taxonomy" && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 pt-1">
           <FieldRow label="block types (comma separated)">
             <Field value={st.types.join(", ")} onCommit={(v) => patchWorkspace({ types: v.split(",").map((x) => x.trim()).filter(Boolean) })} />
           </FieldRow>
@@ -825,9 +854,9 @@ function Settings({ tab: initial }: { tab?: string }) {
         </div>
       )}
       {tab === "workspace" && (
-        <div className="flex flex-col gap-3">
-          <p>
-            Open: <b>{s.vfs?.name}</b> ({s.vfs?.kind === "browser" ? "browser storage" : "folder on disk"})
+        <div className="flex flex-col items-start gap-4 pt-1">
+          <p className="font-serif text-[17px]">
+            <span className="text-ink-3 italic">open</span> {s.vfs?.name} <span className="text-ink-3 italic">— {s.vfs?.kind === "browser" ? "in browser storage" : "a folder on disk"}</span>
           </p>
           <Button
             variant="outline"

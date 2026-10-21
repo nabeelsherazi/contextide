@@ -28,7 +28,8 @@ npm run build        # typecheck + static PWA in dist/
 | `src/ui/` | React shell. `widgets.tsx` holds the thin app wrappers over shadcn (`Field`, `NumField`, `Choice`, `Seg`, `FieldRow`, `CheckRow`, `KeyValues`, `JsonField`). `items.ts` lists everything insertable, shared by the slash menu, palette and drawer. |
 | `src/components/ui/` | shadcn/ui components, restyled to the night/day look. Add one with `npx shadcn@latest add <name>`; check its imports and restyle it. |
 | `src/app.css` | Tailwind entry. Maps shadcn tokens onto the palette and imports the two custom layers. |
-| `src/theme.css` | The custom look: night/day tokens, sky and stars and grain, welcome rope, tour, variable bubbles, rendered view, surfaces. |
+| `src/theme.css` | The custom look: night/day tokens, the painted backdrops, the rope, welcome, tour, variable bubbles, rendered view, surfaces. |
+| `public/sky/` | The night and day backdrops, rendered by `scripts/sky.py` (numpy + Pillow): smooth gradients, soft clouds, stars, no texture. Re-run it only to change the look; the output is committed. |
 | `src/editor.css` | The editor: cards, bridges, chips, markdown, stable-prefix and rope decorations. |
 | `src/seed.ts` | Starter workspace contents (library, variables, endpoints, sample project). |
 | `src/testHooks.ts` | `window.__contextide`: hooks for e2e tests and devtools. |
@@ -62,6 +63,12 @@ changes into a new `Workspace`.
   Mock LLMs with `page.route`.
 - **Look at the UI after visual changes.** `SHOTS=/tmp/shots [THEME=light] npx playwright test e2e/shots.spec.ts e2e/shots2.spec.ts` screenshots about 20 screens. Check both themes.
 - `e2e/layout.spec.ts` guards against horizontal overflow. `e2e/tutorial.spec.ts` checks that every tour step spotlights a real element.
+
+**Type**
+
+- Two voices only: EB Garamond for anything a person would say (titles, labels, menus, buttons, prose) and the mono for anything a machine would (numbers, ids, URLs, token counts, keys, transforms). Tailwind's `font-sans` is mapped to Garamond, so there is no sans to fall back to by accident.
+- Headings in drawers and panels are tracked Garamond capitals (`Eyebrow`); labels above fields are italic (`FieldRow`). This Garamond build has no true small caps, so don't reach for `font-variant: small-caps`.
+- In day mode anything sitting straight on the painted sky is cream with a soft shadow; pages other than the version page sit on a glass `.cx-sheet`.
 
 **Gotchas**
 

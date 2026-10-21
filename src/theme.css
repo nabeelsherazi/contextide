@@ -1,104 +1,105 @@
-/* ContextIDE theme: night/day tokens, sky, welcome, tour, shared custom pieces.
-   UI chrome is Tailwind + shadcn/ui (see app.css and components/ui). */
+/* ContextIDE theme: night/day tokens, the sky backdrops, the rope, welcome, tour, bubbles,
+   rendered view and the shared surfaces. UI chrome is Tailwind + shadcn/ui (app.css, components/ui).
 
-/* ContextIDE — night & day.
-   Night (default): a warm-black sky with faint stars; cards float on it as dark glass.
-   Day: an open sky; the page is cloud-glass. The golden rope marks where the known
-   (stable prefix, lit like daylight) meets the unknown (what changes between runs). */
+   Two voices, never more: EB Garamond for anything a person would say (titles, labels, menus,
+   buttons, prose) and the mono for anything a machine would (numbers, ids, URLs, tokens, keys).
+
+   Night (default) is a deep ultramarine-to-umber sky lit from below; day is an open sky with soft cumulus.
+   Oil painting is the energy, not the surface: deep pigments, one warm light, glazes, soft edges.
+   The golden rope marks where the known (the stable prefix, lit like daylight) meets the unknown. */
 
 :root {
   /* night */
-  --sky-top: #0b0a0e;
-  --sky-bottom: #050406;
-  --glow-a: rgba(74, 110, 170, 0.16);
-  --glow-b: rgba(232, 184, 120, 0.06);
-  --star: rgba(255, 246, 228, 0.7);
-  --star-dim: rgba(220, 228, 255, 0.4);
-  --sparkle: 0.85;
-  --grain-opacity: 0.05;
+  --backdrop: #0b0a0c url("/sky/night.webp") center / cover fixed;
+  --sparkle: 0.9;
 
-  --desk: transparent;
-  --desk-2: rgba(255, 255, 255, 0.03);
-  --glass: rgba(14, 13, 17, 0.72);
-  --glass-strong: rgba(17, 16, 21, 0.94);
-  --stage: linear-gradient(180deg, rgba(22, 20, 26, 0.94), rgba(13, 12, 16, 0.96));
-  --stage-edge: rgba(232, 184, 120, 0.11);
-  --paper: rgba(255, 255, 255, 0.035);
-  --paper-2: rgba(255, 255, 255, 0.06);
-  --field: rgba(255, 255, 255, 0.04);
-  --ink: #ece4d4;
-  --ink-2: #b9b0a1;
-  --ink-3: #847c70;
-  --ink-4: #4f4a43;
-  --rule: rgba(255, 255, 255, 0.07);
-  --rule-2: rgba(255, 255, 255, 0.12);
-  --gold: #e8b878; /* the rope / skin-warm gold */
-  --gold-ink: #1a130b;
-  --gold-soft: rgba(232, 184, 120, 0.13);
+  --glass: rgba(13, 11, 10, 0.74);
+  --glass-strong: rgba(19, 16, 14, 0.96);
+  --glass-edge: rgba(255, 236, 205, 0.07);
+  --stage: linear-gradient(180deg, rgba(26, 22, 19, 0.95), rgba(16, 13, 11, 0.97));
+  --stage-edge: rgba(232, 184, 120, 0.12);
+  --paper: rgba(255, 244, 225, 0.035);
+  --paper-2: rgba(255, 244, 225, 0.065);
+  --field: rgba(255, 244, 225, 0.045);
+  --ink: #efe6d3;
+  --ink-2: #c0b5a2;
+  --ink-3: #8d8374;
+  --ink-4: #574f45;
+  --rule: rgba(255, 236, 205, 0.075);
+  --rule-2: rgba(255, 236, 205, 0.13);
+  --gold: #e6b676; /* hemp rope in lamplight */
+  --gold-ink: #1a120a;
+  --gold-soft: rgba(230, 182, 118, 0.13);
   --sky: #8fb3e6;
   --sky-soft: rgba(143, 179, 230, 0.1);
-  --good: #9cc9a7;
-  --danger: #ec8a7a;
-  --stable: rgba(143, 179, 230, 0.045);
+  --good: #9fcca9;
+  --danger: #ee8d7c;
+  --stable: rgba(143, 179, 230, 0.05);
   --stable-edge: rgba(143, 179, 230, 0.35);
-  --cut: #e8b878;
+  --cut: #e6b676;
   --k-line: #6d665c;
-  --k-directive: #e8b878;
+  --k-directive: #e6b676;
   --k-section: #a59a89;
   --k-use: #8fb3e6;
   --k-data: #b9a8e8;
-  --k-tool: #9cc9a7;
+  --k-tool: #9fcca9;
   --k-ins: #f0a877;
-  --add: rgba(156, 201, 167, 0.18);
-  --del: rgba(236, 138, 122, 0.18);
-  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 120px rgba(160, 175, 200, 0.04);
-  --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --add: rgba(159, 204, 169, 0.18);
+  --del: rgba(238, 141, 124, 0.18);
+  --shadow: 0 1px 0 rgba(255, 240, 215, 0.04) inset, 0 30px 80px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 24px 70px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(255, 236, 205, 0.07);
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --font-ui: "Inter", system-ui, -apple-system, sans-serif;
   --font-serif: "EB Garamond", Georgia, serif;
   --font-page: "EB Garamond", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
   --page-size: 21px;
   --page-leading: 1.6;
   --page-width: 760px;
+
+  /* notebook cards */
+  --card: #1a1613;
+  --card-2: #1f1a16;
+  --card-edge: rgba(255, 236, 205, 0.08);
+  --card-hi: rgba(255, 240, 215, 0.05);
+  --card-drop: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 34px -14px rgba(0, 0, 0, 0.75);
+  --card-drop-last: 0 18px 30px -16px rgba(0, 0, 0, 0.8);
+  --bridge: 40px;
+  --tail-x: 50%;
+  --tail-w: 16px;
+  --neck: 3px;
   color-scheme: dark;
 }
 
-/* day: open sky, cloud-glass */
+/* day: an open sky; panels are cloud-white glass, cards are primed canvas */
 :root[data-theme="light"] {
-  --sky-top: #6f9bd6;
-  --sky-bottom: #c9dbef;
-  --glow-a: rgba(255, 255, 255, 0.55);
-  --glow-b: rgba(255, 236, 205, 0.35);
-  --star: rgba(255, 255, 255, 0);
-  --star-dim: rgba(255, 255, 255, 0);
+  --backdrop: #3b7ccc url("/sky/day.webp") center bottom / cover fixed;
   --sparkle: 0;
-  --grain-opacity: 0.06;
-  --glass: rgba(250, 247, 240, 0.62);
-  --glass-strong: rgba(252, 250, 245, 0.96);
-  --stage: linear-gradient(180deg, rgba(255, 253, 248, 0.92), rgba(250, 246, 238, 0.9));
+  --glass: rgba(250, 247, 240, 0.84);
+  --glass-strong: rgba(253, 251, 246, 0.97);
+  --glass-edge: rgba(255, 255, 255, 0.7);
+  --stage: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(250, 246, 238, 0.94));
   --stage-edge: rgba(255, 255, 255, 0.8);
   --paper: rgba(255, 255, 255, 0.55);
-  --paper-2: rgba(40, 60, 90, 0.06);
-  --field: rgba(255, 255, 255, 0.7);
-  --ink: #1f1b16;
-  --ink-2: #4f483e;
-  --ink-3: #857c6f;
-  --ink-4: #bdb3a4;
-  --rule: rgba(40, 50, 70, 0.1);
-  --rule-2: rgba(40, 50, 70, 0.18);
-  --gold: #a8622a;
+  --paper-2: rgba(40, 52, 72, 0.065);
+  --field: rgba(255, 255, 255, 0.72);
+  --ink: #1d1a16;
+  --ink-2: #3a332a;
+  --ink-3: #5d5448;
+  --ink-4: #8f8474;
+  --rule: rgba(40, 50, 70, 0.12);
+  --rule-2: rgba(40, 50, 70, 0.2);
+  --gold: #9c5b22;
   --gold-ink: #fff8ee;
-  --gold-soft: rgba(168, 98, 42, 0.12);
-  --sky: #3f6fb0;
-  --sky-soft: rgba(63, 111, 176, 0.09);
-  --good: #3f7a55;
-  --danger: #b23c2c;
-  --stable: rgba(63, 111, 176, 0.07);
+  --gold-soft: rgba(156, 91, 34, 0.11);
+  --sky: #2f63aa;
+  --sky-soft: rgba(47, 99, 170, 0.09);
+  --good: #3a7550;
+  --danger: #b0392a;
+  --stable: rgba(63, 111, 176, 0.045);
   --stable-edge: rgba(63, 111, 176, 0.35);
-  --cut: #b06a2c;
+  --cut: #a8622a;
   --k-line: #b9ae9e;
-  --k-directive: #b06a2c;
+  --k-directive: #a8622a;
   --k-section: #6c6458;
   --k-use: #3f6fb0;
   --k-data: #7356a8;
@@ -106,10 +107,18 @@
   --k-ins: #b8562a;
   --add: rgba(63, 140, 87, 0.18);
   --del: rgba(190, 60, 46, 0.16);
-  --shadow: 0 1px 2px rgba(30, 50, 80, 0.06), 0 24px 70px rgba(30, 60, 110, 0.18);
-  --shadow-pop: 0 20px 60px rgba(30, 60, 110, 0.25), 0 0 0 1px rgba(40, 50, 70, 0.08);
+  --shadow: 0 1px 2px rgba(30, 50, 80, 0.06), 0 24px 70px rgba(30, 60, 110, 0.2);
+  --shadow-pop: 0 24px 60px rgba(30, 60, 110, 0.26), 0 0 0 1px rgba(40, 50, 70, 0.08);
+  --card: #fffdf8;
+  --card-2: #fffefb;
+  --card-edge: rgba(40, 50, 70, 0.11);
+  --card-hi: rgba(255, 255, 255, 0.95);
+  --card-drop: 0 1px 2px rgba(30, 50, 80, 0.08), 0 16px 30px -14px rgba(30, 60, 110, 0.36);
+  --card-drop-last: 0 16px 28px -16px rgba(30, 60, 110, 0.38);
   color-scheme: light;
 }
+
+/* ---------- base ---------- */
 
 * {
   box-sizing: border-box;
@@ -123,12 +132,13 @@ body,
 }
 
 body {
-  background: var(--desk);
+  background: var(--backdrop);
   color: var(--ink);
-  font-family: var(--font-ui);
-  font-size: 13px;
+  font-family: var(--font-serif);
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-variant-numeric: lining-nums;
 }
 
 button,
@@ -140,30 +150,198 @@ textarea {
 }
 
 code,
-pre {
+pre,
+kbd {
   font-family: var(--font-mono);
+}
+
+/* inline code inside prose sits a size down, so the mono doesn't shout */
+:where(p, span, label, li) > code {
+  font-size: 0.82em;
 }
 
 ::selection {
-  background: var(--gold-soft);
+  background: rgba(230, 182, 118, 0.28);
 }
 
-.cx-mono {
-  font-family: var(--font-mono);
-  font-size: 12px;
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  outline-offset: 2px;
 }
 
-.cx-danger {
-  color: var(--danger);
+#root {
+  position: relative;
+  z-index: 1;
 }
 
-.cx-good {
-  color: var(--good);
+/* a few stars that still breathe on top of the rendered ones */
+.cx-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: var(--sparkle);
+  background-repeat: no-repeat;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><g fill='%23fff6e4'><circle cx='11' cy='11' r='1.3'/><path d='M11 1 L11.5 10.5 L21 11 L11.5 11.5 L11 21 L10.5 11.5 L1 11 L10.5 10.5Z' opacity='.55'/></g></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><g fill='%23e4ebff'><circle cx='8' cy='8' r='1'/><path d='M8 1 L8.4 7.6 L15 8 L8.4 8.4 L8 15 L7.6 8.4 L1 8 L7.6 7.6Z' opacity='.5'/></g></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><g fill='%23fff1dc'><circle cx='9' cy='9' r='1.1'/><path d='M9 1 L9.45 8.55 L17 9 L9.45 9.45 L9 17 L8.55 9.45 L1 9 L8.55 8.55Z' opacity='.5'/></g></svg>");
+  background-position: 38% 9%, 71% 46%, 52% 88%;
+  animation: cx-twinkle 7s ease-in-out infinite;
+}
+
+@keyframes cx-twinkle {
+  50% {
+    opacity: calc(var(--sparkle) * 0.35);
+  }
+}
+
+@keyframes cx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes cx-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* ---------- the rope ---------- */
+
+/* a golden thread: a lit core with a soft glow, the faintest hint of a twist */
+.cx-rope {
+  background:
+    repeating-linear-gradient(-62deg, transparent 0 5px, rgba(255, 244, 220, 0.18) 5px 6px),
+    linear-gradient(90deg, #9a6a34, #f0c88a 45%, #fbe3b4 55%, #b07a3c);
+  box-shadow: 0 0 18px rgba(230, 182, 118, 0.35), 0 0 2px rgba(230, 182, 118, 0.6);
+  border-radius: 99px;
+}
+
+/* the same thread, lying down */
+.cx-rope-h,
+.cx-rope-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 70%, transparent), var(--gold) 30%, color-mix(in srgb, var(--gold) 80%, white) 60%, var(--gold));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--gold) 45%, transparent);
+  border-radius: 99px;
+}
+
+/* ---------- welcome: day meets night along the rope ---------- */
+
+.cx-welcome {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* the day half */
+.cx-welcome-day {
+  position: absolute;
+  inset: 0 50% 0 0;
+  background: #3b7ccc url("/sky/day.webp") left bottom / cover;
+  box-shadow: inset -60px 0 80px -60px rgba(10, 20, 40, 0.35);
+}
+
+.cx-welcome-rope {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: calc(50% - 2px);
+  width: 4px;
+  z-index: 2;
+}
+
+/* the name crosses the rope: on the day side it is cut from the night, on the night side from the day */
+.cx-welcome-title {
+  position: absolute;
+  left: 50%;
+  top: 17vh;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: grid;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(84px, 10.5vw, 172px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  animation: cx-rise 1.1s var(--ease) both;
+}
+
+.cx-welcome-title > span {
+  grid-area: 1 / 1;
+  padding: 0.06em 0.04em 0.12em;
+}
+
+/* the name crosses the thread: dark ink over the day, lit cream over the night */
+.cx-welcome-title > .day {
+  clip-path: inset(0 50% 0 0);
+  color: #0b1424;
+}
+
+.cx-welcome-title > .night {
+  clip-path: inset(0 0 0 50%);
+  color: #f3e9d6;
+}
+
+.cx-welcome-body::before {
+  content: "";
+  position: absolute;
+  inset: -60px -80px -60px -70px;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgba(10, 9, 12, 0.7), rgba(10, 9, 12, 0.4) 55%, transparent);
+  pointer-events: none;
+}
+
+.cx-welcome-actions button {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background-color: rgba(16, 13, 11, 0.72);
+}
+
+.cx-welcome-body {
+  position: absolute;
+  left: calc(50% + 64px);
+  right: 48px;
+  top: calc(17vh + clamp(84px, 10.5vw, 172px) * 1.32);
+  z-index: 3;
+  max-width: 470px;
+  animation: cx-rise 1.1s 0.15s var(--ease) both;
+}
+
+.cx-lede {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.cx-welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 30px 0 22px;
+}
+
+.cx-welcome-actions > p {
+  flex-basis: 100%;
+  margin: 0 0 4px;
 }
 
 .cx-fine {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--ink-3);
-  font-size: 12px;
   margin: 4px 0;
 }
 
@@ -171,70 +349,60 @@ pre {
   color: var(--danger);
 }
 
-.cx-seg-ctl {
-  display: inline-flex;
-  border: 1px solid var(--rule-2);
-  border-radius: 7px;
-  overflow: hidden;
-  flex-wrap: wrap;
-}
-
-.cx-seg-ctl button {
-  border: 0;
-  background: var(--paper);
-  padding: 4px 9px;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--ink-2);
-}
-
-.cx-seg-ctl button + button {
-  border-left: 1px solid var(--rule);
-}
-
-.cx-seg-ctl button.on {
-  background: var(--ink);
-  color: var(--paper);
-}
-
-/* ---------- welcome ---------- */
-
-.cx-welcome {
-  height: 100%;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.cx-welcome-card {
-  max-width: 560px;
-  background: var(--paper);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  padding: 44px 48px 36px;
-}
-
-.cx-welcome h1 {
-  font-family: var(--font-page);
+/* the two worlds, captioned along the bottom edge */
+.cx-welcome-caption {
+  position: absolute;
+  bottom: 26px;
+  z-index: 3;
+  font-family: var(--font-serif);
   font-weight: 500;
-  font-size: 44px;
-  margin: 0 0 8px;
-  letter-spacing: -0.01em;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
 }
 
-.cx-lede {
-  font-family: var(--font-page);
-  font-size: 20px;
-  line-height: 1.5;
-  color: var(--ink-2);
+.cx-welcome-caption.day {
+  right: calc(50% + 28px);
+  color: #fffaf0;
+  text-shadow: 0 1px 2px rgba(20, 40, 80, 0.5), 0 0 18px rgba(20, 40, 80, 0.55);
 }
 
-.cx-welcome-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 26px 0 18px;
-  align-items: flex-start;
+.cx-welcome-caption.night {
+  left: calc(50% + 28px);
+  color: var(--ink-3);
+}
+
+@media (max-width: 860px) {
+  .cx-welcome-day,
+  .cx-welcome-rope,
+  .cx-welcome-caption {
+    display: none;
+  }
+  .cx-welcome-title {
+    left: 24px;
+    transform: none;
+    font-size: 64px;
+    top: 12vh;
+  }
+  .cx-welcome-title > .day {
+    display: none;
+  }
+  .cx-welcome-title > .night {
+    clip-path: none;
+  }
+  .cx-welcome-body {
+    left: 24px;
+    right: 24px;
+    top: calc(12vh + 96px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-welcome-title,
+  .cx-welcome-body,
+  .cx-app::before {
+    animation: none;
+  }
 }
 
 /* ---------- layout ---------- */
@@ -251,7 +419,8 @@ pre {
   min-width: 0;
 }
 
-/* rendered view */
+/* ---------- rendered view: exactly what the model receives ---------- */
+
 .cx-rendered {
   font-family: var(--font-page);
 }
@@ -259,27 +428,35 @@ pre {
 .cx-rendered-tools {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-family: var(--font-ui);
-  font-size: 12px;
-  color: var(--ink-2);
-  margin: -14px -20px 16px;
+  gap: 2px;
   flex-wrap: wrap;
+  margin: -16px -22px 22px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
 }
 
 .cx-r-msg + .cx-r-msg {
-  margin-top: 22px;
+  margin-top: 26px;
+  padding-top: 18px;
   border-top: 1px dashed var(--rule-2);
-  padding-top: 14px;
 }
 
 .cx-r-role {
-  font-family: var(--font-ui);
-  font-size: 10.5px;
+  font-family: var(--font-serif);
+  font-size: 11.5px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.22em;
   color: var(--ink-3);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.cx-role-system > .cx-r-role {
+  color: var(--k-use);
+}
+
+.cx-role-assistant > .cx-r-role {
+  color: var(--good);
 }
 
 .cx-r-text {
@@ -291,8 +468,13 @@ pre {
   margin: 0;
 }
 
-.cx-seg-frame {
-  color: var(--ink-2);
+/* the known is lit like daylight; past the rope, what changes between runs sits in the dusk */
+.cx-r-text .cx-seg.cx-stable {
+  background: none;
+}
+
+.cx-r-text .cx-seg:not(.cx-stable) {
+  opacity: 0.68;
 }
 
 .cx-seg-use {
@@ -307,18 +489,35 @@ pre {
   color: var(--k-ins);
 }
 
-.cx-r-json, .cx-output {
+.cx-r-extra {
+  margin-top: 22px;
+}
+
+.cx-show-ws .cx-r-text {
+  color: var(--ink);
+}
+
+/* ---------- code-ish output ---------- */
+
+.cx-r-json,
+.cx-output {
   font-family: var(--font-mono);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.55;
   white-space: pre-wrap;
   word-wrap: break-word;
-  background: var(--paper-2);
-  border-radius: 7px;
-  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 11px 13px;
   margin: 6px 0;
   max-height: 520px;
   overflow: auto;
+}
+
+:root[data-theme="light"] .cx-r-json,
+:root[data-theme="light"] .cx-output {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .cx-output.cx-small {
@@ -326,34 +525,52 @@ pre {
   max-height: 300px;
 }
 
-.cx-r-extra {
-  margin-top: 20px;
+.cx-mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
-.cx-show-ws .cx-r-text {
-  color: var(--ink);
+.cx-danger {
+  color: var(--danger);
+}
+
+.cx-good {
+  color: var(--good);
 }
 
 .cx-kv-new input {
   opacity: 0.7;
 }
 
+/* tables in the panel: hairlines, mono figures, serif words */
 .cx-table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 11.5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
 }
 
-.cx-table th, .cx-table td {
+.cx-table th,
+.cx-table td {
   text-align: left;
-  padding: 4px 6px;
+  padding: 6px 6px;
   border-bottom: 1px solid var(--rule);
   vertical-align: top;
 }
 
 .cx-table th {
+  white-space: nowrap;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 400;
   color: var(--ink-3);
-  font-weight: 500;
+  padding-top: 2px;
+}
+
+.cx-table tr:last-child td {
+  border-bottom: 0;
 }
 
 .cx-clickable {
@@ -372,88 +589,113 @@ pre {
   padding: 0 4px;
 }
 
-.cx-diff .cx-del {
-  background: var(--del);
-  text-decoration: line-through;
+.cx-diff .cx-add,
+.cx-diff-head .cx-add {
+  background: var(--add);
   border-radius: 2px;
 }
 
+.cx-diff .cx-del,
 .cx-diff-head .cx-del {
   background: var(--del);
+  border-radius: 2px;
+}
+
+.cx-diff .cx-del {
+  text-decoration: line-through;
+}
+
+.cx-diff-head {
+  font-family: var(--font-serif);
+  font-size: 15px;
+}
+
+.cx-diff-head .cx-add,
+.cx-diff-head .cx-del {
+  padding: 0 5px;
+  border-radius: 4px;
 }
 
 .cx-ref-body {
-  font-family: var(--font-page);
-  font-size: 17px;
-  line-height: 1.5;
+  font-family: var(--font-page) !important;
+  font-size: 17px !important;
 }
 
-@keyframes cx-blink {
-  to {
-    visibility: hidden;
-  }
-}
+/* ---------- tour ---------- */
 
-/* tutorial */
 .cx-tour {
   position: fixed;
   inset: 0;
   z-index: 70;
 }
 
-.cx-tour-dim, .cx-tour-spot {
+.cx-tour-dim,
+.cx-tour-spot {
   position: fixed;
   pointer-events: auto;
 }
 
 .cx-tour-dim {
   inset: 0;
-  background: rgba(25, 18, 10, 0.42);
+  background: rgba(6, 4, 3, 0.62);
 }
 
 .cx-tour-spot {
-  border-radius: 10px;
-  box-shadow: 0 0 0 9999px rgba(25, 18, 10, 0.42);
-  outline: 2px solid var(--gold);
-  outline-offset: 0;
-  transition: all 0.25s ease;
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(6, 4, 3, 0.62), 0 0 34px rgba(230, 182, 118, 0.25);
+  outline: 1.5px solid color-mix(in srgb, var(--gold) 80%, transparent);
+  transition: all 0.3s var(--ease);
+}
+
+:root[data-theme="light"] .cx-tour-dim {
+  background: rgba(30, 55, 95, 0.36);
+}
+
+:root[data-theme="light"] .cx-tour-spot {
+  box-shadow: 0 0 0 9999px rgba(30, 55, 95, 0.36);
 }
 
 .cx-tour-card {
   position: fixed;
-  background: var(--paper);
-  border-radius: 12px;
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid var(--rule-2);
+  border-radius: 18px;
   box-shadow: var(--shadow-pop);
-  padding: 16px 18px 12px;
-  transition: top 0.25s ease, left 0.25s ease;
+  color: var(--ink);
+  padding: 20px 22px 14px;
+  transition: top 0.3s var(--ease), left 0.3s var(--ease);
 }
 
 .cx-tour-card h3 {
-  font-family: var(--font-page);
-  font-weight: 500;
-  font-size: 23px;
-  margin: 2px 0 6px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1.15;
+  margin: 6px 0 8px;
 }
 
 .cx-tour-card p {
-  font-family: var(--font-page);
-  font-size: 16.5px;
+  font-family: var(--font-serif);
+  font-size: 17px;
   line-height: 1.5;
   color: var(--ink-2);
-  margin: 0 0 14px;
+  margin: 0 0 16px;
 }
 
-.cx-tour-card code, .cx-tour-card kbd {
+.cx-tour-card code,
+.cx-tour-card kbd {
   font-family: var(--font-mono);
   font-size: 12px;
   background: var(--paper-2);
   border-radius: 4px;
-  padding: 0 4px;
+  padding: 1px 5px;
 }
 
 .cx-tour-step {
+  font-family: var(--font-mono);
   font-size: 10.5px;
-  text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--ink-3);
 }
@@ -462,403 +704,28 @@ pre {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
 }
 
-.cx-tour-dots {
+/* progress along a short length of rope */
+.cx-tour-progress {
   flex: 1;
-  display: flex;
-  gap: 4px;
-  justify-content: center;
-}
-
-.cx-tour-dots span {
-  width: 5px;
-  height: 5px;
+  height: 3px;
+  margin: 0 14px;
   border-radius: 99px;
-  background: var(--ink-4);
-}
-
-.cx-tour-dots span.on {
-  background: var(--gold);
-  width: 14px;
-}
-
-/* =====================================================================
-   Night & Day skin
-   ===================================================================== */
-
-body {
-  background:
-    radial-gradient(ellipse 70% 55% at 12% -12%, var(--glow-a), transparent 62%),
-    radial-gradient(ellipse 55% 45% at 92% 112%, var(--glow-b), transparent 60%),
-    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
-  background-attachment: fixed;
-  font-size: 13px;
-}
-
-/* a still field of faint stars */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    radial-gradient(1px 1px at 12% 18%, var(--star), transparent),
-    radial-gradient(1px 1px at 37% 72%, var(--star-dim), transparent),
-    radial-gradient(1px 1px at 63% 31%, var(--star), transparent),
-    radial-gradient(1px 1px at 81% 84%, var(--star-dim), transparent),
-    radial-gradient(1.5px 1.5px at 90% 12%, var(--star), transparent),
-    radial-gradient(1px 1px at 24% 55%, var(--star-dim), transparent),
-    radial-gradient(1px 1px at 55% 92%, var(--star-dim), transparent);
-  background-size: 340px 340px, 280px 280px, 410px 410px, 300px 300px, 520px 520px, 230px 230px, 370px 370px;
-}
-
-/* canvas grain, like an old oil painting */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1000;
-  opacity: var(--grain-opacity);
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.45  0 0 0 0 0.4  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-}
-
-/* day: soft clouds instead of stars */
-:root[data-theme="light"] body::before {
-  background-image:
-    radial-gradient(ellipse 34% 14% at 18% 22%, rgba(255, 255, 255, 0.75), transparent 70%),
-    radial-gradient(ellipse 22% 10% at 30% 28%, rgba(255, 255, 255, 0.6), transparent 70%),
-    radial-gradient(ellipse 30% 12% at 84% 70%, rgba(255, 255, 255, 0.7), transparent 70%),
-    radial-gradient(ellipse 18% 8% at 72% 76%, rgba(255, 252, 245, 0.55), transparent 70%),
-    radial-gradient(ellipse 40% 16% at 50% 104%, rgba(255, 255, 255, 0.8), transparent 70%);
-  background-size: 100% 100%;
-}
-
-#root {
-  position: relative;
-  z-index: 1;
-}
-
-::selection {
-  background: rgba(232, 184, 120, 0.28);
-}
-
-:root[data-theme="light"] .cx-btn.primary {
-  background: var(--gold);
-  color: var(--gold-ink);
-  box-shadow: 0 6px 18px rgba(168, 98, 42, 0.25);
-}
-
-.cx-seg-ctl {
-  border-radius: 999px;
-  border-color: var(--rule);
-  background: var(--field);
-  padding: 2px;
-  gap: 2px;
-}
-
-.cx-seg-ctl button {
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ink-3);
-  padding: 4px 11px;
-  transition: background 0.2s, color 0.2s;
-}
-
-.cx-seg-ctl button + button {
-  border-left: 0;
-}
-
-.cx-seg-ctl button:hover {
-  color: var(--ink);
-}
-
-.cx-seg-ctl button.on {
-  background: var(--gold-soft);
-  color: var(--gold);
-}
-
-.cx-fine {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-/* ---------- welcome: day meets night along a golden rope ---------- */
-
-.cx-welcome {
-  position: relative;
+  background: var(--rule);
   overflow: hidden;
-  place-items: center start;
-  padding: 0 0 0 calc(38vw + 64px);
 }
 
-.cx-welcome::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 38vw;
-  background:
-    radial-gradient(ellipse 60% 18% at 30% 30%, rgba(255, 255, 255, 0.5), transparent 70%),
-    radial-gradient(ellipse 45% 14% at 62% 38%, rgba(255, 255, 255, 0.38), transparent 70%),
-    radial-gradient(ellipse 70% 20% at 40% 70%, rgba(255, 252, 244, 0.45), transparent 70%),
-    radial-gradient(ellipse 40% 12% at 72% 78%, rgba(255, 255, 255, 0.32), transparent 70%),
-    linear-gradient(180deg, #4f7fc2, #7ea6d8 55%, #a9c3e3);
-  box-shadow: 30px 0 80px rgba(0, 0, 0, 0.45);
-}
-
-.cx-welcome::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(38vw - 2px);
-  width: 4px;
-  background: repeating-linear-gradient(-58deg, #c8955c 0 3px, #8a5f34 3px 5px, #e3b47c 5px 7px);
-  box-shadow: 0 0 18px rgba(232, 184, 120, 0.35);
-}
-
-.cx-welcome-card {
-  position: relative;
-  z-index: 1;
-  max-width: 520px;
-  background: none;
-  box-shadow: none;
-  padding: 0;
-  animation: cx-rise 0.9s var(--ease) both;
-}
-
-.cx-welcome h1 {
-  font-size: 68px;
-  font-weight: 400;
-  letter-spacing: -0.015em;
-  margin: 0 0 14px;
-}
-
-.cx-welcome h1::before {
-  content: "context engineering";
+.cx-tour-progress > span {
   display: block;
-  font-family: var(--font-ui);
-  font-size: 11px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  margin-bottom: 18px;
+  height: 100%;
+  transition: width 0.4s var(--ease);
 }
 
-.cx-lede {
-  font-size: 21px;
-  font-style: italic;
-  color: var(--ink-2);
-}
+/* ---------- variable bubbles ---------- */
 
-.cx-welcome-actions {
-  margin: 34px 0 26px;
-  gap: 10px;
-}
-
-@keyframes cx-rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
-@media (max-width: 860px) {
-  .cx-welcome {
-    padding: 24px;
-    place-items: center;
-  }
-  .cx-welcome::before, .cx-welcome::after {
-    display: none;
-  }
-}
-
-/* ---------- popovers, dialogs, palette ---------- */
-
-.cx-tour-card {
-  background: var(--glass-strong);
-  -webkit-backdrop-filter: blur(24px) saturate(1.3);
-  backdrop-filter: blur(24px) saturate(1.3);
-  border: 1px solid var(--rule-2);
-  box-shadow: var(--shadow-pop);
-  color: var(--ink);
-}
-
-:root[data-theme="light"] .cx-overlay {
-  background: rgba(60, 90, 130, 0.22);
-}
-
-@keyframes cx-pop {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.985);
-  }
-}
-
-/* ---------- run / outputs / diff ---------- */
-
-.cx-r-json, .cx-output {
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-}
-
-:root[data-theme="light"] .cx-r-json,
-:root[data-theme="light"] .cx-output,
-:root[data-theme="light"] .cx-live {
-  background: rgba(255, 255, 255, 0.6);
-}
-
-.cx-rendered-tools {
-  margin: -22px -26px 20px;
-}
-
-/* ---------- tour ---------- */
-
-.cx-tour-dim {
-  background: rgba(4, 3, 6, 0.6);
-}
-
-.cx-tour-spot {
-  border-radius: 14px;
-  box-shadow: 0 0 0 9999px rgba(4, 3, 6, 0.6), 0 0 30px rgba(232, 184, 120, 0.25);
-  outline: 1.5px solid color-mix(in srgb, var(--gold) 80%, transparent);
-}
-
-:root[data-theme="light"] .cx-tour-spot {
-  box-shadow: 0 0 0 9999px rgba(40, 70, 110, 0.35);
-}
-
-.cx-tour-card {
-  border-radius: 16px;
-  padding: 18px 20px 14px;
-}
-
-.cx-tour-card h3 {
-  font-weight: 400;
-  font-size: 25px;
-}
-
-.cx-tour-step {
-  letter-spacing: 0.22em;
-}
-
-.cx-tour-dots span.on {
-  background: var(--gold);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cx-welcome-card {
-    animation: none;
-  }
-}
-
-.cx-mono {
-  font-family: var(--font-mono);
-}
-
-.cx-ref-body {
-  font-family: var(--font-page) !important;
-  font-size: 17px !important;
-}
-
-.cx-seg-ctl button {
-  font-style: normal;
-  font-family: var(--font-ui);
-  font-size: 12px;
-}
-
-input[type="checkbox"],
-input[type="range"] {
-  accent-color: var(--gold);
-}
-
-:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
-  outline-offset: 2px;
-}
-
-/* a few brighter stars with soft spikes, like a long exposure */
-.cx-app::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: var(--sparkle);
-  background-repeat: no-repeat;
-  background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><g fill='%23fff6e4'><circle cx='11' cy='11' r='1.4'/><path d='M11 1 L11.5 10.5 L21 11 L11.5 11.5 L11 21 L10.5 11.5 L1 11 L10.5 10.5Z' opacity='.55'/></g></svg>"),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><g fill='%23e4ebff'><circle cx='8' cy='8' r='1.1'/><path d='M8 1 L8.4 7.6 L15 8 L8.4 8.4 L8 15 L7.6 8.4 L1 8 L7.6 7.6Z' opacity='.5'/></g></svg>"),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><g fill='%23fff1dc'><circle cx='9' cy='9' r='1.2'/><path d='M9 1 L9.45 8.55 L17 9 L9.45 9.45 L9 17 L8.55 9.45 L1 9 L8.55 8.55Z' opacity='.5'/></g></svg>"),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><g fill='%23ffffff'><circle cx='7' cy='7' r='1'/><path d='M7 1 L7.35 6.65 L13 7 L7.35 7.35 L7 13 L6.65 7.35 L1 7 L6.65 6.65Z' opacity='.45'/></g></svg>");
-  background-position: 21% 7%, 96% 38%, 3% 63%, 74% 95%;
-  animation: cx-twinkle 7s ease-in-out infinite;
-}
-
-.cx-welcome::before {
-  z-index: 0;
-}
-
-@keyframes cx-twinkle {
-  50% {
-    opacity: calc(var(--sparkle) * 0.55);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cx-app::before {
-    animation: none;
-  }
-}
-
-/* in day, the far side of the rope is night */
-:root[data-theme="light"] .cx-welcome::before {
-  background:
-    radial-gradient(1px 1px at 22% 18%, rgba(255, 246, 228, 0.85), transparent),
-    radial-gradient(1px 1px at 64% 34%, rgba(220, 228, 255, 0.6), transparent),
-    radial-gradient(1.5px 1.5px at 40% 62%, rgba(255, 246, 228, 0.8), transparent),
-    radial-gradient(1px 1px at 78% 80%, rgba(220, 228, 255, 0.55), transparent),
-    radial-gradient(1px 1px at 12% 88%, rgba(255, 246, 228, 0.6), transparent),
-    radial-gradient(ellipse 80% 50% at 30% 20%, rgba(74, 110, 170, 0.18), transparent 70%),
-    linear-gradient(180deg, #0b0a0e, #050406);
-  background-size: 260px 260px, 310px 310px, 380px 380px, 290px 290px, 340px 340px, 100% 100%, 100% 100%;
-  box-shadow: 20px 0 60px rgba(20, 40, 80, 0.25);
-}
-
-/* day: keep secondary text legible over the sky */
-:root[data-theme="light"] {
-  --ink-2: #3a332a;
-  --ink-3: #5d5448;
-  --ink-4: #8f8474;
-  --glass: rgba(251, 249, 244, 0.86);
-  --glass-strong: rgba(253, 252, 248, 0.97);
-  --rule: rgba(40, 50, 70, 0.12);
-  --rule-2: rgba(40, 50, 70, 0.2);
-}
-
-:root[data-theme="light"] .cx-topbar,
-:root[data-theme="light"] .cx-status {
-  background: rgba(251, 249, 244, 0.72);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-}
-
-:root[data-theme="light"] .cx-page-head {
-  text-shadow: 0 1px 12px rgba(255, 255, 255, 0.6);
-}
-
-:root[data-theme="light"] .cx-page-sub,
-:root[data-theme="light"] .cx-page-actions .cx-btn.ghost {
-  color: #2f3a4a;
-}
-
-/* variable bubbles */
 .cx-cluster-wrap {
   display: flex;
   justify-content: center;
@@ -874,7 +741,7 @@ input[type="range"] {
   border-radius: 50%;
   border: 1px solid var(--rule-2);
   background:
-    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.09), transparent 55%),
+    radial-gradient(circle at 35% 28%, rgba(255, 244, 225, 0.1), transparent 55%),
     var(--paper-2);
   color: var(--ink);
   cursor: pointer;
@@ -887,14 +754,14 @@ input[type="range"] {
   transform: scale(var(--s, 1));
   transition: transform 0.35s var(--ease), border-color 0.2s, box-shadow 0.3s var(--ease);
   animation: cx-bubble-in 0.5s var(--ease) both;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
 }
 
 .cx-bubble:hover {
   transform: scale(calc(var(--s, 1) * 1.1));
   z-index: 2;
   border-color: color-mix(in srgb, var(--gold) 60%, transparent);
-  box-shadow: 0 0 26px rgba(232, 184, 120, 0.22), 0 8px 22px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 26px rgba(230, 182, 118, 0.22), 0 8px 22px rgba(0, 0, 0, 0.3);
 }
 
 .cx-bubble.on {
@@ -907,7 +774,7 @@ input[type="range"] {
 
 .cx-bubble-name {
   font-family: var(--font-serif);
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.05;
   max-width: 100%;
   overflow: hidden;
@@ -916,17 +783,18 @@ input[type="range"] {
 }
 
 .cx-bubble-name.long {
-  font-size: 13.5px;
+  font-size: 14px;
 }
 
 .cx-bubble-value {
-  font-size: 10px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12px;
   color: var(--ink-3);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-ui);
 }
 
 .cx-bubble.add {
@@ -954,62 +822,9 @@ input[type="range"] {
   box-shadow: 0 6px 16px rgba(30, 60, 110, 0.14);
 }
 
-/* =====================================================================
-   Notebook canvas: floating cards joined by bridges
-   ===================================================================== */
-
-:root {
-  --card: #17151b;
-  --card-2: #1b1920;
-  --card-edge: rgba(255, 255, 255, 0.075);
-  --card-hi: rgba(255, 255, 255, 0.05);
-  --card-drop: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 34px -14px rgba(0, 0, 0, 0.7);
-  --card-drop-last: 0 18px 30px -16px rgba(0, 0, 0, 0.75);
-  --bridge: 34px;
-  --tail-x: 50%;
-  --tail-w: 16px;
-  --neck: 3px;
-}
-
-:root[data-theme="light"] {
-  --card: #fffdf9;
-  --card-2: #fffefb;
-  --card-edge: rgba(40, 50, 70, 0.11);
-  --card-hi: rgba(255, 255, 255, 0.95);
-  --card-drop: 0 1px 2px rgba(30, 50, 80, 0.08), 0 16px 30px -14px rgba(30, 60, 110, 0.32);
-  --card-drop-last: 0 16px 28px -16px rgba(30, 60, 110, 0.35);
-}
-
-/* progress along a length of rope */
-.cx-rope-fill {
-  background: repeating-linear-gradient(-58deg, var(--gold) 0 3px, color-mix(in srgb, var(--gold) 55%, transparent) 3px 6px);
-}
-
-
-/* rendered view: exactly what the model receives */
-.cx-r-text .cx-seg.cx-stable {
-  background: var(--stable);
-  padding: 0.18em 0;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-
-.cx-r-text .cx-seg-sep.cx-stable {
-  background: none;
-}
-
-.cx-r-text .cx-seg.cx-stable {
-  background: var(--stable);
-}
-
-.cx-r-text .cx-seg.cx-stable {
-  background: var(--stable);
-  padding: 0;
-}
-
 /* ---------- surfaces (one definition each) ---------- */
 
-/* the stage: a single dark-glass card, used by the rendered view */
+/* the stage: a single dark-glass plate, used by the rendered view and editors of raw text */
 .cx-stage,
 .cx-card-panel,
 .cx-code,
@@ -1019,26 +834,32 @@ input[type="range"] {
   box-shadow: var(--shadow);
   border-radius: 16px;
 }
+
 .cx-stage {
   position: relative;
   max-width: var(--page-width);
   min-height: 60vh;
-  padding: 44px 56px 56px;
+  padding: 38px 56px 56px;
 }
-/* a faint sheen along the top edge of the stage */
-.cx-stage::before {
+
+/* a faint sheen along the top edge */
+.cx-stage::before,
+.cx-card-panel::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 12%;
-  right: 12%;
+  top: -1px;
+  left: 14%;
+  right: 14%;
   height: 1px;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 45%, transparent), transparent);
-  opacity: 0.6;
+  opacity: 0.55;
 }
+
 .cx-card-panel {
-  padding: 18px 22px;
+  position: relative;
+  padding: 20px 24px 22px;
 }
+
 .cx-data-text {
   width: 100%;
   max-width: var(--page-width);
@@ -1047,12 +868,34 @@ input[type="range"] {
   color: var(--ink);
   font-family: var(--font-mono);
   font-size: 12.5px;
-  line-height: 1.55;
+  line-height: 1.6;
   white-space: pre;
   tab-size: 4;
   resize: vertical;
   outline: none;
 }
+
+/* day: pages of settings and data sit on a sheet of cloud-glass, not straight on the sky */
+:root[data-theme="light"] .cx-sheet {
+  max-width: calc(var(--page-width) + 72px);
+  margin: -26px -36px 0;
+  padding: 26px 36px 34px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid var(--glass-edge);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.cx-empty-page {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--ink-2);
+  font-family: var(--font-page);
+  font-size: 20px;
+}
+
 @media (max-width: 1100px) {
   .cx-stage {
     padding: 26px 32px 36px;

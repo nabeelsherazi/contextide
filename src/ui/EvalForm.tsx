@@ -22,14 +22,21 @@ export function EvalForm() {
   const keyFields = keySrc ? dataItems(keySrc).fields : [];
   const otherFields = [...new Set(p.data.filter((d) => d.name !== ev?.key).flatMap((d) => dataItems(d).fields))];
   return (
-    <div className="flex flex-col gap-3" data-testid="eval-form">
-      <FieldRow label="answer key">
-        <Choice value={ev?.key ?? ""} onChange={(k) => (k ? set({ key: k }) : set(null))} options={[["", "(no scoring)"], ...p.data.map((d) => d.name)]} testid="eval-key" />
-      </FieldRow>
+    <div className="flex flex-col gap-4" data-testid="eval-form">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-4">
+        <FieldRow label="answer key">
+          <Choice value={ev?.key ?? ""} onChange={(k) => (k ? set({ key: k }) : set(null))} options={[["", "(no scoring)"], ...p.data.map((d) => d.name)]} className="w-full" testid="eval-key" />
+        </FieldRow>
+        {ev && (
+          <FieldRow label="read the output as">
+            <Choice value={ev.parser.type} onChange={(t) => set({ parser: { type: t } as ParserCfg })} options={PARSERS} className="w-full" testid="eval-parser" />
+          </FieldRow>
+        )}
+      </div>
       {ev && (
         <>
           {keyFields.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-4">
               <FieldRow label="key id field">
                 <Choice value={ev.keyId} onChange={(f) => set({ keyId: f })} options={keyFields} className="w-full" />
               </FieldRow>
@@ -43,13 +50,12 @@ export function EvalForm() {
             </Hint>
           )}
           {otherFields.length > 0 && (
-            <FieldRow label="item id field (in the data shown)">
-              <Choice value={ev.itemId ?? ""} onChange={(f) => set({ itemId: f || undefined })} options={[["", "(auto)"], ...otherFields]} />
-            </FieldRow>
+            <div className="grid grid-cols-2 gap-x-3">
+              <FieldRow label="item id field, in the data shown">
+                <Choice value={ev.itemId ?? ""} onChange={(f) => set({ itemId: f || undefined })} options={[["", "(auto)"], ...otherFields]} className="w-full" />
+              </FieldRow>
+            </div>
           )}
-          <FieldRow label="read the output as">
-            <Choice value={ev.parser.type} onChange={(t) => set({ parser: { type: t } as ParserCfg })} options={PARSERS} testid="eval-parser" />
-          </FieldRow>
           {ev.parser.type === "json" && (
             <div className="grid grid-cols-3 gap-2">
               <Field value={ev.parser.path ?? ""} placeholder="path (e.g. labels)" onCommit={(v) => set({ parser: { ...ev.parser, path: v || undefined } as ParserCfg })} />

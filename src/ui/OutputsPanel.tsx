@@ -23,7 +23,7 @@ export const pct = (x?: number) => (x === undefined ? "" : `${Math.round(x * 100
 export function Fold(p: { title: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
     <Collapsible defaultOpen={p.defaultOpen}>
-      <CollapsibleTrigger className="group/f flex cursor-pointer items-center gap-1 py-1 font-serif text-[14px] text-ink-2 italic hover:text-foreground">
+      <CollapsibleTrigger className="group/f flex cursor-pointer items-center gap-1.5 py-1 font-serif text-[15px] text-ink-2 italic hover:text-foreground">
         <span className="inline-block transition-transform group-data-[state=open]/f:rotate-90">›</span> {p.title}
       </CollapsibleTrigger>
       <CollapsibleContent>{p.children}</CollapsibleContent>
@@ -52,10 +52,11 @@ function RunDetail({ r, onBack }: { r: RunRecord; onBack(): void }) {
           <Star />
         </Button>
       </div>
-      <div className="text-[12px] text-ink-2">
-        <b className="font-serif text-[16px] font-medium">{r.version}</b> · {r.model || "(default model)"} · {r.mode} · {ago(r.time)}
+      <div className="flex flex-wrap items-baseline gap-x-2 font-mono text-[10.5px] text-ink-3">
+        <b className="font-serif text-[22px] leading-none font-normal text-foreground">{r.version}</b>
+        <span>{r.model || "default model"}</span>·<span>{r.mode}</span>·<span>{ago(r.time)}</span>
         {r.accuracy !== undefined && (
-          <span className="ml-2 font-serif text-[15px] text-good" data-testid="run-score">
+          <span className="ml-auto font-serif text-[17px] text-good" data-testid="run-score">
             {pct(r.accuracy)}
             {r.total !== undefined && ` (${r.correct}/${r.total})`}
           </span>
@@ -76,7 +77,7 @@ function RunDetail({ r, onBack }: { r: RunRecord; onBack(): void }) {
           <pre className="cx-output" data-testid="run-output">
             {o.text}
           </pre>
-          <div className="text-[11.5px] text-ink-3">
+          <div className="-mt-1 font-mono text-[10.5px] text-ink-3">
             {o.ms !== undefined && `${(o.ms / 1000).toFixed(1)}s`}
             {o.usage?.prompt_tokens !== undefined && ` · ${o.usage.prompt_tokens} in / ${o.usage.completion_tokens ?? "?"} out`}
           </div>
@@ -161,8 +162,8 @@ export function OutputsPanel() {
               onClick={() => useStore.setState({ selectedRun: r.id })}
               data-testid={`run-row-${r.id}`}
             >
-              <span className="w-[22px] font-serif text-[18px] font-medium">{r.version}</span>
-              <span className="min-w-0 flex-1 truncate">
+              <span className="w-[22px] font-serif text-[20px]">{r.version}</span>
+              <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-ink-2">
                 {r.mode !== "whole" && (
                   <Badge variant="outline" className="mr-1 text-ink-3">
                     {r.mode}
@@ -176,7 +177,7 @@ export function OutputsPanel() {
               {r.starred && <Star className="size-3.5 text-gold" />}
               {r.rating === "up" && <ThumbsUp className="size-3.5" />}
               {r.rating === "down" && <ThumbsDown className="size-3.5" />}
-              {r.accuracy !== undefined && <span className="font-serif text-[15px] text-good">{pct(r.accuracy)}</span>}
+              {r.accuracy !== undefined && <span className="font-serif text-[16px] text-good">{pct(r.accuracy)}</span>}
             </button>
           </li>
         ))}

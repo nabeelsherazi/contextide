@@ -133,7 +133,7 @@ function useTargetBox(selector: string | undefined, step: number): Box | null {
   return box;
 }
 
-const CARD_W = 340;
+const CARD_W = 364;
 
 export function Tour() {
   const step = useStore((s) => s.tour);
@@ -206,18 +206,16 @@ export function Tour() {
       {box ? <div className="cx-tour-spot" style={box} /> : <div className="cx-tour-dim" />}
       <div className="cx-tour-card" style={{ ...style, width: CARD_W }}>
         <div className="cx-tour-step">
-          {step + 1} / {STEPS.length}
+          {String(step + 1).padStart(2, "0")} — {String(STEPS.length).padStart(2, "0")}
         </div>
         <h3>{s.title}</h3>
         <p>{s.body}</p>
         <div className="cx-tour-foot">
-          <Button variant="ghost" size="sm" onClick={endTour} data-testid="tour-skip">
+          <Button variant="ghost" size="sm" className="-ml-2" onClick={endTour} data-testid="tour-skip">
             Skip
           </Button>
-          <span className="cx-tour-dots">
-            {STEPS.map((_, i) => (
-              <span key={i} className={i === step ? "on" : ""} />
-            ))}
+          <span className="cx-tour-progress" aria-hidden>
+            <span className="cx-rope-fill" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
           </span>
           {step > 0 && (
             <Button variant="outline" size="sm" onClick={back}>

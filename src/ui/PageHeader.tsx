@@ -8,15 +8,16 @@ import { Eyebrow } from "./widgets";
 export function PageHeader(p: { kind: ReactNode; title: ReactNode; right?: ReactNode }) {
   const version = useStore((s) => s.version);
   return (
-    <header className="mb-[18px] flex flex-wrap items-center gap-[18px]">
-      <Button variant="ghost" size="sm" onClick={() => useStore.setState({ view: { t: "version" } })} data-testid="back">
-        <ArrowLeft className="size-3.5" /> {version ?? "back"}
-      </Button>
-      <div className="flex min-w-0 flex-col gap-0.5">
+    <header className="mb-9 flex max-w-[var(--page-width)] flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="xs" className="-ml-2 text-[14.5px]" onClick={() => useStore.setState({ view: { t: "version" } })} data-testid="back">
+          <ArrowLeft className="size-3" /> {version ? `version ${version}` : "back"}
+        </Button>
+        <span className="h-3.5 w-px bg-rule-2" aria-hidden />
         <Eyebrow>{p.kind}</Eyebrow>
-        <div className="font-serif text-[34px] leading-tight font-normal">{p.title}</div>
+        {p.right && <div className="ml-auto flex items-center gap-2">{p.right}</div>}
       </div>
-      {p.right && <div className="ml-auto flex items-center gap-2">{p.right}</div>}
+      <div className="min-w-0 font-serif text-[44px] leading-[1.05] font-normal tracking-[-0.01em]">{p.title}</div>
     </header>
   );
 }
@@ -24,8 +25,8 @@ export function PageHeader(p: { kind: ReactNode; title: ReactNode; right?: React
 /** A panel on a page (settings-like groups). */
 export function Panel(p: { title?: ReactNode; children: ReactNode }) {
   return (
-    <section className="cx-card-panel mb-3.5 max-w-[var(--page-width)]">
-      {p.title && <h3 className="mb-2 font-serif text-[20px] font-normal">{p.title}</h3>}
+    <section className="cx-card-panel mb-5 max-w-[var(--page-width)]">
+      {p.title && <h3 className="mb-4 font-serif text-[22px] leading-tight font-normal">{p.title}</h3>}
       {p.children}
     </section>
   );

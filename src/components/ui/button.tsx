@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-gold/70 bg-gradient-to-b from-gold/15 to-gold/5 text-foreground shadow-[0_0_22px_rgba(232,184,120,0.16)] hover:border-gold hover:from-gold/25 hover:to-gold/10 hover:shadow-[0_0_30px_rgba(232,184,120,0.26)] day:border-transparent day:bg-gold day:bg-none day:text-gold-ink day:shadow-[0_6px_18px_rgba(168,98,42,0.25)] day:hover:bg-gold/90",
+          "border border-gold/70 bg-gradient-to-b from-gold/15 to-gold/5 text-foreground shadow-[0_0_22px_rgba(232,184,120,0.16)] hover:border-gold hover:from-gold/25 hover:to-gold/10 hover:shadow-[0_0_30px_rgba(232,184,120,0.26)] day:border-transparent day:bg-gold day:bg-none day:!text-gold-ink day:shadow-[0_6px_18px_rgba(168,98,42,0.25)] day:hover:bg-gold/90",
         destructive:
           "border border-danger/40 bg-danger/10 text-danger hover:bg-danger/20",
         outline:
@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-paper-2 text-foreground hover:bg-paper-2/80",
         ghost:
           "italic text-ink-2 hover:bg-paper-2 hover:text-foreground",
-        link: "h-auto px-0 font-sans text-[12px] text-gold underline decoration-gold/40 underline-offset-[3px] hover:decoration-gold",
+        link: "h-auto px-0 font-serif text-[15px] text-gold underline decoration-gold/35 underline-offset-[4px] hover:decoration-gold",
       },
       size: {
         default: "h-9 px-4 has-[>svg]:px-3",

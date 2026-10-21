@@ -69,13 +69,28 @@ export function Welcome() {
 
   return (
     <div className="cx-welcome">
-      <div className="cx-welcome-card">
-        <h1>ContextIDE</h1>
+      <div className="cx-welcome-day" aria-hidden />
+      <div className="cx-welcome-rope cx-rope" aria-hidden />
+      <h1 className="cx-welcome-title" aria-label="ContextIDE">
+        <span className="day" aria-hidden>
+          ContextIDE
+        </span>
+        <span className="night" aria-hidden>
+          ContextIDE
+        </span>
+      </h1>
+      <span className="cx-welcome-caption day" aria-hidden>
+        what you write
+      </span>
+      <span className="cx-welcome-caption night" aria-hidden>
+        what comes back
+      </span>
+      <div className="cx-welcome-body">
         <p className="cx-lede">A writing desk for context engineering. Compose prompts from reusable blocks, A/B test versions, and run them against your models — all as plain text in a folder.</p>
         {pendingInit ? (
           <div className="cx-welcome-actions">
-            <p>
-              <b>{pendingInit.name}</b> isn't a ContextIDE workspace yet. Set it up?
+            <p className="font-serif text-[17px]">
+              <b className="font-medium">{pendingInit.name}</b> isn't a ContextIDE workspace yet. Set it up?
             </p>
             <Button size="lg" onClick={() => init(true)} data-testid="init-sample">
               Starter library + sample project

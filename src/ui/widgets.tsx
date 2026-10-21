@@ -13,22 +13,22 @@ import { cn } from "@/lib/utils";
 /** A labelled control: serif italic label above (or beside, for checks). */
 export function FieldRow(p: { label: ReactNode; children: ReactNode; className?: string; hint?: ReactNode }) {
   return (
-    <label className={cn("flex min-w-0 flex-col gap-1.5 font-serif text-[14.5px] text-ink-2 italic", p.className)}>
-      <span>{p.label}</span>
+    <label className={cn("flex min-w-0 flex-col gap-2 font-serif text-[15px] text-ink-3 italic", p.className)}>
+      <span className="pl-0.5 leading-none">{p.label}</span>
       <div className="not-italic">{p.children}</div>
-      {p.hint && <span className="font-serif text-[13.5px] text-ink-3 italic">{p.hint}</span>}
+      {p.hint && <span className="font-serif text-[13.5px] leading-snug text-ink-3 italic">{p.hint}</span>}
     </label>
   );
 }
 
 export function Hint(p: { children: ReactNode; className?: string }) {
-  return <p className={cn("my-1 font-serif text-[14px] leading-snug text-ink-3 italic", p.className)}>{p.children}</p>;
+  return <p className={cn("my-0.5 font-serif text-[15px] leading-normal text-ink-3 italic", p.className)}>{p.children}</p>;
 }
 
 export function CheckRow(p: { checked: boolean; onChange(v: boolean): void; children: ReactNode; disabled?: boolean; testid?: string }) {
   return (
     <div>
-      <label className={cn("flex cursor-pointer items-center gap-2 font-serif text-[15px] text-ink-2 not-italic", p.disabled && "opacity-50")}>
+      <label className={cn("flex cursor-pointer items-center gap-3 font-serif text-[16px] text-ink-2 not-italic", p.disabled && "opacity-50")}>
         <Checkbox checked={p.checked} disabled={p.disabled} onCheckedChange={(v) => p.onChange(v === true)} data-testid={p.testid} />
         <span>{p.children}</span>
       </label>
@@ -60,9 +60,10 @@ export function Field(p: { value: string; onCommit(v: string): void; placeholder
   return <Input {...common} className={p.className} list={p.list} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()} />;
 }
 
-export function NumField(p: { value: number | undefined; onCommit(v: number | undefined): void; placeholder?: string; testid?: string }) {
+export function NumField(p: { value: number | undefined; onCommit(v: number | undefined): void; placeholder?: string; testid?: string; className?: string }) {
   return (
     <Field
+      className={cn("font-mono text-[13px] tabular-nums placeholder:font-serif", p.className)}
       value={p.value === undefined ? "" : String(p.value)}
       placeholder={p.placeholder}
       testid={p.testid}
@@ -113,7 +114,7 @@ export function Seg<T extends string>(p: { value: T; options: [NoInfer<T>, React
   return (
     <ToggleGroup type="single" value={p.value} onValueChange={(v) => v && p.onChange(v as T)} className={p.className} data-testid={p.testid}>
       {p.options.map(([v, l]) => (
-        <ToggleGroupItem key={v} value={v} data-value={v} className="h-6 px-2.5">
+        <ToggleGroupItem key={v} value={v} data-value={v} className="h-7 px-3">
           {l}
         </ToggleGroupItem>
       ))}
@@ -132,7 +133,7 @@ export function KeyValues(p: { value: Record<string, string>; onChange(v: Record
     <div className="flex flex-col gap-1.5" data-testid={p.testid}>
       {entries.map(([k, v], i) => (
         <div key={i} className="grid grid-cols-[1fr_1.6fr_auto] items-center gap-1.5">
-          <Field value={k} onCommit={(nk) => set(i, nk, v)} placeholder={p.keyPlaceholder ?? "name"} />
+          <Field value={k} onCommit={(nk) => set(i, nk, v)} placeholder={p.keyPlaceholder ?? "name"} className={KEY} />
           <Field value={v} onCommit={(nv) => set(i, k, nv)} placeholder={p.valuePlaceholder ?? "value"} />
           <Button variant="ghost" size="icon-sm" onClick={() => p.onChange(Object.fromEntries(entries.filter((_, j) => j !== i)))} title="Remove">
             <X />
@@ -143,6 +144,9 @@ export function KeyValues(p: { value: Record<string, string>; onChange(v: Record
     </div>
   );
 }
+
+/** Keys are identifiers, so they speak in the mono. */
+const KEY = "font-mono text-[12.5px] placeholder:font-serif";
 
 function AddKV(p: { onAdd(k: string, v: string): void; keyPlaceholder?: string; valuePlaceholder?: string }) {
   const [k, setK] = useState("");
@@ -155,7 +159,7 @@ function AddKV(p: { onAdd(k: string, v: string): void; keyPlaceholder?: string; 
   };
   return (
     <div className="cx-kv-new grid grid-cols-[1fr_1.6fr_auto] items-center gap-1.5">
-      <Input value={k} placeholder={p.keyPlaceholder ?? "name"} onChange={(e) => setK(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
+      <Input value={k} placeholder={p.keyPlaceholder ?? "name"} onChange={(e) => setK(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} className={KEY} />
       <Input value={v} placeholder={p.valuePlaceholder ?? "value"} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
       <Button variant="ghost" size="icon-sm" className="text-good disabled:text-ink-4" onClick={add} title="Add this row" disabled={!k.trim()} data-testid="kv-add">
         <Check />
@@ -204,7 +208,7 @@ export function JsonField(p: { value: unknown; onCommit(v: unknown): void; rows?
   );
 }
 
-/** Small uppercase section heading used in drawers and panels. */
+/** Small capitals, tracked like an inscription: the heading voice of drawers and panels. */
 export function Eyebrow(p: { children: ReactNode; className?: string }) {
-  return <div className={cn("font-sans text-[10.5px] font-medium tracking-[0.22em] text-ink-3 uppercase", p.className)}>{p.children}</div>;
+  return <div className={cn("font-serif text-[11.5px] font-medium tracking-[0.22em] text-ink-3 uppercase", p.className)}>{p.children}</div>;
 }

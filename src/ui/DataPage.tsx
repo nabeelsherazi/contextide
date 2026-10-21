@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2 } from "lucide-react";
 import { slug } from "../core/doc";
+import { cn } from "@/lib/utils";
 
 export function DataPage() {
   const s = useStore();
@@ -47,7 +48,7 @@ export function DataPage() {
         kind={`▤ data · ${d.format}`}
         title={
           <Field
-            className="h-auto border-transparent bg-transparent px-0 font-serif text-[34px] focus-visible:ring-0"
+            className="h-auto border-transparent bg-transparent px-0 py-0 font-serif text-[44px] leading-[1.05] tracking-[-0.01em] hover:border-transparent focus-visible:ring-0"
             value={d.name}
             onCommit={(v) => {
               const n = slug(v);
@@ -81,7 +82,7 @@ export function DataPage() {
           </FieldRow>
         )}
         <span className="flex-1" />
-        <span className={parsed.error ? "text-danger" : "text-ink-3"} data-testid="data-count">
+        <span className={cn("pb-2 font-mono text-[11px]", parsed.error ? "text-danger" : "text-ink-3")} data-testid="data-count">
           {parsed.error ? `parse error: ${parsed.error}` : `${parsed.items.length} items${parsed.fields.length ? ` · fields: ${parsed.fields.join(", ")}` : ""}`}
         </span>
       </div>
@@ -92,14 +93,14 @@ export function DataPage() {
             <ol className="my-1.5 pl-6">
               {parsed.items.slice(0, 6).map((it, i) => (
                 <li key={i}>
-                  <code className="text-[11.5px]">{itemText(it).slice(0, 300)}</code>
+                  <code className="text-[11.5px] text-ink-2">{itemText(it).slice(0, 300)}</code>
                 </li>
               ))}
             </ol>
           </Fold>
         </div>
       )}
-      <footer className="mt-[18px] flex max-w-[var(--page-width)] items-center justify-between text-[12px] text-ink-3">
+      <footer className="mt-[18px] flex max-w-[var(--page-width)] items-center justify-between font-mono text-[10.5px] text-ink-3">
         <span>{d.file}</span>
         <Button
           variant="ghost"

@@ -2,6 +2,7 @@ import { test, type Page } from "@playwright/test";
 import { boot, caretAfter, expandLibrary } from "./helpers";
 const dir = process.env.SHOTS!;
 test.skip(!dir, "screenshots only on demand");
+test.use({ deviceScaleFactor: Number(process.env.SCALE ?? 1) });
 const only = (process.env.ONLY ?? "").split(",").filter(Boolean);
 const shot = async (page: Page, name: string) => {
   if (only.length && !only.some((o) => name.includes(o))) return;

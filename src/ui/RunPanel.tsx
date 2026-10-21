@@ -4,7 +4,7 @@ import { useStore, currentProject, currentVersion, getKey, openModal } from "../
 import { startRun, stopRun, patchRunSettings, clearVersionRunOverride, compareVersions } from "../state/actions";
 import { mergedRunSettings, type RunSettings } from "../core/workspace";
 import type { RunMode } from "../core/runs";
-import { NumField, Field, Seg, FieldRow, CheckRow, Hint, Choice } from "./widgets";
+import { NumField, Field, Seg, FieldRow, CheckRow, Hint, Choice, Eyebrow } from "./widgets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, RefreshCw, Square } from "lucide-react";
@@ -70,21 +70,21 @@ export function RunPanel() {
   })();
 
   return (
-    <div className="flex flex-col" data-testid="run-panel">
-      <section className="flex flex-col gap-3 border-b border-rule pt-2 pb-4">
+    <div className="flex flex-col gap-8" data-testid="run-panel">
+      <section className="flex flex-col gap-4">
         <FieldRow label="endpoint">
-          <span className="flex items-center gap-1.5">
-            <Choice value={ep?.id ?? ""} onChange={(id) => set({ endpoint: id })} options={s.ws.settings.endpoints.map((e) => [e.id, e.name] as [string, string])} testid="run-endpoint" />
-            <Button variant="ghost" size="icon-xs" title="Edit endpoints" onClick={() => openModal({ t: "settings", tab: "endpoints" })}>
-              <Pencil />
+          <span className="flex items-center gap-1">
+            <Choice value={ep?.id ?? ""} onChange={(id) => set({ endpoint: id })} options={s.ws.settings.endpoints.map((e) => [e.id, e.name] as [string, string])} className="min-w-0 flex-1" testid="run-endpoint" />
+            <Button variant="ghost" size="icon-sm" title="Edit endpoints" onClick={() => openModal({ t: "settings", tab: "endpoints" })}>
+              <Pencil className="size-3.5" />
             </Button>
           </span>
         </FieldRow>
         <FieldRow label="model" hint={modelErr && <span className="text-danger not-italic">{modelErr}</span>}>
-          <span className="flex items-center gap-1.5">
-            <Field value={rs.model ?? ""} placeholder={ep?.defaultModel || "model id"} list="cx-models" onCommit={(m) => set({ model: m || undefined })} testid="run-model" />
-            <Button variant="ghost" size="icon-xs" title="Fetch the model list from the endpoint" onClick={loadModels}>
-              <RefreshCw />
+          <span className="flex items-center gap-1">
+            <Field value={rs.model ?? ""} placeholder={ep?.defaultModel || "model id"} list="cx-models" onCommit={(m) => set({ model: m || undefined })} className="font-mono text-[12.5px] placeholder:font-serif" testid="run-model" />
+            <Button variant="ghost" size="icon-sm" title="Fetch the model list from the endpoint" onClick={loadModels}>
+              <RefreshCw className="size-3.5" />
             </Button>
           </span>
           <datalist id="cx-models">
@@ -93,48 +93,54 @@ export function RunPanel() {
             ))}
           </datalist>
         </FieldRow>
-        <div className="grid grid-cols-2 gap-2">
-          <FieldRow label="temperature">
-            <NumField value={rs.temperature} onCommit={(n) => set({ temperature: n })} testid="run-temp" />
-          </FieldRow>
-          <FieldRow label="max tokens">
-            <NumField value={rs.max_tokens} onCommit={(n) => set({ max_tokens: n })} />
-          </FieldRow>
-          <FieldRow label="top_p">
-            <NumField value={rs.top_p} placeholder="default" onCommit={(n) => set({ top_p: n })} />
-          </FieldRow>
-          <FieldRow label="seed">
-            <NumField value={rs.seed} placeholder="none" onCommit={(n) => set({ seed: n })} />
-          </FieldRow>
-        </div>
-        <CheckRow checked={!!rs.stream} onChange={(c) => set({ stream: c || undefined })}>
-          stream tokens
-        </CheckRow>
-        <CheckRow
-          checked={s.runOverride || overridden}
-          onChange={(c) => {
-            useStore.setState({ runOverride: c });
-            if (!c && overridden) clearVersionRunOverride();
-          }}
-        >
-          settings for this version only {overridden && <Badge variant="outline" className="ml-1 text-ink-3">override</Badge>}
-        </CheckRow>
       </section>
 
-      <section className="flex flex-col gap-3 border-b border-rule py-4">
-        <FieldRow label="mode">
-          <Seg
-            value={o.mode}
-            options={[
-              ["whole", "whole"],
-              ["fanout", "fan-out"],
-              ["repeat", "repeat"],
-              ["ablation", "ablation"],
-            ]}
-            onChange={(m) => useRunOpts.setState({ mode: m })}
-            testid="run-mode"
-          />
-        </FieldRow>
+      <section>
+        <Eyebrow className="mb-3">Sampling</Eyebrow>
+        <div className="grid grid-cols-4 divide-x divide-rule overflow-hidden rounded-xl border border-rule bg-field">
+          <Param label="temp">
+            <NumField value={rs.temperature} placeholder="—" onCommit={(n) => set({ temperature: n })} className={PARAM} testid="run-temp" />
+          </Param>
+          <Param label="max tok">
+            <NumField value={rs.max_tokens} placeholder="—" onCommit={(n) => set({ max_tokens: n })} className={PARAM} />
+          </Param>
+          <Param label="top p">
+            <NumField value={rs.top_p} placeholder="—" onCommit={(n) => set({ top_p: n })} className={PARAM} />
+          </Param>
+          <Param label="seed">
+            <NumField value={rs.seed} placeholder="—" onCommit={(n) => set({ seed: n })} className={PARAM} />
+          </Param>
+        </div>
+        <div className="mt-4 flex flex-col gap-2.5">
+          <CheckRow checked={!!rs.stream} onChange={(c) => set({ stream: c || undefined })}>
+            stream tokens
+          </CheckRow>
+          <CheckRow
+            checked={s.runOverride || overridden}
+            onChange={(c) => {
+              useStore.setState({ runOverride: c });
+              if (!c && overridden) clearVersionRunOverride();
+            }}
+          >
+            settings for this version only {overridden && <Badge variant="outline" className="ml-1 text-ink-3">override</Badge>}
+          </CheckRow>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <Eyebrow>Mode</Eyebrow>
+        <Seg
+          value={o.mode}
+          options={[
+            ["whole", "whole"],
+            ["fanout", "fan-out"],
+            ["repeat", "repeat"],
+            ["ablation", "ablation"],
+          ]}
+          onChange={(m) => useRunOpts.setState({ mode: m })}
+          className="w-full [&>*]:flex-1"
+          testid="run-mode"
+        />
         {o.mode === "whole" && <Hint>One call with the whole prompt.</Hint>}
         {o.mode === "fanout" && (
           <div className="grid grid-cols-2 gap-2" data-testid="fanout-opts">
@@ -153,7 +159,7 @@ export function RunPanel() {
         )}
         {o.mode === "ablation" && <Hint>Runs once as-is, then once per card with that card muted ({nAblate + 1} calls), and ranks which cards change the result.</Hint>}
         <CheckRow checked={o.scoring && !!p.settings.eval} disabled={!p.settings.eval} onChange={(c) => useRunOpts.setState({ scoring: c })}>
-          score against answer key
+          score against the answer key
           {!p.settings.eval && (
             <Button variant="link" className="ml-1.5" onClick={() => useStore.setState({ view: { t: "project" } })}>
               set up
@@ -162,58 +168,75 @@ export function RunPanel() {
         </CheckRow>
       </section>
 
-      <div className="flex items-center gap-2 pt-4">
+      <section className="flex flex-col gap-3 border-t border-rule pt-7">
         {prog.running ? (
-          <Button variant="destructive" size="lg" className="flex-1" onClick={stopRun} data-testid="stop">
+          <Button variant="destructive" size="lg" className="h-12 w-full text-[19px]" onClick={stopRun} data-testid="stop">
             <Square className="size-3.5" /> Stop
           </Button>
         ) : (
-          <Button size="lg" className="flex-1" onClick={() => startRunFromPanel()} data-testid="run" title="⌘↵">
+          <Button size="lg" className="relative h-12 w-full text-[19px]" onClick={() => startRunFromPanel()} data-testid="run" title="⌘↵">
             Run {v.title}
+            <kbd className="absolute right-4 font-mono text-[10.5px] tracking-[0.08em] opacity-55">⌘↵</kbd>
           </Button>
         )}
         {p.versions.length > 1 && !prog.running && (
-          <Choice
-            value=""
-            placeholder="Compare with…"
-            title="Run two versions with the same settings and compare"
-            onChange={(x) => x && compareVersions(v.id, x, o.scoring && !!p.settings.eval)}
-            options={p.versions.filter((x) => x.id !== v.id).map((x) => [x.id, x.title] as [string, string])}
-            size="default"
-            testid="compare"
-          />
+          <div className="flex items-center justify-center gap-1 font-serif text-[14.5px] text-ink-3 italic">
+            or run side by side with
+            <Choice
+              value=""
+              placeholder="another version"
+              title="Run two versions with the same settings and compare"
+              onChange={(x) => x && compareVersions(v.id, x, o.scoring && !!p.settings.eval)}
+              options={p.versions.filter((x) => x.id !== v.id).map((x) => [x.id, <>{x.title} <span className="text-ink-3 italic">{x.subtitle}</span></>] as [string, React.ReactNode])}
+              className="h-7 border-transparent bg-transparent px-1.5 text-[15px] hover:border-transparent hover:bg-paper-2"
+              testid="compare"
+            />
+          </div>
         )}
-      </div>
+      </section>
       {prog.running && (
-        <div className="mt-3" data-testid="progress">
-          <div className="mb-1.5 h-1 overflow-hidden rounded-full bg-rule">
+        <div data-testid="progress">
+          <div className="mb-2 h-[3px] overflow-hidden rounded-full bg-rule">
             <span className="cx-rope-fill block h-full transition-[width] duration-300" style={{ width: `${prog.total ? (prog.done / prog.total) * 100 : 0}%` }} />
           </div>
-          <div className="text-ink-3">
+          <div className="font-mono text-[11px] text-ink-3">
             {prog.done}/{prog.total} · {prog.label}
           </div>
           {prog.live && <pre className="cx-output mt-2 max-h-[260px]">{prog.live}</pre>}
         </div>
       )}
       {!prog.running && prog.error && (
-        <div className="mt-3 rounded-lg border border-danger/25 bg-danger/10 px-2.5 py-2 text-[12px] leading-snug text-danger" data-testid="run-error">
+        <div className="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 font-serif text-[14.5px] leading-snug text-danger" data-testid="run-error">
           {prog.error}
         </div>
       )}
       {req && (
-        <div className="mt-4 flex items-center gap-2.5 text-[11.5px] text-ink-3">
-          copy as
-          <Button variant="link" onClick={() => copy(JSON.stringify(req.body, null, 2), "Copied request JSON")}>
-            JSON
+        <div className="flex items-center gap-1.5">
+          <span className="mr-1 font-serif text-[14px] text-ink-3 italic">copy the request as</span>
+          <Button variant="outline" size="xs" className={CHIP} onClick={() => copy(JSON.stringify(req.body, null, 2), "Copied request JSON")}>
+            json
           </Button>
-          <Button variant="link" onClick={() => copy(curlFor(req), "Copied curl")}>
+          <Button variant="outline" size="xs" className={CHIP} onClick={() => copy(curlFor(req), "Copied curl")}>
             curl
           </Button>
-          <Button variant="link" onClick={() => copy(tsLiteralFor(s.analysis!.rendered), "Copied TS")}>
-            TS
+          <Button variant="outline" size="xs" className={CHIP} onClick={() => copy(tsLiteralFor(s.analysis!.rendered), "Copied TS")}>
+            ts
           </Button>
         </div>
       )}
     </div>
   );
 }
+
+/** A cell of the sampling strip: an italic label over a bare mono number. */
+function Param(p: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex min-w-0 cursor-text flex-col gap-1.5 px-3 pt-2.5 pb-1.5 transition-colors focus-within:bg-paper-2 hover:bg-paper">
+      <span className="font-serif text-[14px] leading-none text-ink-3 italic">{p.label}</span>
+      {p.children}
+    </label>
+  );
+}
+
+const PARAM = "h-6 rounded-none border-0 bg-transparent px-0 text-[14px] shadow-none focus-visible:ring-0 placeholder:text-ink-4";
+const CHIP = "h-7 rounded-full px-3 font-mono text-[11px] tracking-[0.04em]";

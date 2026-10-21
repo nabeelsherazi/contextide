@@ -42,7 +42,7 @@ export function Editor(p: EditorProps) {
   const propsRef = useRef(p);
   propsRef.current = p;
   flavorRef.current = p.flavor;
-  const [slash, setSlash] = useState<{ state: SlashState; x: number; y: number } | null>(null);
+  const [slash, setSlash] = useState<{ state: SlashState; x: number; y: number; above?: boolean } | null>(null);
   const [slashIndex, setSlashIndex] = useState(0);
   const slashRef = useRef<{ items: MenuItem[]; index: number }>({ items: [], index: 0 });
   const chooseRef = useRef<(i: MenuItem | undefined) => void>(() => {});
@@ -133,7 +133,7 @@ export function Editor(p: EditorProps) {
               }
               const c = v.coordsAtPos(state.from);
               const below = window.innerHeight - c.bottom > 340;
-              setSlash({ state, x: c.left, y: below ? c.bottom + 6 : Math.max(8, c.top - 6 - 330) });
+              setSlash({ state, x: c.left, y: below ? c.bottom + 6 : c.top - 6, above: !below });
             },
           },
           onContextMenu: (_v, e) => useStore.setState({ menu: { x: e.clientX, y: e.clientY, kind: "editor" } }),
@@ -258,12 +258,12 @@ export function Editor(p: EditorProps) {
       <div ref={host} />
       {slash && (
         <div
-          className="fixed z-50 max-h-[330px] min-w-[260px] overflow-y-auto rounded-xl border border-rule-2 bg-popover p-1.5 text-popover-foreground shadow-[var(--shadow-pop)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95"
-          style={{ left: slash.x, top: slash.y }}
+          className="fixed z-50 max-h-[330px] w-[300px] overflow-y-auto rounded-xl border border-rule-2 bg-popover p-1.5 text-popover-foreground shadow-[var(--shadow-pop)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95"
+          style={slash.above ? { left: slash.x, bottom: window.innerHeight - slash.y } : { left: slash.x, top: slash.y }}
           data-testid="slash-menu"
           onMouseDown={(e) => e.preventDefault()}
         >
-          {items.length === 0 && <div className="px-2.5 py-2 font-serif text-ink-3 italic">No matches</div>}
+          {items.length === 0 && <div className="px-2.5 py-2 font-serif text-[15.5px] text-ink-3 italic">Nothing matches</div>}
           {items.slice(0, 40).map((it, i) => (
             <button
               key={it.id}
@@ -271,9 +271,9 @@ export function Editor(p: EditorProps) {
               onMouseEnter={() => setSlashIndex(i)}
               onClick={() => chooseRef.current(it)}
             >
-              <span className="w-[18px] flex-none text-center text-ink-3">{it.icon}</span>
-              <span className="min-w-0 flex-1 truncate font-serif text-[15.5px]">{it.label}</span>
-              {it.hint && <span className="font-sans text-[11px] whitespace-nowrap text-ink-3">{it.hint}</span>}
+              <span className="w-[18px] flex-none text-center font-mono text-[11px] text-ink-3">{it.icon}</span>
+              <span className="min-w-0 flex-1 truncate font-serif text-[16px]">{it.label}</span>
+              {it.hint && <span className="max-w-[150px] truncate font-mono text-[10px] whitespace-nowrap text-ink-3">{it.hint}</span>}
             </button>
           ))}
         </div>

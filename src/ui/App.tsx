@@ -17,20 +17,23 @@ import { startRunFromPanel } from "./RunPanel";
 
 function useTheme() {
   const prefs = useStore((s) => s.prefs);
+  // the welcome is its own composition, day and night side by side, so it ignores the theme
+  const welcome = useStore((s) => !s.vfs);
   useEffect(() => {
     const r = document.documentElement;
     const mql = window.matchMedia("(prefers-color-scheme: light)");
-    const apply = () => r.setAttribute("data-theme", prefs.theme === "system" ? (mql.matches ? "light" : "dark") : prefs.theme);
+    const apply = () => r.setAttribute("data-theme", welcome ? "dark" : prefs.theme === "system" ? (mql.matches ? "light" : "dark") : prefs.theme);
     apply();
     mql.addEventListener("change", apply);
     r.style.setProperty("--font-page", `"${prefs.font}", "EB Garamond", Georgia, serif`);
     r.style.setProperty("--font-mono", `"${prefs.mono}", ui-monospace, Menlo, monospace`);
+    r.style.setProperty("--font-mono-app", `"${prefs.mono}", ui-monospace, Menlo, monospace`); // read by the font-mono utility
     r.style.setProperty("--page-size", `${prefs.fontSize}px`);
     r.style.setProperty("--page-leading", String(prefs.lineHeight));
     r.style.setProperty("--page-width", `${prefs.pageWidth}px`);
     r.classList.toggle("cx-show-ws", prefs.showWhitespace);
     return () => mql.removeEventListener("change", apply);
-  }, [prefs]);
+  }, [prefs, welcome]);
 }
 
 export function App() {

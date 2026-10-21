@@ -2,6 +2,7 @@ import { test } from "@playwright/test";
 import { boot, choose } from "./helpers";
 const dir = process.env.SHOTS!;
 test.skip(!dir, "screenshots only on demand");
+test.use({ deviceScaleFactor: Number(process.env.SCALE ?? 1) });
 test("cards", async ({ page }) => {
   const theme = process.env.THEME ?? "dark";
   await page.addInitScript((t) => localStorage.setItem("contextide:prefs", JSON.stringify({ theme: t })), theme);

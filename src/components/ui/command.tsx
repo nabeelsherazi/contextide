@@ -65,13 +65,13 @@ function CommandInput({
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-9 items-center gap-2 border-b px-3"
+      className="flex h-14 items-center gap-3 border-b border-rule px-4"
     >
-      <SearchIcon className="size-4 shrink-0 opacity-50" />
+      <SearchIcon className="size-4 shrink-0 text-ink-3" />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          "flex h-12 w-full bg-transparent py-3 font-serif text-[19px] outline-hidden placeholder:text-muted-foreground placeholder:italic disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-12 w-full bg-transparent py-3 font-serif text-[21px] outline-hidden placeholder:text-ink-4 placeholder:italic disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
@@ -102,7 +102,7 @@ function CommandEmpty({
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
-      className="py-6 text-center text-sm"
+      className="py-8 text-center font-serif text-[16px] text-ink-3 italic"
       {...props}
     />
   )
@@ -116,7 +116,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10.5px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:tracking-[0.22em] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:text-muted-foreground",
+        "overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2.5 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:font-serif [&_[cmdk-group-heading]]:text-[11.5px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:tracking-[0.22em] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:text-ink-3",
         className
       )}
       {...props}
@@ -161,7 +161,7 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground",
+        "ml-auto pl-4 font-mono text-[10.5px] tracking-[0.06em] text-ink-3",
         className
       )}
       {...props}

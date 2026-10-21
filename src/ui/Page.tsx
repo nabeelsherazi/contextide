@@ -17,14 +17,14 @@ function VersionPage() {
   if (!p)
     return (
       <div className="py-20 text-center font-serif text-[20px] text-ink-2">
-        <p className="mb-4">No projects yet.</p>
+        <p className="mb-5 italic">No projects yet.</p>
         <Button onClick={() => openModal({ t: "new-project" })}>New project</Button>
       </div>
     );
   if (!v)
     return (
       <div className="py-20 text-center font-serif text-[20px] text-ink-2">
-        <p className="mb-4">This project has no versions.</p>
+        <p className="mb-5 italic">This project has no versions.</p>
         <Button onClick={() => openModal({ t: "new-version" })}>New version</Button>
       </div>
     );
@@ -32,13 +32,13 @@ function VersionPage() {
   const roles = (s.liveDoc?.messages ?? v.doc.messages).map((m) => m.role);
   return (
     <>
-      <header className="mb-[18px] flex min-h-[34px] flex-wrap items-baseline gap-2.5 day:[text-shadow:0_1px_12px_rgba(255,255,255,0.6)]">
-        <button className="flex cursor-pointer items-baseline gap-3 text-left" onClick={() => openModal({ t: "version-settings", id: v.id })} title="Rename, change subtitle or flavor">
-          <span className="font-serif text-[34px] font-normal">{v.title}</span>
-          {v.subtitle && <span className="font-serif text-[21px] text-ink-3 italic day:text-[#2f3a4a]">{v.subtitle}</span>}
+      <header className="mb-10 flex flex-wrap items-end gap-3 day:text-[#fffaf0] day:[text-shadow:0_1px_2px_rgba(15,35,75,0.35),0_0_22px_rgba(15,35,75,0.3)]">
+        <button className="group/vh flex cursor-pointer items-baseline gap-4 text-left" onClick={() => openModal({ t: "version-settings", id: v.id })} title="Rename, change subtitle or flavor">
+          <span className="font-serif text-[58px] leading-[0.9] font-normal tracking-[-0.01em]">{v.title}</span>
+          {v.subtitle && <span className="font-serif text-[25px] leading-none text-ink-2 italic transition-colors group-hover/vh:text-foreground day:text-[#eef3fb] day:group-hover/vh:text-white">{v.subtitle}</span>}
         </button>
         {!s.rendered && (
-          <span className="ml-auto flex gap-1 opacity-60 transition-opacity hover:opacity-100">
+          <span className="ml-auto flex gap-0.5 pb-0.5 opacity-60 transition-opacity hover:opacity-100 day:opacity-90 day:[&_button]:text-white day:[&_button:hover]:bg-white/15">
             {!roles.includes("system") && (
               <Button variant="ghost" size="sm" onClick={() => runCommand(addMessage("system"))} data-testid="add-system">
                 <Plus className="size-3.5" /> System message
@@ -79,11 +79,15 @@ export function Page() {
   }, [viewKey]);
   return (
     <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto [scroll-padding:80px]" data-testid="page" ref={ref}>
-      <div className="mx-auto max-w-[calc(var(--page-width)+128px)] px-16 pt-[34px] pb-[180px] max-[1100px]:px-9">
+      <div className="mx-auto max-w-[calc(var(--page-width)+160px)] px-20 pt-14 pb-[200px] max-[1100px]:px-10">
         {view.t === "version" && <VersionPage />}
-        {view.t === "block" && <BlockPage />}
-        {view.t === "data" && <DataPage />}
-        {view.t === "project" && <ProjectPage />}
+        {view.t !== "version" && (
+          <div className="cx-sheet">
+            {view.t === "block" && <BlockPage />}
+            {view.t === "data" && <DataPage />}
+            {view.t === "project" && <ProjectPage />}
+          </div>
+        )}
       </div>
     </main>
   );

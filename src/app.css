@@ -64,9 +64,9 @@
   --color-good: var(--good);
   --color-danger: var(--danger);
   --color-glass: var(--glass);
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "EB Garamond", Georgia, serif; /* no sans voice: Garamond for words, mono for machine values */
   --font-serif: "EB Garamond", Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --font-mono: var(--font-mono-app, "JetBrains Mono", ui-monospace, Menlo, monospace);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

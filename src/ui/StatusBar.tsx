@@ -33,30 +33,28 @@ export function StatusBar() {
   const hints = a?.hints ?? [];
   const errs = hints.filter((h) => h.level === "error").length;
   return (
-    <footer className="flex min-h-7 items-center gap-2 border-t border-rule px-4 py-1 font-sans text-[11.5px] text-ink-3 tabular-nums day:bg-[rgba(251,249,244,0.72)] day:backdrop-blur-md" data-testid="status">
+    <footer className="relative z-10 flex h-9 items-center gap-3 border-t border-rule bg-glass px-5 font-mono text-[11px] tracking-[0.02em] text-ink-3 tabular-nums backdrop-blur-xl" data-testid="status">
       {a ? (
         <>
           <span title={tokenizerReady() ? "o200k tokenizer estimate" : "rough estimate (tokenizer loading)"} data-testid="token-count">
-            ~{a.total.toLocaleString()} tok
+            <span className="text-ink-2">{a.total.toLocaleString()}</span> tokens
           </span>
           <Dot />
           <span title="Tokens before the first thing that changes between runs — the part a prompt cache can reuse" data-testid="prefix-count">
-            stable prefix {a.prefixTokens.toLocaleString()} ({pct}%)
+            <span className="text-ink-2">{a.prefixTokens.toLocaleString()}</span> stable · {pct}%
           </span>
-          <span className="ml-1.5 inline-flex h-[5px] w-[120px] overflow-hidden rounded-full bg-rule" title={kinds.map(([k, n]) => `${k}: ${Math.round((n / kindTotal) * 100)}%`).join("\n")}>
+          <span className="inline-flex h-[3px] w-[110px] overflow-hidden rounded-full bg-rule" title={kinds.map(([k, n]) => `${k}: ${Math.round((n / kindTotal) * 100)}%`).join("\n")}>
             {kinds.map(([k, n]) => (
               <span key={k} className="block h-full" style={{ width: `${(n / kindTotal) * 100}%`, background: KIND_COLORS[k] ?? "var(--ink-3)" }} />
             ))}
           </span>
         </>
-      ) : (
-        <span>—</span>
-      )}
+      ) : null}
       <span className="flex-1" />
       {hints.length > 0 && (
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="xs" className={cn("text-[13px]", errs && "text-danger not-italic")} data-testid="hints-button">
+            <Button variant="ghost" size="xs" className={cn("h-6 text-[14px]", errs && "text-danger not-italic")} data-testid="hints-button">
               {errs ? (
                 <>
                   <AlertTriangle className="size-3" /> {errs} error{errs > 1 ? "s" : ""}
@@ -70,23 +68,23 @@ export function StatusBar() {
             {hints.map((h, i) => (
               <button
                 key={i}
-                className={cn("block w-full cursor-pointer rounded-lg px-2.5 py-1.5 text-left text-[12px] leading-snug hover:bg-paper-2", h.level === "error" && "text-danger")}
+                className={cn("block w-full cursor-pointer rounded-lg px-2.5 py-1.5 text-left font-serif text-[15px] leading-snug hover:bg-paper-2", h.level === "error" && "text-danger")}
                 onClick={() => jumpToCard(h.id)}
               >
-                <span className="mr-1 font-mono text-[10px] text-ink-3">{h.code}</span> {h.msg}
+                <span className="mr-1.5 font-mono text-[10px] text-ink-3">{h.code}</span> {h.msg}
               </button>
             ))}
           </PopoverContent>
         </Popover>
       )}
       {v && s.view.t === "version" && (
-        <span className="flex items-center gap-1" title="The version's flavor picks library block variants">
+        <span className="flex items-center gap-0.5 font-serif text-[13.5px] tracking-normal italic" title="The version's flavor picks library block variants">
           flavor
           <Choice
             value={v.flavor}
             onChange={(f) => updateVersionMeta(v.id, { flavor: f })}
             options={[...new Set([...s.ws.settings.flavors, v.flavor])]}
-            className="h-6 border-transparent bg-transparent px-1.5 font-serif text-[14px]"
+            className="h-6 border-transparent bg-transparent px-1.5 text-[14.5px] not-italic text-ink-2 hover:border-transparent hover:bg-paper-2"
             testid="version-flavor"
           />
         </span>

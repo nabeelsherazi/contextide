@@ -27,8 +27,8 @@ function DragRow(p: { make: () => Insertable; icon: string; label: string; sub?:
   return (
     <div
       className={cn(
-        "group/row flex min-w-0 cursor-grab items-center gap-2 rounded-[9px] px-2 py-[5px] transition-colors select-none hover:bg-paper-2",
-        p.active && "bg-paper-2 shadow-[inset_2px_0_0_var(--gold)]",
+        "group/row relative flex min-w-0 cursor-grab items-center gap-2.5 rounded-[10px] py-[7px] pr-1.5 pl-2 transition-colors select-none hover:bg-paper-2",
+        p.active && "bg-paper-2 before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-gold",
       )}
       draggable
       title={p.title}
@@ -40,10 +40,10 @@ function DragRow(p: { make: () => Insertable; icon: string; label: string; sub?:
       }}
       onClick={p.onOpen}
     >
-      <span className="w-4 flex-none text-center text-[12px] text-ink-3">{p.icon}</span>
-      <span className="min-w-0 flex-1 truncate font-serif text-[16px]">
+      <span className="w-5 flex-none text-center font-mono text-[11px] whitespace-nowrap text-ink-3">{p.icon}</span>
+      <span className="min-w-0 flex-1 truncate font-serif text-[16.5px] leading-snug">
         {p.label}
-        {p.sub && <span className="ml-1.5 font-sans text-[11px] text-ink-3">{p.sub}</span>}
+        {p.sub && <span className="ml-2 font-mono text-[10.5px] text-ink-3">{p.sub}</span>}
       </span>
       {p.badges}
       <Button
@@ -64,26 +64,26 @@ function DragRow(p: { make: () => Insertable; icon: string; label: string; sub?:
 
 function Group(p: { id: string; label: ReactNode; count: number; open: boolean; onToggle(): void; onAdd(): void; addTestid: string; children: ReactNode }) {
   return (
-    <Collapsible open={p.open} onOpenChange={p.onToggle} className="border-b border-rule py-1 last:border-b-0" data-testid={`group-${p.id}`}>
+    <Collapsible open={p.open} onOpenChange={p.onToggle} className="group/g border-b border-rule py-0.5 last:border-b-0" data-testid={`group-${p.id}`}>
       <div className="flex items-center justify-between">
         <CollapsibleTrigger
-          className="group/t flex cursor-pointer items-center gap-1.5 py-2 font-sans text-[10.5px] font-medium tracking-[0.22em] text-ink-3 uppercase transition-colors hover:text-foreground"
+          className="group/t flex flex-1 cursor-pointer items-center gap-2 py-3.5 font-serif text-[12px] font-medium tracking-[0.2em] text-ink-2 uppercase transition-colors hover:text-foreground"
           data-testid={`toggle-group-${p.id}`}
         >
-          <ChevronRight className="size-3 transition-transform group-data-[state=open]/t:rotate-90" />
+          <ChevronRight className="size-3 text-ink-3 transition-transform duration-200 group-data-[state=open]/t:rotate-90" />
           {p.label}
-          <span className="tracking-normal text-ink-4">{p.count}</span>
+          <span className="font-mono text-[10.5px] font-normal tracking-normal text-ink-4">{p.count}</span>
         </CollapsibleTrigger>
-        <Button variant="ghost" size="icon-xs" onClick={p.onAdd} title={`New ${p.id}`} data-testid={p.addTestid}>
+        <Button variant="ghost" size="icon-xs" className="opacity-40 transition-opacity group-hover/g:opacity-100 focus-visible:opacity-100" onClick={p.onAdd} title={`New ${p.id}`} data-testid={p.addTestid}>
           <Plus />
         </Button>
       </div>
-      <CollapsibleContent className="pb-1">{p.children}</CollapsibleContent>
+      <CollapsibleContent className="pb-3">{p.children}</CollapsibleContent>
     </Collapsible>
   );
 }
 
-const TypeLabel = (p: { children: ReactNode }) => <div className="mt-2.5 mb-0.5 ml-1.5 font-serif text-[13px] text-ink-3 italic">{p.children}</div>;
+const TypeLabel = (p: { children: ReactNode }) => <div className="mt-3 mb-1 ml-[38px] font-serif text-[14.5px] text-ink-3 italic">{p.children}</div>;
 
 export function Library() {
   const s = useStore();
@@ -121,28 +121,31 @@ export function Library() {
   const data = (p?.data ?? []).filter((d) => !q || d.name.toLowerCase().includes(q));
 
   return (
-    <aside className="flex w-[286px] flex-none flex-col border-r border-rule bg-glass backdrop-blur-xl max-[1100px]:w-[250px]" data-testid="library">
-      <div className="flex flex-col gap-2 px-3.5 pt-3.5 pb-2">
+    <aside className="flex w-[300px] flex-none flex-col border-r border-rule bg-glass backdrop-blur-xl max-[1100px]:w-[256px]" data-testid="library">
+      <div className="flex flex-col gap-1.5 px-5 pt-5 pb-2">
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-ink-3" />
+          <Search className="pointer-events-none absolute top-1/2 left-3.5 size-3.5 -translate-y-1/2 text-ink-3" />
           <Input
-            className="rounded-full pl-8 font-serif text-[15px]"
+            className="rounded-full pl-9"
             placeholder="Search blocks…"
             value={s.search}
             onChange={(e) => useStore.setState({ search: e.target.value })}
             data-testid="library-search"
           />
         </div>
-        <Choice
-          value={s.flavorFilter}
-          onChange={(f) => useStore.setState({ flavorFilter: f })}
-          options={[["auto", `flavor: ${v?.flavor ?? "general"} (version)`], ["all", "all flavors"], ...s.ws.settings.flavors]}
-          className="w-full"
-          title="Show blocks for a flavor (plus General)"
-          testid="flavor-filter"
-        />
+        <div className="flex items-center gap-1 pl-3.5 font-serif text-[14px] text-ink-3 italic">
+          showing
+          <Choice
+            value={s.flavorFilter}
+            onChange={(f) => useStore.setState({ flavorFilter: f })}
+            options={[["auto", <>{v?.flavor ?? "general"} <span className="text-ink-3 italic">· as the version</span></>], ["all", "all flavors"], ...s.ws.settings.flavors]}
+            className="h-7 border-transparent bg-transparent px-1.5 text-[15px] hover:border-transparent hover:bg-paper-2"
+            title="Show blocks for a flavor (plus General)"
+            testid="flavor-filter"
+          />
+        </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-3.5 pt-1 pb-10">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-1 pb-12">
         {BLOCK_KINDS.map((kind) => {
           const types = [...groups[kind].entries()].sort(([a], [b]) => a.localeCompare(b));
           const count = (kind === "insertion" ? INSERTIONS.length : 0) + [...groups[kind].values()].flat().length;
