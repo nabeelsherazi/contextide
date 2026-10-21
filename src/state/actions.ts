@@ -1,5 +1,5 @@
 // Higher-level workspace actions used by the UI and the palette.
-import { useStore, writeFile, removeFile, renameFile, setVersion, setProject, currentProject, currentVersion, toast, getKey } from "./store";
+import { useStore, writeFile, removeFile, removeTree, renameFile, setVersion, setProject, currentProject, currentVersion, toast, getKey } from "./store";
 import { type BlockKind, blockFile, newBlockKey, keyPath, type RunSettings, type ProjectSettings, type WorkspaceSettings, DEFAULT_SETTINGS, mergedRunSettings } from "../core/workspace";
 import { joinFront, parseDoc, fmtDoc, slug, splitFront } from "../core/doc";
 import { activeEditor } from "../editor/active";
@@ -9,29 +9,35 @@ import { docFromPM } from "../editor/convert";
 
 const get = useStore.getState;
 
-export function nextVersionId(existing: string[]): string {
-  for (let i = 0; i < 26 * 27; i++) {
-    const id = i < 26 ? String.fromCharCode(65 + i) : String.fromCharCode(64 + Math.floor(i / 26)) + String.fromCharCode(65 + (i % 26));
-    if (!existing.includes(id)) return id;
+/** A version's file name (and id) comes from its title: "Prompt Version 2" → Prompt-Version-2.md. */
+export const versionIdFor = (title: string) => title.trim().replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "") || "Prompt";
+
+/** The next free default title: Prompt Version 1, 2, 3… */
+export function nextVersionName(existingIds: string[]): string {
+  const taken = new Set(existingIds.map((x) => x.toLowerCase()));
+  for (let n = existingIds.length + 1; ; n++) {
+    const t = `Prompt Version ${n}`;
+    if (!taken.has(versionIdFor(t).toLowerCase())) return t;
   }
-  return `V${existing.length + 1}`;
 }
 
-export async function createVersion(o: { id?: string; subtitle?: string; flavor?: string; fork?: string }) {
+export async function createVersion(o: { title?: string; subtitle?: string; flavor?: string; fork?: string }) {
   const p = currentProject();
   if (!p) return;
-  const id = (o.id?.trim() || nextVersionId(p.versions.map((v) => v.id))).replace(/[^\w.-]/g, "-");
+  const title = o.title?.trim() || nextVersionName(p.versions.map((v) => v.id));
+  const id = versionIdFor(title);
   const src = o.fork ? p.versions.find((v) => v.id === o.fork) : undefined;
   activeEditor()?.flush();
   const base = src ? get().files.get(src.file) ?? "" : "";
   const doc = base ? parseDoc(base) : { front: {}, messages: [] };
-  const front = { ...doc.front, title: id, subtitle: o.subtitle ?? (src ? `fork of ${src.id}` : ""), flavor: o.flavor ?? src?.flavor ?? "general" };
+  const front = { ...doc.front, title, subtitle: o.subtitle ?? (src ? `fork of ${src.title}` : ""), flavor: o.flavor ?? src?.flavor ?? "general" };
   const text = base ? fmtDoc({ front, messages: doc.messages }) : joinFront(front, "\n");
   await writeFile(`${p.dir}/versions/${id}.md`, text);
   setVersion(id);
 }
 
-export async function updateVersionMeta(id: string, patch: { id?: string; subtitle?: string; flavor?: string }) {
+/** Change a version's title (which renames its file), subtitle or flavor. */
+export async function updateVersionMeta(id: string, patch: { title?: string; subtitle?: string; flavor?: string }) {
   const p = currentProject();
   const v = p?.versions.find((x) => x.id === id);
   if (!p || !v) return;
@@ -40,18 +46,18 @@ export async function updateVersionMeta(id: string, patch: { id?: string; subtit
   const front: Record<string, unknown> = {};
   if (patch.subtitle !== undefined) front.subtitle = patch.subtitle;
   if (patch.flavor !== undefined) front.flavor = patch.flavor;
-  if (patch.id && patch.id !== id) front.title = patch.id;
+  const newId = patch.title !== undefined ? versionIdFor(patch.title) : id;
+  if (patch.title !== undefined && patch.title.trim() !== v.title) front.title = patch.title.trim();
   if (isOpen) ed!.setFront(front);
   else {
     const text = get().files.get(v.file) ?? "";
     const d = parseDoc(text);
     await writeFile(v.file, fmtDoc({ front: { ...d.front, ...front }, messages: d.messages }));
   }
-  if (patch.id && patch.id !== id) {
-    const to = `${p.dir}/versions/${patch.id.replace(/[^\w.-]/g, "-")}.md`;
+  if (newId !== id) {
     await new Promise((r) => setTimeout(r, 50));
-    await renameFile(v.file, to);
-    setVersion(patch.id);
+    await renameFile(v.file, `${p.dir}/versions/${newId}.md`);
+    setVersion(newId);
   }
 }
 
@@ -68,8 +74,30 @@ export async function createProject(name: string, description = "") {
   const n = slug(name);
   if (!n) return;
   await writeFile(`projects/${n}/project.json`, JSON.stringify({ description, run: { endpoint: get().ws.settings.endpoints[0]?.id, temperature: 0 } }, null, 2) + "\n");
-  await writeFile(`projects/${n}/versions/A.md`, joinFront({ title: "A", subtitle: "", flavor: "general" }, "\n"));
+  const title = nextVersionName([]);
+  await writeFile(`projects/${n}/versions/${versionIdFor(title)}.md`, joinFront({ title, subtitle: "", flavor: "general" }, "\n"));
   setProject(n);
+}
+
+/** Delete a workflow and everything in its folder (versions, data, runs). */
+export async function deleteProject(name: string) {
+  const s = get();
+  const p = s.ws.projects.find((x) => x.name === name);
+  if (!p) return;
+  activeEditor()?.flush();
+  if (s.project === name) {
+    const next = s.ws.projects.find((x) => x.name !== name);
+    if (next) setProject(next.name);
+    else useStore.setState({ project: null, version: null });
+  }
+  await removeTree(p.dir);
+  const order = s.ws.settings.projectOrder;
+  if (order?.includes(name)) await patchWorkspace({ projectOrder: order.filter((x) => x !== name) });
+}
+
+/** Save the workflow order shown in the picker. */
+export async function reorderProjects(names: string[]) {
+  await patchWorkspace({ projectOrder: names });
 }
 
 export async function patchProject(patch: Partial<ProjectSettings>) {
@@ -208,7 +236,9 @@ export async function startRun(o: { mode: RunMode; fanout?: { source: string; si
     const { fileName, text, record } = await executeRun(plan);
     const path = `${p.dir}/runs/${fileName}`;
     await writeFile(path, text);
-    useStore.setState({ progress: { running: false, done: 0, total: 0, label: "", live: "" }, selectedRun: fileName.replace(/\.md$/, "") });
+    const run = fileName.replace(/\.md$/, "");
+    const last = { run, version: v.id, text: record.outputs[0]?.text ?? "", outputs: record.outputs.length, accuracy: record.accuracy };
+    useStore.setState({ progress: { running: false, done: 0, total: 0, label: "", live: "", last }, selectedRun: run });
     const err = record.outputs.find((x) => x.error)?.error;
     if (err) useStore.setState((st) => ({ progress: { ...st.progress, error: err } }));
     return fileName.replace(/\.md$/, "");

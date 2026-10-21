@@ -62,7 +62,7 @@ test("screens", async ({ page }) => {
   await shot(page, `10-block-${theme}`);
   await page.getByTestId("data-merchants").click();
   await shot(page, `11-data-${theme}`);
-  await page.getByRole("button", { name: "Project settings" }).click();
+  await page.getByRole("button", { name: "Workflow settings" }).click();
   await shot(page, `12-project-${theme}`);
   await page.getByTestId("version-tab-A").click();
   await page.locator(".cx-data", { hasText: "merchants" }).dblclick();

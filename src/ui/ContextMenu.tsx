@@ -32,7 +32,7 @@ export function ContextMenu() {
     items.push(
       { label: "Ungroup section", run: () => (sel(), doCmd(cmd.ungroupSection)()) },
       { label: "Save section to library…", run: () => (close(), saveSelectionToLibrary("library", pos)), testid: "menu-save-section" },
-      { label: "Save section to project…", run: () => (close(), saveSelectionToLibrary("project", pos)) },
+      { label: "Save section to this workflow…", run: () => (close(), saveSelectionToLibrary("project", pos)) },
       "-",
       { label: "Move up", keys: "⌥↑", run: () => (sel(), doCmd(cmd.moveCard(-1))()) },
       { label: "Move down", keys: "⌥↓", run: () => (sel(), doCmd(cmd.moveCard(1))()) },
@@ -48,7 +48,7 @@ export function ContextMenu() {
     if (can(cmd.ungroupSection)) items.push({ label: "Ungroup section", run: doCmd(cmd.ungroupSection) });
     if (!isUse && card && card.node.type.name !== "data" && card.node.type.name !== "tool" && card.node.type.name !== "schema") {
       items.push({ label: "Save to library…", run: () => (close(), saveSelectionToLibrary("library")), testid: "menu-save-library" });
-      items.push({ label: "Save to project…", run: () => (close(), saveSelectionToLibrary("project")) });
+      items.push({ label: "Save to this workflow…", run: () => (close(), saveSelectionToLibrary("project")) });
     }
     if (isUse && card) {
       const ws = useStore.getState().ws;

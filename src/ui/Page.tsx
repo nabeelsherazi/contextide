@@ -9,6 +9,7 @@ import { runCommand } from "../editor/active";
 import { addMessage } from "../editor/commands";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 function VersionPage() {
   const s = useStore();
@@ -17,14 +18,14 @@ function VersionPage() {
   if (!p)
     return (
       <div className="py-20 text-center font-serif text-[20px] text-ink-2">
-        <p className="mb-5 italic">No projects yet.</p>
-        <Button onClick={() => openModal({ t: "new-project" })}>New project</Button>
+        <p className="mb-5 italic">No workflows yet.</p>
+        <Button onClick={() => openModal({ t: "new-project" })}>New workflow</Button>
       </div>
     );
   if (!v)
     return (
       <div className="py-20 text-center font-serif text-[20px] text-ink-2">
-        <p className="mb-5 italic">This project has no versions.</p>
+        <p className="mb-5 italic">This workflow has no versions.</p>
         <Button onClick={() => openModal({ t: "new-version" })}>New version</Button>
       </div>
     );
@@ -34,7 +35,7 @@ function VersionPage() {
     <>
       <header className="mb-10 flex flex-wrap items-end gap-3 day:text-[#fffaf0] day:[text-shadow:0_1px_2px_rgba(15,35,75,0.35),0_0_22px_rgba(15,35,75,0.3)]">
         <button className="group/vh flex cursor-pointer items-baseline gap-4 text-left" onClick={() => openModal({ t: "version-settings", id: v.id })} title="Rename, change subtitle or flavor">
-          <span className="font-serif text-[58px] leading-[0.9] font-normal tracking-[-0.01em]">{v.title}</span>
+          <span className={cn("font-serif leading-[0.9] font-normal tracking-[-0.01em]", v.title.length > 3 ? "text-[44px]" : "text-[58px]")}>{v.title}</span>
           {v.subtitle && <span className="font-serif text-[25px] leading-none text-ink-2 italic transition-colors group-hover/vh:text-foreground day:text-[#eef3fb] day:group-hover/vh:text-white">{v.subtitle}</span>}
         </button>
         {!s.rendered && (

@@ -47,8 +47,8 @@ const STEPS: Step[] = [
   {
     target: "[data-testid=version-tabs]",
     place: "below",
-    title: "Projects and versions",
-    body: <>A project is one workflow. Each tab is an alternative version of its prompt — A, B, C — with a subtitle for the idea behind it. Fork one with + to try something new.</>,
+    title: "Workflows and versions",
+    body: <>A workflow is one job you prompt a model to do. Each tab is an alternative version of its prompt, with a subtitle for the idea behind it. Fork one with + to try something new; right-click a workflow in the picker to reorder or delete it.</>,
   },
   {
     target: ".cx-canvas",

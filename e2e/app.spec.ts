@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { boot, choose, editorText, expectFile, hook, mod, file } from "./helpers";
+import { boot, choose, editorText, expectFile, hook, mod, file, mouseDrag } from "./helpers";
 
 test.beforeEach(async ({ page }) => boot(page));
 
@@ -82,8 +82,8 @@ test("new version forks the current one", async ({ page }) => {
   await page.getByTestId("new-version").click();
   await page.getByTestId("version-subtitle").fill("xml everything");
   await page.getByTestId("new-version-ok").click();
-  await expect(page.getByTestId("version-tab-C")).toBeVisible();
-  await expectFile(page, "projects/merchant-categorizer/versions/C.md", (t) => !!t?.includes("subtitle: xml everything") && !!t.includes("You categorize merchants"));
+  await expect(page.getByTestId("version-tab-Prompt-Version-3")).toContainText("Prompt Version 3");
+  await expectFile(page, "projects/merchant-categorizer/versions/Prompt-Version-3.md", (t) => !!t?.includes("title: Prompt Version 3") && !!t.includes("subtitle: xml everything") && !!t.includes("You categorize merchants"));
 });
 
 test("create a data source, paste rows, and drop it on the page", async ({ page }) => {
@@ -177,4 +177,39 @@ test("variables are added with a checkmark", async ({ page }) => {
   await kv.locator(".cx-kv-new input").nth(1).fill("Acme");
   await kv.getByTestId("kv-add").click();
   await expectFile(page, "contextide.json", (t) => !!t?.includes('"company": "Acme"'));
+});
+
+test("a finished run's output stays in the run panel until the next run", async ({ page }) => {
+  await mockLLM(page);
+  await page.getByTestId("run").click();
+  const last = page.getByTestId("last-output");
+  await expect(last).toContainText("NETFLIX.COM -> fun.music");
+  await page.waitForTimeout(1500);
+  await expect(last).toContainText("NETFLIX.COM -> fun.music");
+  await expect(last).toContainText("94%");
+});
+
+test("workflows: create one, reorder by dragging, delete from the right-click menu", async ({ page }) => {
+  await page.getByTestId("project-select").click();
+  await page.getByTestId("new-workflow").click();
+  await page.getByTestId("project-name").fill("triage");
+  await page.getByTestId("new-project-ok").click();
+  // a new workflow's first prompt is "Prompt Version 1", not "A"
+  await expect(page.getByTestId("version-tab-Prompt-Version-1")).toContainText("Prompt Version 1");
+  await expectFile(page, "projects/triage/versions/Prompt-Version-1.md", (t) => !!t?.includes("title: Prompt Version 1"));
+
+  await page.getByTestId("project-select").click();
+  const list = page.getByTestId("workflow-list");
+  await expect(list.locator("[data-testid^=workflow-]").first()).toHaveAttribute("data-testid", "workflow-merchant-categorizer");
+  const from = (await page.getByTestId("workflow-triage").boundingBox())!;
+  const to = (await page.getByTestId("workflow-merchant-categorizer").boundingBox())!;
+  await mouseDrag(page, { x: from.x + 60, y: from.y + from.height / 2 }, { x: to.x + 60, y: to.y + 4 });
+  await expectFile(page, "contextide.json", (t) => !!t && JSON.parse(t).projectOrder?.join() === "triage,merchant-categorizer");
+  await expect(list.locator("[data-testid^=workflow-]").first()).toHaveAttribute("data-testid", "workflow-triage");
+
+  await page.getByTestId("workflow-triage").click({ button: "right" });
+  await page.getByTestId("workflow-delete").click();
+  await page.getByTestId("confirm-ok").click();
+  await expect.poll(async () => Object.keys(await hook<Record<string, string>>(page, "files")).some((p) => p.startsWith("projects/triage/"))).toBe(false);
+  await expect(page.getByTestId("project-select")).toContainText("merchant-categorizer");
 });

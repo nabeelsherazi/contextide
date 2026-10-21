@@ -11,17 +11,18 @@ export interface InsertionCtx {
 export interface InsertionInfo {
   fn: string;
   label: string;
+  /** an icon name (ui/icons.tsx, editor/icons.ts) */
   icon: string;
   doc: string;
   defaults: { pos: Value[]; args: Args };
 }
 
 export const INSERTIONS: InsertionInfo[] = [
-  { fn: "now", label: "Date / time", icon: "⌚", doc: "Current date/time with a format, timezone and offset; can be frozen", defaults: { pos: [], args: { format: "dddd, MMMM D, YYYY" } } },
-  { fn: "var", label: "Variable", icon: "＄", doc: "A workspace or project variable", defaults: { pos: [], args: {} } },
-  { fn: "uuid", label: "UUID", icon: "#", doc: "Random UUID (seed it to make it stable)", defaults: { pos: [], args: {} } },
-  { fn: "randint", label: "Random int", icon: "⚄", doc: "Random integer between min and max", defaults: { pos: [], args: { min: 1, max: 100 } } },
-  { fn: "pick", label: "Random pick", icon: "⚂", doc: "Pick one of a list", defaults: { pos: [["a", "b", "c"]], args: {} } },
+  { fn: "now", label: "Date / time", icon: "clock", doc: "Current date/time with a format, timezone and offset; can be frozen", defaults: { pos: [], args: { format: "dddd, MMMM D, YYYY" } } },
+  { fn: "var", label: "Variable", icon: "variable", doc: "A workspace or project variable", defaults: { pos: [], args: {} } },
+  { fn: "uuid", label: "UUID", icon: "hash", doc: "Random UUID (seed it to make it stable)", defaults: { pos: [], args: {} } },
+  { fn: "randint", label: "Random int", icon: "dice", doc: "Random integer between min and max", defaults: { pos: [], args: { min: 1, max: 100 } } },
+  { fn: "pick", label: "Random pick", icon: "shuffle", doc: "Pick one of a list", defaults: { pos: [["a", "b", "c"]], args: {} } },
 ];
 
 export const insertionInfo = (fn: string) => INSERTIONS.find((x) => x.fn === fn);

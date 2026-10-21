@@ -12,7 +12,7 @@ export function ProjectPage() {
   if (!p) return null;
   return (
     <div data-testid="project-page">
-      <PageHeader kind="project" title={p.name} />
+      <PageHeader kind="workflow" title={p.name} />
       <Panel title="Description">
         <Field multiline value={p.settings.description ?? ""} placeholder="What is this workflow for?" onCommit={(v) => patchProject({ description: v || undefined })} />
       </Panel>

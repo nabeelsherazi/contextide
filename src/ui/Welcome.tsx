@@ -97,7 +97,7 @@ export function Welcome() {
               <b className="font-medium">{pendingInit.name}</b> isn't a ContextIDE workspace yet. Set it up?
             </p>
             <Button size="lg" onClick={() => init(true)} data-testid="init-sample">
-              Starter library + sample project
+              Starter library + sample workflow
             </Button>
             <Button size="lg" variant="outline" onClick={() => init(false)}>
               Empty workspace

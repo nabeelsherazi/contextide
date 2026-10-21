@@ -1,9 +1,9 @@
 import { PanelLeft, PanelRight, Plus, Settings2, SlidersHorizontal } from "lucide-react";
-import { useStore, setProject, setVersion, toggle, openModal, currentProject } from "../state/store";
+import { useStore, setVersion, toggle, openModal, currentProject } from "../state/store";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Choice } from "./widgets";
+import { WorkflowPicker } from "./WorkflowPicker";
 import { cn } from "@/lib/utils";
 
 function Tip(p: { label: string; children: React.ReactNode }) {
@@ -50,16 +50,9 @@ export function TopBar() {
         </Button>
       </Tip>
       <Divider />
-      <Choice
-        value={s.project ?? ""}
-        onChange={(v) => (v === "__new" ? openModal({ t: "new-project" }) : setProject(v))}
-        options={[...s.ws.projects.map((x) => x.name), ["__new", <span className="text-ink-3 italic">New project…</span>]]}
-        className="h-8 max-w-[240px] rounded-full border-transparent bg-transparent pr-2 pl-2.5 text-[18px] hover:border-transparent hover:bg-paper-2"
-        size="default"
-        testid="project-select"
-      />
-      <Tip label="Project settings & scoring">
-        <Button variant="ghost" size="icon-sm" className={s.view.t === "project" ? "bg-paper-2 text-foreground" : ""} onClick={() => useStore.setState({ view: { t: "project" } })} aria-label="Project settings">
+      <WorkflowPicker />
+      <Tip label="Workflow settings & scoring">
+        <Button variant="ghost" size="icon-sm" className={s.view.t === "project" ? "bg-paper-2 text-foreground" : ""} onClick={() => useStore.setState({ view: { t: "project" } })} aria-label="Workflow settings">
           <SlidersHorizontal />
         </Button>
       </Tip>

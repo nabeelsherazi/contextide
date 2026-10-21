@@ -72,7 +72,7 @@ export function handleVfs(root: FileSystemDirectoryHandle, kind: "folder" | "bro
     },
     async remove(path) {
       const [d, name] = await dirFor(root, path, false);
-      await d.removeEntry(name);
+      await d.removeEntry(name, { recursive: true }); // a file, or a whole folder
     },
   };
 }
@@ -98,6 +98,7 @@ export function memoryVfs(initial: Record<string, string> = {}): Vfs & { files: 
     },
     async remove(path) {
       files.delete(path);
+      for (const p of [...files.keys()]) if (p.startsWith(path + "/")) files.delete(p);
     },
   };
 }

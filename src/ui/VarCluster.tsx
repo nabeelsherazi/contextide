@@ -1,5 +1,6 @@
 // Variables as a cluster of bubbles packed on a hex grid, smaller toward the edge — like a watch's app grid.
 import { useMemo } from "react";
+import { Plus } from "lucide-react";
 
 export interface VarBubble {
   name: string;
@@ -63,7 +64,7 @@ export function VarCluster(p: { vars: VarBubble[]; value?: string; onPick(name: 
               className={`cx-bubble${v.name === p.value ? " on" : ""}${v.scope === "project" ? " project" : ""}`}
               style={{ left: c.x, top: c.y, width: D, height: D, ["--s" as string]: scaleFor(c.ring), animationDelay: `${i * 28}ms` }}
               onClick={() => p.onPick(v.name)}
-              title={`${v.name} = ${v.value}${v.scope === "project" ? " (project)" : ""}`}
+              title={`${v.name} = ${v.value}${v.scope === "project" ? " (workflow)" : ""}`}
               data-testid={`var-${v.name}`}
             >
               <span className={`cx-bubble-name${long ? " long" : ""}`}>{v.name}</span>
@@ -81,7 +82,7 @@ export function VarCluster(p: { vars: VarBubble[]; value?: string; onPick(name: 
               title="Add a new variable in Settings"
               data-testid="var-add"
             >
-              <span className="cx-bubble-plus">+</span>
+              <Plus className="cx-bubble-plus" strokeWidth={1.5} />
               <span className="cx-bubble-value">new</span>
             </button>
           );

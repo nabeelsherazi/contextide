@@ -13,7 +13,7 @@ test("first launch shows the tutorial once; it can be replayed from settings", a
     if (i > 0) await expect(tour.locator(".cx-tour-spot"), `step ${i + 1} has a spotlight`).toBeVisible();
     await page.getByTestId("tour-next").click();
   }
-  expect(titles).toEqual(["Welcome to ContextIDE", "Projects and versions", "The page", "Directives and sections", "The library", "Data, insertions, tools", "Know your context", "Run and compare"]);
+  expect(titles).toEqual(["Welcome to ContextIDE", "Workflows and versions", "The page", "Directives and sections", "The library", "Data, insertions, tools", "Know your context", "Run and compare"]);
   await expect(tour).toBeHidden();
   expect(await page.evaluate(() => localStorage.getItem("contextide:tutorial-seen"))).toBe("1");
 
@@ -29,7 +29,7 @@ test("first launch shows the tutorial once; it can be replayed from settings", a
   await page.getByTestId("replay-tutorial").click();
   await expect(tour).toBeVisible();
   await page.keyboard.press("ArrowRight");
-  await expect(tour).toContainText("Projects and versions");
+  await expect(tour).toContainText("Workflows and versions");
   await page.keyboard.press("Escape");
   await expect(tour).toBeHidden();
 });

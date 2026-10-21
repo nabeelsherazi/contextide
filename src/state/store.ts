@@ -77,6 +77,8 @@ export interface RunProgress {
   live: string;
   error?: string;
   abort?: AbortController;
+  /** the finished run's output, kept on screen until the next run starts */
+  last?: { run: string; version: string; text: string; outputs: number; accuracy?: number };
 }
 
 export interface State {
@@ -222,6 +224,24 @@ export async function removeFile(path: string) {
     await s.vfs.remove(path);
   } catch (e) {
     set({ saveError: `Could not delete ${path}: ${(e as Error).message}` });
+  }
+}
+
+/** Remove a folder and everything in it. */
+export async function removeTree(dir: string) {
+  const s = get();
+  if (!s.vfs) return;
+  const files = new Map(s.files);
+  const mtimes = new Map(s.mtimes);
+  for (const p of [...files.keys()]) if (p.startsWith(dir + "/")) {
+    files.delete(p);
+    mtimes.delete(p);
+  }
+  rebuild(files, { mtimes });
+  try {
+    await s.vfs.remove(dir);
+  } catch (e) {
+    set({ saveError: `Could not delete ${dir}: ${(e as Error).message}` });
   }
 }
 

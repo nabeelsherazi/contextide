@@ -73,8 +73,10 @@ test("drag a library block onto the page", async ({ page }) => {
 
 test("drag a card by its handle to reorder", async ({ page }) => {
   const card = page.locator(".cx-editor > .cx-message > .cx-message-body > .cx-line", { hasText: "Answer with one line" });
-  await card.scrollIntoViewIfNeeded();
-  await card.hover();
+  // centre the target line, so both it and the card are on screen (not under the top bar)
+  await page.locator(".cx-text", { hasText: "Today is" }).evaluate((el) => el.scrollIntoView({ block: "center" }));
+  const c = (await card.boundingBox())!;
+  await page.mouse.move(c.x + 40, c.y + c.height / 2); // a raw hover: locator.hover() would scroll again
   const h = (await card.locator(".cx-handle").boundingBox())!;
   const t = (await page.locator(".cx-text", { hasText: "Today is" }).boundingBox())!;
   await mouseDrag(page, { x: h.x + 10, y: h.y + 10 }, { x: t.x + 30, y: t.y + 3 });
@@ -202,4 +204,28 @@ test("variables: picker shows existing variables as bubbles; + new goes to setti
   await page.locator(".cx-ins[data-fn=var]").last().click();
   await page.getByTestId("var-add").click();
   await expect(page.getByTestId("workspace-vars")).toBeVisible();
+});
+
+test("dragging inside already-selected text makes a new selection instead of moving the text", async ({ page }) => {
+  await page.getByTestId("version-tab-B").click();
+  const text = page.locator(".cx-directive .cx-text", { hasText: "Copy each merchant name exactly as written." });
+  await text.scrollIntoViewIfNeeded();
+  await text.click({ clickCount: 3 }); // select the whole line first
+  const b = (await text.boundingBox())!;
+  await mouseDrag(page, { x: b.x + 60, y: b.y + b.height / 2 }, { x: b.x + b.width - 4, y: b.y + b.height / 2 });
+  await page.keyboard.press("Backspace");
+  await expect.poll(async () => editorText(page)).toMatch(/\{% directive %\}Copy e?\{% enddirective %\}/);
+});
+
+test("a variable inside a saved, referenced directive still shows as a variable", async ({ page }) => {
+  await select(page, "one person living in", ".");
+  await page.locator(".cx-text", { hasText: "one person living in" }).click({ button: "right", position: { x: 40, y: 8 } });
+  await page.getByTestId("menu-save-library").click();
+  await page.getByTestId("save-type").fill("context");
+  await page.getByTestId("save-fn").fill("Where they live");
+  await page.getByTestId("save-block-ok").click();
+  const chip = page.locator(".cx-chip.cx-use", { hasText: "Where they live" });
+  await expect(chip.locator(".cx-chip-preview .cx-ins")).toContainText("city: New York City");
+  await expect(chip.locator(".cx-chip-preview")).not.toContainText("{{");
+  await expectFile(page, "library/directives/context/where-they-live.md", (t) => !!t?.includes('{{ var("city") }}'));
 });

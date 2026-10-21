@@ -1,7 +1,7 @@
 // Data transform pipeline: data("x") | shuffle(seed=1) | head(50) | numbered
 import type { Call, Value } from "./expr";
 import { num, str, bool } from "./expr";
-import { type Item, type Rec, itemText } from "./data";
+import { type Item, type Rec, itemText, getPath, isPath, pathSegments } from "./data";
 import { rng, shuffle as shuffleArr } from "./random";
 
 export interface PipeCtx {
@@ -26,10 +26,10 @@ export const TRANSFORMS: TransformInfo[] = [
   { name: "sort", group: "select", sig: 'sort(field="name", desc=false)', doc: "Sort by text or field" },
   { name: "dedupe", group: "select", sig: 'dedupe(field="name")', doc: "Drop repeated items" },
   { name: "filter", group: "select", sig: 'filter("regex", field="name", invert=false)', doc: "Keep items matching a regex" },
-  { name: "pick", group: "fields", sig: 'pick("a", "b")', doc: "Keep only these record fields" },
+  { name: "pick", group: "fields", sig: 'pick("a", ".b.c")', doc: "Keep only these fields; jq-style paths reach nested values" },
   { name: "drop", group: "fields", sig: 'drop("answer")', doc: "Remove record fields (e.g. hide the answer)" },
   { name: "rename", group: "fields", sig: 'rename(old="new")', doc: "Rename record fields" },
-  { name: "template", group: "format", sig: 'template("Merchant: {name}")', doc: "Per-item text; {field}, {text}, {i}" },
+  { name: "template", group: "format", sig: 'template("Merchant: {name}")', doc: "Per-item text; {field}, {.nested.path}, {text}, {i}" },
   { name: "bullets", group: "format", sig: 'bullets(marker="-")', doc: "One bullet per item" },
   { name: "numbered", group: "format", sig: "numbered(start=1)", doc: "Numbered lines: 1. item" },
   { name: "join", group: "format", sig: 'join(", ")', doc: "Join items with a separator" },
@@ -45,8 +45,10 @@ export const TRANSFORMS: TransformInfo[] = [
 
 type State = { items: Item[] } | { text: string };
 
-const fieldOr = (it: Item, field: string | undefined): string =>
-  typeof it === "string" ? it : field ? String(it[field] ?? "") : itemText(it);
+const asText = (v: unknown) => (v === undefined || v === null ? "" : typeof v === "string" ? v : JSON.stringify(v));
+
+/** A field (or jq-style path like ".a.b[0]") as text; plain-text items are their own value. */
+const fieldOr = (it: Item, field: string | undefined): string => (typeof it === "string" ? it : field ? asText(getPath(it, field)) : itemText(it));
 
 const mapStrings = (it: Item, f: (s: string) => string, field?: string): Item => {
   if (typeof it === "string") return f(it);
@@ -56,16 +58,15 @@ const mapStrings = (it: Item, f: (s: string) => string, field?: string): Item =>
 };
 
 export function fill(tpl: string, it: Item, i: number): string {
-  return tpl.replace(/\{(\w+)\}/g, (m, key: string) => {
+  // {field}, or a jq-style path: {.a.b}, {a.b[0]}
+  return tpl.replace(/\{(\.?[\w$-]+(?:\.[\w$-]+|\[\d+\])*)\}/g, (m, key: string) => {
     if (key === "i") return String(i + 1);
     if (key === "i0") return String(i);
     if (key === "text") return typeof it === "string" ? it : itemText(it);
     if (key === "json") return JSON.stringify(it);
-    if (typeof it === "object" && key in it) {
-      const v = it[key];
-      return typeof v === "string" ? v : JSON.stringify(v);
-    }
-    return m;
+    if (typeof it !== "object") return m;
+    if (isPath(key)) return asText(getPath(it, key));
+    return key in it ? asText(it[key]) : m;
   });
 }
 
@@ -154,8 +155,9 @@ export function applyPipeline(items: Item[], pipe: Call[], ctx: PipeCtx): { text
           break;
         }
         case "pick": {
-          const keep = strs(c.pos);
-          st = { items: its.map((x) => (typeof x === "string" ? x : Object.fromEntries(keep.filter((k) => k in x).map((k) => [k, x[k]])))) };
+          // pick("a", ".b.c") keeps a and c; pick(alias=".b.c") names it
+          const want: [string, string][] = [...strs(c.pos).map((k): [string, string] => [isPath(k) ? String(pathSegments(k).at(-1) ?? k) : k, k]), ...Object.entries(c.args).map(([k, v]): [string, string] => [k, str(v)])];
+          st = { items: its.map((x) => (typeof x === "string" ? x : Object.fromEntries(want.filter(([, path]) => getPath(x, path) !== undefined).map(([name, path]) => [name, getPath(x, path)])))) };
           break;
         }
         case "drop": {

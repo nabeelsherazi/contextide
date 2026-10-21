@@ -8,6 +8,8 @@ import { insertionInfo, describeInsertion } from "../core/insertions";
 import { pipeFromString } from "./convert";
 import { applyPipeline } from "../core/pipeline";
 import { setCardAttrs, removeMessage } from "./commands";
+import { parseInline } from "../core/doc";
+import { svgIcon } from "./icons";
 import { openSlashAt } from "./plugins";
 
 export interface EditorCtx {
@@ -68,7 +70,8 @@ const isDrop = (e: Event) => e.type === "dragover" || e.type === "dragenter" || 
 const fromHandle = (e: Event) => !!(e.target as HTMLElement)?.closest?.(".cx-handle") && (e.type === "mousedown" || e.type === "dragstart" || e.type === "click");
 
 const muteBtn = (view: EditorView, getPos: () => number | undefined, muted: boolean) => {
-  const b = h("button", "cx-mini cx-mute", muted ? "◌" : "●");
+  const b = h("button", "cx-mini cx-icon-btn cx-mute");
+  b.append(svgIcon(muted ? "eyeOff" : "eye"));
   b.title = muted ? "Unmute (include in prompt)" : "Mute (exclude from prompt without deleting)";
   b.contentEditable = "false";
   b.addEventListener("mousedown", (e) => e.preventDefault());
@@ -109,7 +112,8 @@ class TextCardView implements NodeView {
       add.type = "button";
       add.title = "Add a block (or just start typing)";
       add.setAttribute("data-testid", "add-card");
-      add.innerHTML = '<span class="cx-add-plus">+</span><span class="cx-add-hint">type, or choose a block</span>';
+      // a drawn cross, not a "+" glyph: a font's plus sits on its baseline, off the circle's centre
+      add.innerHTML = '<span class="cx-add-plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="cx-add-hint">type, or choose a block</span>';
       add.addEventListener("mousedown", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -156,7 +160,8 @@ class MessageView implements NodeView {
     const head = h("div", "cx-message-head");
     head.contentEditable = "false";
     this.label = h("span", "cx-role");
-    const rm = h("button", "cx-mini", "×");
+    const rm = h("button", "cx-mini cx-icon-btn");
+    rm.append(svgIcon("x"));
     rm.title = "Remove this message";
     rm.addEventListener("click", () => {
       const pos = this.getPos();
@@ -249,7 +254,8 @@ class SectionView implements NodeView {
     this.list = select(LISTS, node.attrs.list, (v) => set({ list: v }), "How directives inside render");
     this.mute = muteBtn(view, getPos, node.attrs.muted) as HTMLButtonElement;
     this.from = h("span", "cx-badge");
-    const more = h("button", "cx-mini", "⋯");
+    const more = h("button", "cx-mini cx-icon-btn");
+    more.append(svgIcon("more"));
     more.title = "Section actions";
     more.addEventListener("click", () => {
       const pos = this.getPos();
@@ -267,7 +273,7 @@ class SectionView implements NodeView {
     this.frame.value = a.frame;
     this.list.value = a.list;
     this.dom.classList.toggle("cx-muted", !!a.muted);
-    this.mute.textContent = a.muted ? "◌" : "●";
+    this.mute.replaceChildren(svgIcon(a.muted ? "eyeOff" : "eye"));
     this.from.textContent = a.from ? "⇢ detached" : "";
     this.from.title = a.from ? `Detached copy of ${a.from}` : "";
   }
@@ -336,6 +342,33 @@ abstract class ChipView implements NodeView {
   }
 }
 
+const chipIcon = (name: string) => {
+  const s = h("span", "cx-chip-icon");
+  s.append(svgIcon(name));
+  return s;
+};
+
+/** An inline insertion token: its icon, then what it will say. */
+function insChip(fn: string, text: string) {
+  const el = h("span", "cx-ins");
+  el.append(svgIcon(insertionInfo(fn)?.icon ?? "more"), text);
+  return el;
+}
+
+/** A block body as the page would show it: {{ … }} insertions become the same small tokens as in the editor. */
+function previewInto(el: HTMLElement, text: string, ctx: EditorCtx) {
+  text.split("\n").forEach((line, i) => {
+    if (i) el.append("\n");
+    for (const part of parseInline(line)) {
+      if (part.t === "text") {
+        el.append(part.text);
+        continue;
+      }
+      el.append(insChip(part.fn, describeInsertion(part.fn, part.pos, part.args, { now: new Date(), vars: ctx.vars(), seed: 1 })));
+    }
+  });
+}
+
 class UseView extends ChipView {
   constructor(node: PMNode, view: EditorView, getPos: () => number | undefined, ctx: EditorCtx) {
     super(node, view, getPos, ctx, "use");
@@ -348,7 +381,7 @@ class UseView extends ChipView {
     const { block, fellBack } = resolveBlock(ws, ref, this.ctx.flavor(), pin, this.ctx.project());
     this.body.replaceChildren();
     const head = h("div", "cx-chip-head");
-    head.append(h("span", "cx-chip-icon", "⛓"), h("span", "cx-chip-kind", keyKind(ref)));
+    head.append(chipIcon("link"), h("span", "cx-chip-kind", keyKind(ref)));
     if (!block) {
       head.append(h("span", "cx-chip-title cx-broken", `missing: ${ref}`));
       this.body.append(head);
@@ -363,7 +396,8 @@ class UseView extends ChipView {
     if (n > 1) head.append(h("span", "cx-muted-text", `${n} variants`));
     this.body.append(head);
     const preview = block.kind === "section" ? block.body.replace(/\{%\s*directive[^%]*%\}|\{%\s*enddirective\s*%\}/g, "").replace(/\{%[^%]*%\}/g, "…") : block.body;
-    const p = h("div", "cx-chip-preview", preview);
+    const p = h("div", "cx-chip-preview");
+    previewInto(p, preview, this.ctx);
     this.body.append(p);
     this.dom.title = "Live library reference · double-click to edit or detach";
   }
@@ -384,7 +418,7 @@ class DataView extends ChipView {
     const src = p?.data.find((d) => d.name === this.node.attrs.source);
     this.body.replaceChildren();
     const head = h("div", "cx-chip-head");
-    head.append(h("span", "cx-chip-icon", "▤"), h("span", "cx-chip-title", this.node.attrs.source || "(no source)"));
+    head.append(chipIcon("data"), h("span", "cx-chip-title", this.node.attrs.source || "(no source)"));
     const pipe = this.node.attrs.pipe as string;
     if (pipe) head.append(h("code", "cx-pipe", "| " + pipe));
     if (!src) {
@@ -443,7 +477,7 @@ class ToolSchemaView extends ChipView {
     const b = variantsOf(ws, key, this.ctx.project())[0];
     this.body.replaceChildren();
     const head = h("div", "cx-chip-head");
-    head.append(h("span", "cx-chip-icon", this.kind === "tool" ? "⚒" : "{ }"), h("span", "cx-chip-kind", this.kind), h("span", `cx-chip-title${b ? "" : " cx-broken"}`, b ? String(b.front.name ?? b.path) : `missing: ${this.node.attrs.name}`));
+    head.append(chipIcon(this.kind === "tool" ? "tool" : "schema"), h("span", "cx-chip-kind", this.kind), h("span", `cx-chip-title${b ? "" : " cx-broken"}`, b ? String(b.front.name ?? b.path) : `missing: ${this.node.attrs.name}`));
     if (b?.front.description) this.body.append();
     head.append(h("span", "cx-spacer"));
     head.append(
@@ -492,7 +526,7 @@ class InsertionView implements NodeView {
     const fn = this.node.attrs.fn as string;
     const info = insertionInfo(fn);
     const txt = describeInsertion(fn, pos, args, { now: new Date(), vars: this.ctx.vars(), seed: 1 });
-    this.dom.textContent = `${info?.icon ?? "ƒ"} ${txt}`;
+    this.dom.replaceChildren(...insChip(fn, txt).childNodes);
     this.dom.title = `${info?.label ?? fn} — click to configure`;
     this.dom.dataset.fn = fn;
   }

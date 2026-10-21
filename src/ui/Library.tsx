@@ -6,6 +6,7 @@ import { INSERTIONS } from "../core/insertions";
 import { forBlock, forData, forInsertion, dragPayload, type Insertable } from "../editor/blocks";
 import { DRAG_MIME } from "../editor/plugins";
 import { KIND_ICON } from "./items";
+import { Icon } from "./icons";
 import { activeEditor } from "../editor/active";
 import { applyItem } from "./Editor";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -40,7 +41,7 @@ function DragRow(p: { make: () => Insertable; icon: string; label: string; sub?:
       }}
       onClick={p.onOpen}
     >
-      <span className="w-5 flex-none text-center font-mono text-[11px] whitespace-nowrap text-ink-3">{p.icon}</span>
+      <Icon name={p.icon} className="w-5 text-ink-3" />
       <span className="min-w-0 flex-1 truncate font-serif text-[16.5px] leading-snug">
         {p.label}
         {p.sub && <span className="ml-2 font-mono text-[10.5px] text-ink-3">{p.sub}</span>}
@@ -192,7 +193,7 @@ export function Library() {
                                 ))}
                               {shown.scope === "project" && (
                                 <Badge variant="secondary" className="text-ink-3">
-                                  project
+                                  workflow
                                 </Badge>
                               )}
                               {n > 0 && (
@@ -215,7 +216,7 @@ export function Library() {
             <DragRow
               key={d.name}
               make={() => forData(d.name)}
-              icon="▤"
+              icon="data"
               label={d.name}
               sub={`${d.format === "text" ? (d.opts.split ?? "lines") : d.format} · ${dataItems(d).items.length}`}
               testid={`data-${d.name}`}

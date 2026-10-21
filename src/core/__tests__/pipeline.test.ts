@@ -38,6 +38,19 @@ describe("pipeline", () => {
     expect(run(recs, 'rename(name="merchant") | pick("merchant") | kv')).toBe("merchant: A\n\nmerchant: B");
     expect(run(recs, 'sort("name", desc=true) | pick("name") | json')).toBe('{"name":"B"}\n{"name":"A"}');
   });
+  it("reaches into nested records with jq-style paths", () => {
+    const recs = [
+      { id: 1, derivations: { visual_description: { text: "a red door" }, tags: ["door", "red"] } },
+      { id: 2, derivations: { visual_description: { text: "a blue sky" }, tags: ["sky"] } },
+    ];
+    expect(run(recs, 'template("{id}: {.derivations.visual_description.text}")')).toBe("1: a red door\n2: a blue sky");
+    expect(run(recs, 'template("{derivations.tags[0]}")')).toBe("door\nsky");
+    expect(run(recs, 'pick("id", ".derivations.visual_description.text") | json')).toBe('{"id":1,"text":"a red door"}\n{"id":2,"text":"a blue sky"}');
+    expect(run(recs, 'pick(desc=".derivations.visual_description.text") | json')).toBe('{"desc":"a red door"}\n{"desc":"a blue sky"}');
+    expect(run(recs, 'sort(".derivations.visual_description.text") | template("{id}")')).toBe("2\n1");
+    expect(run(recs, 'filter("red", field=".derivations.visual_description.text") | template("{id}")')).toBe("1");
+    expect(run(recs, 'template("{.missing.path}")')).toBe("\n");
+  });
   it("cleans up", () => {
     expect(run(["  Hello   World  "], "squash | lower")).toBe("hello world");
     expect(run(["abcdefghij"], "clip(5)")).toBe("abcd…");

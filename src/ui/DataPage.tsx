@@ -45,7 +45,7 @@ export function DataPage() {
   return (
     <div data-testid="data-page">
       <PageHeader
-        kind={`▤ data · ${d.format}`}
+        kind={`data · ${d.format}`}
         title={
           <Field
             className="h-auto border-transparent bg-transparent px-0 py-0 font-serif text-[44px] leading-[1.05] tracking-[-0.01em] hover:border-transparent focus-visible:ring-0"

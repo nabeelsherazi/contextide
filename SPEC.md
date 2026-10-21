@@ -15,7 +15,7 @@ browser storage (OPFS) for trying it out. Everything on disk is plain text.
 
 ```
 <workspace>/
-  contextide.json                 settings: block types, flavors, variables, endpoints (never API keys)
+  contextide.json                 settings: block types, flavors, variables, endpoints, workflow order (never API keys)
   README.md                       a short guide for people browsing the folder without the app
   library/                        blocks shared by every project
     directives/<type>/<function>[.<flavor>].md
@@ -25,7 +25,7 @@ browser storage (OPFS) for trying it out. Everything on disk is plain text.
     schemas/<name>.md
   projects/<project>/
     project.json                  description, variables, run defaults, data-source options, scoring
-    versions/<id>.md              one file per version (A, B, …)
+    versions/<id>.md              one file per version, named from its title (Prompt-Version-1.md, …)
     blocks/                       project-scoped blocks; same layout as library/, shadows it
     data/<name>.<txt|jsonl|json|csv|tsv>
     runs/<time>_<version>.md      one file per test run
@@ -113,6 +113,7 @@ misses table. See `src/core/runs.ts`.
 
 * `.txt` items are lines (the default), blank-line paragraphs, or the whole file. `.jsonl`, `.json`, `.csv` and `.tsv` items are records.
 * Transforms chain with `|`. The list and their signatures are `TRANSFORMS` in `src/core/pipeline.ts`, in four groups: select and order, fields, format, cleanup.
+* Wherever a transform takes a field (`pick`, `sort`, `dedupe`, `filter`, `clip`, and `{…}` in `template`), it also takes a jq-style path into nested records: `.derivations.visual_description.text`, `tags[0]`, `.["odd key"]`. `pick(".a.b")` keeps the value under its last key (`b`); `pick(alias=".a.b")` names it. A missing path is empty.
 * A data card is **dynamic** by default, which ends the stable prefix. Mark it **static** when the data doesn't change between runs.
 
 ---
@@ -136,7 +137,7 @@ misses table. See `src/core/runs.ts`.
 
 ## 4. Layout and look
 
-* A top bar with the project picker, version tabs (double-click a tab to rename), the rendered-view toggle, the palette and settings.
+* A top bar with the workflow picker (drag to reorder; right-click a workflow to open its settings or delete it), version tabs (double-click a tab to rename), the rendered-view toggle, the palette and settings.
 * Left: the library, with search, a flavor filter, and groups that start collapsed. Right: Run, Outputs and Diff. Both collapse (⌘\, ⌘⇧\, ⌘. for focus mode).
 * Status bar: tokens, stable prefix, a token-share bar by card kind, hints, the version's flavor and save state.
 * ⌘K command palette: actions, edit commands, insert anything, go to anything, and switch day/night.

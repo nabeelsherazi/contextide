@@ -1,7 +1,7 @@
 import { diffWordsWithSpace } from "diff";
 import { useStore, currentProject } from "../state/store";
 import type { RunRecord } from "../core/runs";
-import { ago, pct } from "./OutputsPanel";
+import { ago, pct, titleOf } from "./OutputsPanel";
 import { variance, ablationRanking, similarity } from "../run/compare";
 import { Seg, Choice, Hint } from "./widgets";
 import { Fold } from "./OutputsPanel";
@@ -15,7 +15,7 @@ function RunPick(p: { runs: RunRecord[]; value: string | null; index: number; on
         value={p.value ?? ""}
         placeholder="choose a run…"
         onChange={(v) => p.onChange(v || null, 0)}
-        options={p.runs.map((x) => [x.id, `${x.version} · ${x.mode} · ${ago(x.time)}${x.accuracy !== undefined ? ` · ${pct(x.accuracy)}` : ""}`] as [string, string])}
+        options={p.runs.map((x) => [x.id, `${titleOf(x.version)} · ${x.mode} · ${ago(x.time)}${x.accuracy !== undefined ? ` · ${pct(x.accuracy)}` : ""}`] as [string, string])}
         className="min-w-0 flex-1"
         testid={p.testid}
       />
@@ -116,11 +116,11 @@ export function DiffPanel() {
         <>
           <div className="cx-diff-head">
             <span className="cx-del">
-              {ra.version} {pct(ra.accuracy)}
+              {titleOf(ra.version)} {pct(ra.accuracy)}
             </span>{" "}
             →{" "}
             <span className="cx-add">
-              {rb.version} {pct(rb.accuracy)}
+              {titleOf(rb.version)} {pct(rb.accuracy)}
             </span>
             <span className="cx-muted-text"> · {pct(similarity(textOf(ra, ai), textOf(rb, bi)))} similar</span>
           </div>

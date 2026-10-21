@@ -22,6 +22,33 @@
   color: var(--ink);
 }
 
+/* line icons (editor/icons.ts) */
+.cx-icon {
+  display: inline-block; /* Tailwind's preflight makes svg a block */
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* icon-only buttons in card and message heads: one size, one centre line */
+.cx-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+
+.cx-icon-btn > .cx-icon {
+  width: 15px;
+  height: 15px;
+}
+
 /* native selects in card heads: they read as italic words until you hover them */
 .cx-select {
   appearance: none;
@@ -163,7 +190,6 @@
 
 .cx-message-head .cx-mini {
   letter-spacing: 0;
-  font-size: 15px;
   opacity: 0.5;
 }
 
@@ -393,9 +419,14 @@
 }
 
 .cx-chip-icon {
+  display: inline-grid;
+  place-items: center;
   color: var(--k-use);
-  font-family: var(--font-mono);
-  font-size: 11px;
+}
+
+.cx-chip-icon > .cx-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .cx-data /* the flavor and variant count are details: they surface when you reach for the card */
@@ -513,6 +544,14 @@
 }
 
 /* ---------- inline insertions: small mono tokens set into the prose ---------- */
+
+.cx-ins > .cx-icon {
+  width: 1.05em;
+  height: 1.05em;
+  margin-right: 0.45em;
+  vertical-align: -0.17em;
+  stroke-width: 2;
+}
 
 .cx-ins {
   display: inline-block;
@@ -929,14 +968,20 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-family: var(--font-serif);
-  font-size: 24px;
-  line-height: 1;
   color: var(--gold);
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
   box-shadow: var(--card-drop);
   transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease), border-color 0.2s;
+}
+
+.cx-add-plus > svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
 }
 
 .cx-add:hover .cx-add-plus {
@@ -964,7 +1009,12 @@
 .cx-message-body > .cx-empty-doc .cx-add-plus {
   width: 56px;
   height: 56px;
-  font-size: 34px;
+}
+
+.cx-message-body > .cx-empty-doc .cx-add-plus > svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.4;
 }
 
 .cx-message-body > .cx-empty-doc .cx-add-hint {

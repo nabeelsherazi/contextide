@@ -17,6 +17,9 @@ export const ago = (iso: string) => {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 };
 
+/** A version's display title from its id (runs store the id). */
+export const titleOf = (id: string) => currentProject()?.versions.find((v) => v.id === id)?.title ?? id;
+
 export const pct = (x?: number) => (x === undefined ? "" : `${Math.round(x * 100)}%`);
 
 /** A collapsible "details" section in the panel's voice. */
@@ -53,7 +56,7 @@ function RunDetail({ r, onBack }: { r: RunRecord; onBack(): void }) {
         </Button>
       </div>
       <div className="flex flex-wrap items-baseline gap-x-2 font-mono text-[10.5px] text-ink-3">
-        <b className="font-serif text-[22px] leading-none font-normal text-foreground">{r.version}</b>
+        <b className="font-serif text-[22px] leading-none font-normal text-foreground">{titleOf(r.version)}</b>
         <span>{r.model || "default model"}</span>·<span>{r.mode}</span>·<span>{ago(r.time)}</span>
         {r.accuracy !== undefined && (
           <span className="ml-auto font-serif text-[17px] text-good" data-testid="run-score">
@@ -162,7 +165,7 @@ export function OutputsPanel() {
               onClick={() => useStore.setState({ selectedRun: r.id })}
               data-testid={`run-row-${r.id}`}
             >
-              <span className="w-[22px] font-serif text-[20px]">{r.version}</span>
+              <span className="max-w-[45%] min-w-[22px] truncate font-serif text-[18px]">{titleOf(r.version)}</span>
               <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-ink-2">
                 {r.mode !== "whole" && (
                   <Badge variant="outline" className="mr-1 text-ink-3">

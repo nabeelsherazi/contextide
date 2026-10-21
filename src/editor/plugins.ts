@@ -278,6 +278,18 @@ export const interactionPlugin = (onContextMenu: (view: EditorView, e: MouseEven
         }
       },
       handleDOMEvents: {
+        // A press inside selected text would make the browser drag that text around. Pressing in text
+        // always starts a fresh selection instead; cards move by their handles.
+        mousedown(view, e) {
+          const sel = view.state.selection;
+          if (e.button !== 0 || e.detail !== 1 || e.shiftKey || sel.empty || !(sel instanceof TextSelection)) return false;
+          const t = e.target as HTMLElement;
+          if (!t.closest?.(".cx-text") || t.closest(".cx-handle, .cx-ins, button, input, select")) return false;
+          const at = view.posAtCoords({ left: e.clientX, top: e.clientY });
+          if (!at || at.pos < sel.from || at.pos > sel.to) return false;
+          view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, at.pos)));
+          return false;
+        },
         contextmenu(view, e) {
           const at = view.posAtCoords({ left: e.clientX, top: e.clientY });
           if (at) {

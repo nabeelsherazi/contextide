@@ -1,12 +1,13 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useStore, closeModal, openModal, currentProject, currentVersion, setPrefs, setKey, getKey, closeWorkspace, type Modal } from "../../state/store";
-import { createVersion, updateVersionMeta, deleteVersion, createProject, saveBlock, createDataSource, patchWorkspace, updateBlockBody, nextVersionId } from "../../state/actions";
+import { createVersion, updateVersionMeta, deleteVersion, createProject, saveBlock, createDataSource, patchWorkspace, updateBlockBody, nextVersionName, versionIdFor } from "../../state/actions";
 import { activeEditor } from "../../editor/active";
 import { replaceWithRef, detachRef, setCardAttrs, selectedCards } from "../../editor/commands";
-import { nodeFromPM, pipeFromString } from "../../editor/convert";
+import { nodeFromPM, pipeFromString, inlineFromPM } from "../../editor/convert";
 import { fmtBody, slug, type Node } from "../../core/doc";
 import { resolveBlock, variantsOf, dataItems, usages, type Endpoint, type BlockKind, mergedVars } from "../../core/workspace";
 import { applyPipeline, TRANSFORMS } from "../../core/pipeline";
+import { pathsOf } from "../../core/data";
 import { evalInsertion, insertionInfo } from "../../core/insertions";
 import { Field, KeyValues, JsonField, Seg, NumField, Choice, CheckRow, FieldRow } from "../widgets";
 import { Dialog as UIDialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -86,7 +87,7 @@ function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
   };
   return (
     <Dialog
-      title={`Save ${kind} to ${scope}`}
+      title={`Save ${kind} to ${scope === "project" ? "this workflow" : "the library"}`}
       testid="save-block"
       footer={
         <>
@@ -114,8 +115,8 @@ function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
         <Seg
           value={scope}
           options={[
-            ["library", "Library (all projects)"],
-            ["project", "This project"],
+            ["library", "Library (all workflows)"],
+            ["project", "This workflow"],
           ]}
           onChange={setScope}
         />
@@ -133,12 +134,12 @@ function SaveBlock({ m }: { m: Extract<Modal, { t: "save-block" }> }) {
 function NewVersion({ fork }: { fork?: string }) {
   const s = useStore();
   const p = currentProject(s);
-  const [id, setId] = useState(nextVersionId(p?.versions.map((v) => v.id) ?? []));
+  const [title, setTitle] = useState(() => nextVersionName(p?.versions.map((v) => v.id) ?? []));
   const [subtitle, setSubtitle] = useState("");
   const [from, setFrom] = useState(fork ?? "");
   const src = p?.versions.find((v) => v.id === from);
   const [flavor, setFlavor] = useState(src?.flavor ?? "general");
-  const taken = p?.versions.some((v) => v.id === id);
+  const taken = p?.versions.some((v) => v.id.toLowerCase() === versionIdFor(title).toLowerCase());
   return (
     <Dialog
       title="New version"
@@ -147,10 +148,10 @@ function NewVersion({ fork }: { fork?: string }) {
         <>
           <Cancel />
           <Button
-            disabled={!id.trim() || taken}
+            disabled={!title.trim() || taken}
             onClick={async () => {
               closeModal();
-              await createVersion({ id, subtitle, flavor, fork: from || undefined });
+              await createVersion({ title, subtitle, flavor, fork: from || undefined });
             }}
             data-testid="new-version-ok"
           >
@@ -160,7 +161,7 @@ function NewVersion({ fork }: { fork?: string }) {
       }
     >
       <FieldRow label="name">
-        <Input value={id} onChange={(e) => setId(e.target.value)} data-testid="version-id" />
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} data-testid="version-id" />
         {taken && <span className="text-[11.5px] text-danger not-italic">already exists</span>}
       </FieldRow>
       <FieldRow label="subtitle — the philosophy of this approach">
@@ -180,12 +181,12 @@ function VersionSettings({ id }: { id: string }) {
   const s = useStore();
   const p = currentProject(s);
   const v = p?.versions.find((x) => x.id === id);
-  const [name, setName] = useState(v?.id ?? "");
+  const [name, setName] = useState(v?.title ?? "");
   const [subtitle, setSubtitle] = useState(v?.subtitle ?? "");
   const [flavor, setFlavor] = useState(v?.flavor ?? "general");
   const [confirmDel, setConfirmDel] = useState(false);
   if (!p || !v) return null;
-  const taken = name !== v.id && p.versions.some((x) => x.id === name);
+  const taken = versionIdFor(name) !== v.id && p.versions.some((x) => x.id.toLowerCase() === versionIdFor(name).toLowerCase());
   return (
     <Dialog
       title={`Version ${v.title}`}
@@ -201,7 +202,7 @@ function VersionSettings({ id }: { id: string }) {
                   deleteVersion(v.id);
                 }}
               >
-                Really delete {v.id}
+                Really delete {v.title}
               </Button>
             ) : (
               <Button variant="ghost" className="text-danger" onClick={() => setConfirmDel(true)}>
@@ -214,7 +215,7 @@ function VersionSettings({ id }: { id: string }) {
             disabled={!name.trim() || taken}
             onClick={() => {
               closeModal();
-              updateVersionMeta(v.id, { id: name !== v.id ? name : undefined, subtitle, flavor });
+              updateVersionMeta(v.id, { title: name, subtitle, flavor });
             }}
             data-testid="version-settings-ok"
           >
@@ -243,7 +244,7 @@ function NewProject() {
   const exists = useStore((s) => s.ws.projects.some((p) => p.name === slug(name)));
   return (
     <Dialog
-      title="New project"
+      title="New workflow"
       testid="new-project"
       footer={
         <>
@@ -328,7 +329,7 @@ function NewBlock({ kind }: { kind: BlockKind }) {
           value={scope}
           options={[
             ["library", "Library"],
-            ["project", "This project"],
+            ["project", "This workflow"],
           ]}
           onChange={setScope}
         />
@@ -378,7 +379,7 @@ function NewData() {
           onChange={setFmt}
         />
       </FieldRow>
-      <Textarea className="min-h-[200px] font-mono text-[12.5px]" placeholder="Paste data here (you can also do it later)" value={text} onChange={(e) => setText(e.target.value)} data-testid="new-data-text" />
+      <Textarea className="h-[240px] min-h-0 resize-none font-mono text-[12.5px] whitespace-pre [field-sizing:fixed]" placeholder="Paste data here (you can also do it later)" value={text} onChange={(e) => setText(e.target.value)} data-testid="new-data-text" />
     </Dialog>
   );
 }
@@ -531,7 +532,7 @@ function DataPipe({ pos }: { pos: number }) {
       </div>
       {src && (
         <div className="font-serif text-[14.5px] text-ink-3 italic">
-          fields <span className="font-mono text-[11.5px] text-ink-2 not-italic">{dataItems(src).fields.join(", ") || "(text items)"}</span> — use them as <span className="font-mono text-[11.5px] text-ink-2 not-italic">{"{field}"}</span> in template()
+          fields <span className="font-mono text-[11.5px] text-ink-2 not-italic">{pathsOf(dataItems(src).items).join(", ") || "(text items)"}</span> — use them as <span className="font-mono text-[11.5px] text-ink-2 not-italic">{"{field}"}</span> in template() or pick(); nested ones read like jq, <span className="font-mono text-[11.5px] text-ink-2 not-italic">{"{.a.b[0]}"}</span>
         </div>
       )}
       {preview && (
@@ -579,7 +580,7 @@ function Insertion({ pos }: { pos: number }) {
   const info = insertionInfo(fn);
   return (
     <Dialog
-      title={fn === "var" ? "Insert a variable" : `${info?.icon ?? ""} ${info?.label ?? fn}`}
+      title={fn === "var" ? "Insert a variable" : (info?.label ?? fn)}
       wide={fn === "var" && Object.keys(mergedVars(s.ws, currentProject(s))).length > 6}
       testid="insertion-dialog"
       footer={
@@ -838,7 +839,7 @@ function Settings({ tab: initial }: { tab?: string }) {
       {tab === "variables" && (
         <div className="flex flex-col gap-3 pt-1">
           <p className="font-serif text-[15px] text-ink-3 italic">
-            Workspace variables, available everywhere as <code>{'{{ var("name") }}'}</code>. A browser can't read your hostname, so set it here if you need it. Projects can override these.
+            Workspace variables, available everywhere as <code>{'{{ var("name") }}'}</code>. A browser can't read your hostname, so set it here if you need it. Workflows can override these.
           </p>
           <KeyValues value={st.vars} onChange={(vars) => patchWorkspace({ vars })} testid="workspace-vars" />
         </div>
@@ -945,7 +946,9 @@ export function saveSelectionToLibrary(scope: "library" | "project" = "library",
   if (one && (one.k === "line" || one.k === "directive")) {
     kind = "directive";
     const { from, to, empty } = st.selection;
-    text = empty || sectionPos !== undefined ? inlinePlainFmt(one) : st.doc.textBetween(from, to, "\n");
+    // a partial selection keeps its {{ }} insertions (textBetween would drop them)
+    const part = st.doc.slice(from, to).content;
+    text = empty || sectionPos !== undefined ? inlinePlainFmt(one) : part.firstChild?.isInline ? inlinePlainFmt({ k: "line", content: inlineFromPM(st.schema.nodes.line.create(null, part)) }) : st.doc.textBetween(from, to, "\n");
     if (!text.trim()) text = inlinePlainFmt(one);
   } else if (one && one.k === "section") {
     kind = "section";

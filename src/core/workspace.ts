@@ -25,6 +25,8 @@ export interface WorkspaceSettings {
   types: string[];
   vars: Record<string, string>;
   endpoints: Endpoint[];
+  /** Workflow (project) order in the picker; any not listed follow alphabetically. */
+  projectOrder?: string[];
 }
 
 export interface RunSettings {
@@ -218,7 +220,11 @@ export function buildWorkspace(files: Map<string, string>): Workspace {
     p.runs.sort((a, b) => b.time.localeCompare(a.time));
   }
   blocks.sort((a, b) => a.key.localeCompare(b.key) || a.flavor.localeCompare(b.flavor));
-  return { settings, blocks, projects: [...projects.values()].sort((a, b) => a.name.localeCompare(b.name)) };
+  const rank = (n: string) => {
+    const i = settings.projectOrder?.indexOf(n) ?? -1;
+    return i < 0 ? Infinity : i;
+  };
+  return { settings, blocks, projects: [...projects.values()].sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name)) };
 }
 
 // ---------- resolution ----------
@@ -297,4 +303,12 @@ export function extractJson(body: string): { value?: unknown; error?: string } {
   } catch (e) {
     return { error: (e as Error).message };
   }
+}
+
+/** Move `name` so it sits before `before` (or at the end when `before` is null). */
+export function moveBefore(names: string[], name: string, before: string | null): string[] {
+  const rest = names.filter((n) => n !== name);
+  const i = before === null ? rest.length : rest.indexOf(before);
+  rest.splice(i < 0 ? rest.length : i, 0, name);
+  return rest;
 }

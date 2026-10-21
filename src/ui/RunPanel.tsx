@@ -205,6 +205,19 @@ export function RunPanel() {
           {prog.live && <pre className="cx-output mt-2 max-h-[260px]">{prog.live}</pre>}
         </div>
       )}
+      {!prog.running && prog.last && prog.last.version === v.id && (
+        <div data-testid="last-output">
+          <div className="mb-1.5 flex items-baseline gap-2">
+            <span className="font-serif text-[15px] text-ink-3 italic">{prog.last.outputs > 1 ? `first of ${prog.last.outputs} outputs` : "output"}</span>
+            {prog.last.accuracy !== undefined && <span className="font-serif text-[15px] text-good">{Math.round(prog.last.accuracy * 100)}%</span>}
+            <span className="flex-1" />
+            <Button variant="link" className="text-[14px]" onClick={() => useStore.setState({ rightTab: "outputs", selectedRun: prog.last!.run })}>
+              open run
+            </Button>
+          </div>
+          <pre className="cx-output max-h-[320px]">{prog.last.text || "(empty)"}</pre>
+        </div>
+      )}
       {!prog.running && prog.error && (
         <div className="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 font-serif text-[14.5px] leading-snug text-danger" data-testid="run-error">
           {prog.error}

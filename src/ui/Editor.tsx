@@ -13,6 +13,7 @@ import { envFor } from "../core/env";
 import { mergedVars } from "../core/workspace";
 import { insertCard, insertInline } from "../editor/commands";
 import { slashItems, type MenuItem } from "./items";
+import { Icon } from "./icons";
 import { onTokenizerReady } from "../tokens/tokens";
 import { cn } from "@/lib/utils";
 
@@ -271,7 +272,7 @@ export function Editor(p: EditorProps) {
               onMouseEnter={() => setSlashIndex(i)}
               onClick={() => chooseRef.current(it)}
             >
-              <span className="w-[18px] flex-none text-center font-mono text-[11px] text-ink-3">{it.icon}</span>
+              <Icon name={it.icon} className="w-[18px] text-ink-3" />
               <span className="min-w-0 flex-1 truncate font-serif text-[16px]">{it.label}</span>
               {it.hint && <span className="max-w-[150px] truncate font-mono text-[10px] whitespace-nowrap text-ink-3">{it.hint}</span>}
             </button>

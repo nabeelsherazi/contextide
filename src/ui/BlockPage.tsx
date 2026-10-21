@@ -7,7 +7,6 @@ import { Field, Seg, Choice, FieldRow, Hint } from "./widgets";
 import { updateBlockBody, updateBlockFront, addFlavorVariant } from "../state/actions";
 import { splitFront } from "../core/doc";
 import { digest, DEFAULT_DIGEST_HEADER } from "../core/digest";
-import { KIND_ICON } from "./items";
 import { PageHeader } from "./PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,9 +58,9 @@ export function BlockPage() {
   return (
     <div data-testid="block-page">
       <PageHeader
-        kind={`${KIND_ICON[b.kind]} ${b.kind}${b.type ? ` · ${b.type}` : ""}`}
+        kind={`${b.kind}${b.type ? ` · ${b.type}` : ""}`}
         title={b.fn}
-        right={<Badge variant="outline">{b.scope === "project" ? `project: ${b.project}` : "library"}</Badge>}
+        right={<Badge variant="outline">{b.scope === "project" ? `workflow: ${b.project}` : "library"}</Badge>}
       />
       <div className="mb-3 flex flex-wrap items-center gap-2" data-testid="variant-tabs">
         <Tabs value={b.file} onValueChange={(f) => open(f, variants.find((v) => v.file === f)?.flavor ?? "general")}>

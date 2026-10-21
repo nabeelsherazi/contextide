@@ -22,4 +22,22 @@ test("cards", async ({ page }) => {
   await page.screenshot({ path: `${dir}/22-var-picker-${theme}.png` });
   await page.keyboard.press("Escape");
   await page.screenshot({ path: `${dir}/23-cards-${theme}.png` });
+  await page.getByTestId("project-select").click();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/24-picker-${theme}.png` });
+  await page.getByTestId("workflow-merchant-categorizer").click({ button: "right" });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/25-workflow-menu-${theme}.png` });
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await page.route("http://localhost:1234/v1/chat/completions", (r) =>
+    r.fulfill({ status: 200, headers: { "access-control-allow-origin": "*", "content-type": "application/json" }, body: JSON.stringify({ choices: [{ message: { content: "SQ *JOE COFFEE COMPANY -> food.coffee\nNETFLIX.COM -> fun.streaming" } }] }) }),
+  );
+  await page.getByTestId("run").click();
+  await page.getByTestId("last-output").waitFor();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/26-last-output-${theme}.png` });
+  await page.getByTestId("new-data").click();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${dir}/27-new-data-${theme}.png` });
 });

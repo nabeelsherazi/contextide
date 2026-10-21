@@ -5,6 +5,7 @@ const toggleTheme = () => setPrefs({ theme: document.documentElement.getAttribut
 import { activeEditor, runCommand } from "../editor/active";
 import * as cmd from "../editor/commands";
 import { allItems } from "./items";
+import { Icon } from "./icons";
 import { applyItem } from "./Editor";
 import { startRunFromPanel } from "./RunPanel";
 import { saveSelectionToLibrary } from "./modals/Modals";
@@ -31,7 +32,7 @@ export function Palette() {
             <CommandItem onSelect={act(() => startRunFromPanel())}>Run current version<CommandShortcut>⌘↵</CommandShortcut></CommandItem>
             <CommandItem onSelect={act(() => toggle("rendered"))}>Toggle rendered view<CommandShortcut>⌘⇧R</CommandShortcut></CommandItem>
             <CommandItem onSelect={act(() => openModal({ t: "new-version", fork: s.version ?? undefined }))}>New version (fork)</CommandItem>
-            <CommandItem onSelect={act(() => openModal({ t: "new-project" }))}>New project</CommandItem>
+            <CommandItem onSelect={act(() => openModal({ t: "new-project" }))}>New workflow</CommandItem>
             <CommandItem onSelect={act(() => openModal({ t: "new-data" }))}>New data source</CommandItem>
             <CommandItem onSelect={act(() => openModal({ t: "new-block", kind: "directive" }))}>New library directive</CommandItem>
             <CommandItem onSelect={act(() => openModal({ t: "new-block", kind: "section" }))}>New library section</CommandItem>
@@ -46,7 +47,7 @@ export function Palette() {
               Switch to {document.documentElement.getAttribute("data-theme") === "light" ? "night" : "day"}
             </CommandItem>
             <CommandItem onSelect={act(() => openModal({ t: "settings", tab: "endpoints" }))}>Settings: endpoints</CommandItem>
-            <CommandItem onSelect={act(() => useStore.setState({ view: { t: "project" } }))}>Project settings & scoring</CommandItem>
+            <CommandItem onSelect={act(() => useStore.setState({ view: { t: "project" } }))}>Workflow settings & scoring</CommandItem>
           </CommandGroup>
           {ed && (
             <CommandGroup heading="Edit">
@@ -63,7 +64,7 @@ export function Palette() {
             <CommandGroup heading="Insert">
               {allItems(s.ws, s.project ?? undefined, flavor).map((it) => (
                 <CommandItem key={it.id} value={`insert ${it.group} ${it.label} ${it.hint ?? ""}`} onSelect={act(() => applyItem(activeEditor()!.view, it))}>
-                  <span className="w-[18px] text-center text-ink-3">{it.icon}</span> {it.label} <CommandShortcut>{it.group}</CommandShortcut>
+                  <Icon name={it.icon} className="text-ink-3" /> {it.label} <CommandShortcut>{it.group}</CommandShortcut>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -75,8 +76,8 @@ export function Palette() {
               </CommandItem>
             ))}
             {s.ws.projects.map((x) => (
-              <CommandItem key={x.name} value={`project ${x.name}`} onSelect={act(() => setProject(x.name))}>
-                Project {x.name}
+              <CommandItem key={x.name} value={`workflow ${x.name}`} onSelect={act(() => setProject(x.name))}>
+                Workflow {x.name}
               </CommandItem>
             ))}
             {p?.data.map((d) => (
