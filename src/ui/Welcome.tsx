@@ -15,6 +15,8 @@ async function seedIfEmpty(vfs: ReturnType<typeof handleVfs>, withSample: boolea
 
 export function Welcome() {
   const [saved, setSaved] = useState<Saved | null | undefined>(undefined);
+  // true while we look for the last workspace and try to reopen it, so a reload never flashes this page
+  const [checking, setChecking] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [pendingInit, setPendingInit] = useState<FileSystemDirectoryHandle | null>(null);
   const supported = fsAccessSupported();
@@ -26,7 +28,8 @@ export function Welcome() {
         if (s?.kind === "folder" && (await hasPermission(s.handle, false))) await openVfs(handleVfs(s.handle, "folder"));
         else if (s?.kind === "browser") await openVfs(handleVfs(await browserWorkspaceRoot(s.name), "browser"));
       })
-      .catch(() => setSaved(null));
+      .catch(() => setSaved(null))
+      .finally(() => setChecking(false));
   }, []);
 
   const openFolder = async () => {
@@ -67,6 +70,7 @@ export function Welcome() {
     await openVfs(vfs);
   };
 
+  if (checking) return null;
   return (
     <div className="cx-welcome">
       <div className="cx-welcome-day" aria-hidden />
