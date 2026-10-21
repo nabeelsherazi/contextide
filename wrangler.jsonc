@@ -1,0 +1,11 @@
+// An assets-only Worker: Cloudflare serves dist/ as-is, no server code.
+{
+  "name": "contextide",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./dist", "not_found_handling": "single-page-application" },
+  // One origin only. Browser workspaces and API keys live in origin storage, so a second URL
+  // (workers.dev, preview URLs) would show people an empty app.
+  "routes": [{ "pattern": "contextide.nabeelsherazi.com", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false
+}

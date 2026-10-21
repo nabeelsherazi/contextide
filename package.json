@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "test:all": "vitest run && playwright test"
+    "test:all": "vitest run && playwright test",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
@@ -59,6 +60,8 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "vite-plugin-pwa": "^2.0.0",
-    "vitest": "^5.0.5"
-  }
+    "vitest": "^5.0.5",
+    "wrangler": "^4.151.3"
+  },
+  "license": "MIT"
 }

@@ -3,6 +3,8 @@
 A writing desk for context engineering: compose LLM prompts from reusable **blocks**, A/B test
 **versions**, and run them against OpenAI-compatible endpoints. Everything lives as plain text in a folder.
 
+Use it at **[contextide.nabeelsherazi.com](https://contextide.nabeelsherazi.com)**. It runs entirely in your browser: no account, and nothing is sent anywhere except the LLM endpoints you configure.
+
 - **What it does, and the file formats:** [SPEC.md](SPEC.md). That is the single reference for behavior; this README is for working on the code.
 - **Stack:** Vite + React 19 + TypeScript, ProseMirror for the editor, zustand for state, Tailwind v4 + shadcn/ui (Radix) for the UI chrome. It's a static PWA (vite-plugin-pwa).
 
@@ -15,6 +17,13 @@ npm test             # vitest: core, editor commands + layout, runner (fast, no 
 npm run test:e2e     # playwright: headless chromium, fresh browser-storage workspace per test, mocked LLMs
 npm run build        # typecheck + static PWA in dist/
 ```
+
+## Deploy
+
+The site is an assets-only Cloudflare Worker (`wrangler.jsonc`) serving `dist/` on one custom domain.
+Pushes to `main` deploy through Workers Builds; `npm run deploy` does the same by hand. `public/_headers`
+marks the hashed `assets/` as immutable. Keep a single origin: browser workspaces and API keys live in
+origin storage, so a second URL would look like an empty app.
 
 ## Where things live
 
@@ -80,3 +89,7 @@ changes into a new `Workspace`.
 - **Slash menu.** The **+** button opens it with `auto: true`; dismissing it removes the `/` it typed. The query is always derived from the document, so fast typing can't race the menu.
 - **Flavor resolution** is only in `workspace.ts` (`resolveBlock`, `variantsOf`). Rendering goes through `envFor` (`env.ts`).
 - **Keep the repo free of personal data.** The workspace README and seed content in `src/seed.ts` ship to every user.
+
+## License
+
+[MIT](LICENSE)
