@@ -1,5 +1,7 @@
 # ContextIDE
 
+![vibecoded with: claude opus 5.5](https://img.shields.io/badge/vibecoded%20with:-Claude%20Opus%205.5-D97757?logo=claude)
+
 A writing desk for context engineering: compose LLM prompts from reusable **blocks**, A/B test
 **versions**, and run them against OpenAI-compatible endpoints. Everything lives as plain text in a folder.
 
