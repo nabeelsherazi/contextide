@@ -71,6 +71,18 @@ test("drag a library block onto the page", async ({ page }) => {
   expect(await editorText(page)).toContain('{% use "directive:tone/address-as-you" %}');
 });
 
+test("tool and schema cards render and switch mode", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  const target = page.locator(".cx-text", { hasText: "Answer with one line per merchant" });
+  await page.getByTestId("block-tool:lookup-merchant").dragTo(target, { targetPosition: { x: 20, y: 4 } });
+  await page.getByTestId("block-schema:label").dragTo(target, { targetPosition: { x: 20, y: 4 } });
+  await expect(page.locator(".cx-chip.cx-tool")).toBeVisible();
+  await expect(page.locator(".cx-chip.cx-schema")).toBeVisible();
+  expect(await editorText(page)).toMatch(/\{% tool "lookup-merchant" %\}/);
+  expect(errors).toEqual([]);
+});
+
 test("drag a card by its handle to reorder", async ({ page }) => {
   const card = page.locator(".cx-editor > .cx-message > .cx-message-body > .cx-line", { hasText: "Answer with one line" });
   // centre the target line, so both it and the card are on screen (not under the top bar)

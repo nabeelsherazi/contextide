@@ -303,7 +303,7 @@ abstract class ChipView implements NodeView {
     protected view: EditorView,
     protected getPos: () => number | undefined,
     protected ctx: EditorCtx,
-    kind: string,
+    protected kind: string, // a parameter property here, not in a subclass: render() runs below, before a subclass's fields exist
   ) {
     this.dom = h("div", `cx-card cx-chip cx-${kind}`);
     this.body = h("div", "cx-chip-body");
@@ -461,9 +461,14 @@ const MODES: Record<string, [string, string][]> = {
 };
 
 class ToolSchemaView extends ChipView {
-  // Read from the node: ChipView's constructor calls render() before a subclass field would be set.
-  private get kind() {
-    return this.node.type.name as "tool" | "schema";
+  constructor(
+    node: PMNode,
+    view: EditorView,
+    getPos: () => number | undefined,
+    ctx: EditorCtx,
+    kind: "tool" | "schema",
+  ) {
+    super(node, view, getPos, ctx, kind);
   }
   render() {
     this.setMuted();
@@ -486,7 +491,7 @@ class ToolSchemaView extends ChipView {
   }
   activate() {
     const pos = this.getPos();
-    if (pos !== undefined) this.ctx.open(this.kind, pos);
+    if (pos !== undefined) this.ctx.open(this.kind as "tool" | "schema", pos);
   }
 }
 
