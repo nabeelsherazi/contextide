@@ -39,6 +39,10 @@ export interface RunSettings {
   stop?: string[];
   stream?: boolean;
   extra?: Record<string, unknown>;
+  /** tool loop: most rounds of tool calls answered before the model must reply (default 4) */
+  toolRounds?: number;
+  /** tool loop: end with one turn without tools, so a response_format schema can apply */
+  finalNoTools?: boolean;
 }
 
 export interface ProjectSettings {

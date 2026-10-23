@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import { useStore, setVersion, openModal, removeFile, currentProject } from "../state/store";
-import { variantsOf, usages, extractJson } from "../core/workspace";
+import { variantsOf, usages, extractJson, type Block } from "../core/workspace";
 import { Editor } from "./Editor";
 import { Field, Seg, Choice, FieldRow, Hint } from "./widgets";
 import { updateBlockBody, updateBlockFront, addFlavorVariant } from "../state/actions";
 import { splitFront } from "../core/doc";
 import { digest, DEFAULT_DIGEST_HEADER } from "../core/digest";
+import { defaultArg } from "../core/tools";
 import { PageHeader } from "./PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,71 @@ function JsonBody(p: { file: string; body: string; kind: "tool" | "schema"; head
           <pre className="cx-r-json">{digest(parsed.value, p.header)}</pre>
         </>
       )}
+    </div>
+  );
+}
+
+/** How the runner answers calls to this tool: from a data source, or by posting to a url. */
+function ToolHandlerFields({ b, data }: { b: Block; data: string[] }) {
+  const f = b.front;
+  const kind = f.handler === "lookup" || f.handler === "http" ? f.handler : "none";
+  const set = (patch: Record<string, unknown>) => updateBlockFront(b.file, patch);
+  const str = (v: unknown) => (v === undefined || v === null ? "" : String(v));
+  const key = str(f.key) || "id";
+  return (
+    <div className="mb-5 flex max-w-[var(--page-width)] flex-col gap-2.5" data-testid="tool-handler">
+      <div className="flex flex-wrap items-end gap-x-4 gap-y-2.5">
+        <FieldRow label="handler">
+          <Seg
+            value={kind}
+            options={[
+              ["none", "none"],
+              ["lookup", "lookup"],
+              ["http", "http"],
+            ]}
+            onChange={(v) => set({ handler: v === "none" ? undefined : v })}
+            testid="tool-handler-kind"
+          />
+        </FieldRow>
+        {kind === "lookup" && (
+          <>
+            <FieldRow label="source" className="min-w-[140px]">
+              <Field value={str(f.source)} list="cx-tool-sources" placeholder="data source" onCommit={(v) => set({ source: v })} className="font-mono text-[12.5px] placeholder:font-serif" testid="tool-source" />
+            </FieldRow>
+            <FieldRow label="key" className="min-w-[120px]">
+              <Field value={str(f.key)} placeholder="id" onCommit={(v) => set({ key: v })} className="font-mono text-[12.5px] placeholder:font-serif" testid="tool-key" />
+            </FieldRow>
+            <FieldRow label="argument" className="min-w-[120px]">
+              <Field value={str(f.arg)} placeholder={defaultArg(key)} onCommit={(v) => set({ arg: v })} className="font-mono text-[12.5px] placeholder:font-serif" />
+            </FieldRow>
+          </>
+        )}
+        {kind === "http" && (
+          <FieldRow label="url" className="min-w-[260px] flex-1">
+            <Field value={str(f.url)} placeholder="https://…" onCommit={(v) => set({ url: v })} className="font-mono text-[12.5px] placeholder:font-serif" testid="tool-url" />
+          </FieldRow>
+        )}
+      </div>
+      {kind === "lookup" && (
+        <div className="flex flex-wrap items-end gap-x-4 gap-y-2.5">
+          <FieldRow label="return" className="min-w-[220px] flex-1">
+            <Field value={str(f.return)} placeholder="the record as JSON" onCommit={(v) => set({ return: v })} className="font-mono text-[12.5px] placeholder:font-serif" testid="tool-return" />
+          </FieldRow>
+          <FieldRow label="when nothing matches" className="min-w-[220px] flex-1">
+            <Field value={str(f.notFound)} placeholder="No … record with … = …" onCommit={(v) => set({ notFound: v })} className="font-mono text-[12.5px] placeholder:font-serif" />
+          </FieldRow>
+        </div>
+      )}
+      <Hint className="my-0">
+        {kind === "none" && "Without a handler, a call to this tool ends the tool loop and the call is shown as the output."}
+        {kind === "lookup" && "Finds the record whose key equals the call's argument (jq-style paths work for both) and returns the template filled from it, like the template transform. The not-found message is filled from the arguments."}
+        {kind === "http" && "POSTs the arguments as JSON and returns the response body. The browser calls it directly, so the server must allow CORS."}
+      </Hint>
+      <datalist id="cx-tool-sources">
+        {data.map((d) => (
+          <option key={d} value={d} />
+        ))}
+      </datalist>
     </div>
   );
 }
@@ -156,6 +222,7 @@ export function BlockPage() {
           ))}
         </datalist>
       </div>
+      {b.kind === "tool" && <ToolHandlerFields b={b} data={p?.data.map((d) => d.name) ?? []} />}
       {b.kind === "tool" || b.kind === "schema" ? (
         <JsonBody file={b.file} body={body} kind={b.kind} header={String(b.front.digestHeader ?? DEFAULT_DIGEST_HEADER)} />
       ) : (

@@ -7,6 +7,7 @@ import type { Item } from "./data";
 import type { Block } from "./workspace";
 import { extractJson } from "./workspace";
 import { digest, DEFAULT_DIGEST_HEADER } from "./digest";
+import { type ToolHandler, toolHandler, handlerProblem } from "./tools";
 
 export interface RenderEnv {
   flavor: string;
@@ -53,6 +54,8 @@ export interface ToolDef {
 export interface Rendered {
   messages: RenderedMessage[];
   tools: ToolDef[];
+  /** how the runner answers each API tool, by function name; a call to a tool without one ends the loop */
+  toolHandlers: Record<string, ToolHandler>;
   responseFormat?: { type: "json_schema"; json_schema: { name: string; schema: unknown; strict?: boolean } };
   warnings: Warning[];
   /** item count per data card id, after the pipeline */
@@ -70,6 +73,7 @@ export const resolveFrame = (f: Frame, flavor: string): Exclude<Frame, "auto"> =
 export function render(messages: Message[], env: RenderEnv): Rendered {
   const warnings: Warning[] = [];
   const tools: ToolDef[] = [];
+  const toolHandlers: Record<string, ToolHandler> = {};
   let responseFormat: Rendered["responseFormat"];
   const dataCounts: Record<string, number> = {};
   const cards: string[] = [];
@@ -160,7 +164,15 @@ export function render(messages: Message[], env: RenderEnv): Rendered {
           if (params.error) warnings.push({ id, level: "error", msg: `tool ${n.name}: ${params.error}` });
           const name = String(b.front.name ?? b.path.split("/").pop());
           const description = b.front.description ? String(b.front.description) : undefined;
-          if (n.mode !== "text") tools.push({ type: "function", function: { name, description, parameters: params.value ?? {} } });
+          if (n.mode !== "text") {
+            tools.push({ type: "function", function: { name, description, parameters: params.value ?? {} } });
+            const h = toolHandler(b);
+            if (h) {
+              toolHandlers[name] = h;
+              const problem = handlerProblem(h, env);
+              if (problem) warnings.push({ id, level: "warn", msg: `tool ${name}: ${problem}` });
+            }
+          }
           if (n.mode !== "api") {
             const text = [`Tool: ${name}`, description ?? "", `Parameters (JSON schema): ${JSON.stringify(params.value ?? {})}`].filter(Boolean).join("\n");
             out.push(...textLines(text, id, "tool", false));
@@ -221,7 +233,7 @@ export function render(messages: Message[], env: RenderEnv): Rendered {
     }
     out.push({ role: m.role, segments, text });
   });
-  return { messages: out, tools, responseFormat, warnings, dataCounts, cards, dataShown };
+  return { messages: out, tools, toolHandlers, responseFormat, warnings, dataCounts, cards, dataShown };
 }
 
 /** The stable prefix: everything before the first dynamic segment, across messages in order. */

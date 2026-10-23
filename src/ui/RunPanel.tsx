@@ -48,6 +48,7 @@ export function RunPanel() {
   const fanSource = o.fanSource || fanSources.find((d) => d.name !== "categories")?.name || fanSources[0]?.name || "";
   const messages = activeEditor()?.key === v.file ? docFromPM(activeEditor()!.view.state.doc) : v.doc.messages;
   const nAblate = o.mode === "ablation" ? ablationTargets(messages).length : 0;
+  const tools = ep?.style === "chat" ? (s.analysis?.rendered.tools ?? []) : [];
 
   const loadModels = async () => {
     if (!ep) return;
@@ -126,6 +127,42 @@ export function RunPanel() {
           </CheckRow>
         </div>
       </section>
+
+      {tools.length > 0 && (
+        <section className="flex flex-col gap-3" data-testid="tool-loop">
+          <Eyebrow>Tools</Eyebrow>
+          <ul className="flex flex-col gap-1">
+            {tools.map((t) => {
+              const h = s.analysis!.rendered.toolHandlers[t.function.name];
+              return (
+                <li key={t.function.name} className="flex items-baseline gap-2 font-mono text-[11.5px]">
+                  <span className="text-gold">{t.function.name}</span>
+                  <span className="min-w-0 flex-1 truncate font-serif text-[14.5px] text-ink-3 italic">
+                    {!h ? "no handler: a call to it ends the loop" : h.kind === "lookup" ? `looks up ${h.source} by ${h.key}` : `posts to ${h.url}`}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="grid grid-cols-[1fr_2fr] items-end gap-3">
+            <FieldRow label="tool rounds">
+              <NumField value={rs.toolRounds} placeholder="4" onCommit={(n) => set({ toolRounds: n === undefined ? undefined : Math.max(0, Math.min(50, Math.round(n))) })} testid="tool-rounds" />
+            </FieldRow>
+            <div className="pb-2">
+              <CheckRow checked={!!rs.finalNoTools} onChange={(c) => set({ finalNoTools: c || undefined })} testid="final-no-tools">
+                final turn without tools
+              </CheckRow>
+            </div>
+          </div>
+          <Hint>
+            {rs.finalNoTools
+              ? s.analysis?.rendered.responseFormat
+                ? "The answer comes from one last call with no tools, where the schema applies."
+                : "After the last round the model is asked once more, with no tools, for its answer."
+              : "Calls with a handler are answered and the model is called again, up to this many rounds."}
+          </Hint>
+        </section>
+      )}
 
       <section className="flex flex-col gap-3">
         <Eyebrow>Mode</Eyebrow>

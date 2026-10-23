@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Star, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import { useStore, currentProject, openModal } from "../state/store";
 import { updateRunMeta, deleteRun } from "../state/actions";
-import type { RunRecord } from "../core/runs";
+import type { RunRecord, RunTurn } from "../core/runs";
 import { Field, Choice, CheckRow, Hint } from "./widgets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,44 @@ export function Fold(p: { title: React.ReactNode; children: React.ReactNode; def
       </CollapsibleTrigger>
       <CollapsibleContent>{p.children}</CollapsibleContent>
     </Collapsible>
+  );
+}
+
+const argsText = (a: unknown) => (typeof a === "string" ? a : JSON.stringify(a));
+
+/** The tool loop as turns: what the model said, each call it made, and what came back. */
+function Transcript({ turns }: { turns: RunTurn[] }) {
+  const calls = turns.reduce((n, t) => n + (t.calls?.length ?? 0), 0);
+  return (
+    <Fold defaultOpen title={`${turns.length} turn${turns.length === 1 ? "" : "s"} · ${calls} tool call${calls === 1 ? "" : "s"}`}>
+      <ol className="flex list-none flex-col gap-3 pt-1.5 pb-1 pl-0" data-testid="transcript">
+        {turns.map((t, i) => (
+          <li key={i} className="border-l border-rule pl-3" data-testid="turn">
+            <div className="font-mono text-[10.5px] text-ink-3">
+              turn {i + 1}
+              {t.noTools && " · without tools"}
+              {t.usage?.prompt_tokens !== undefined && ` · ${t.usage.prompt_tokens} in / ${t.usage.completion_tokens ?? "?"} out`}
+            </div>
+            {t.text && <pre className="cx-output cx-small">{t.text}</pre>}
+            {t.calls?.map((c, j) => (
+              <div key={j} className="mt-2" data-testid="tool-call">
+                <div className="truncate font-mono text-[11.5px]" title={argsText(c.args)}>
+                  <span className="text-gold">{c.name}</span>
+                  <span className="text-ink-3">(</span>
+                  <span className="text-ink-2">{argsText(c.args)}</span>
+                  <span className="text-ink-3">)</span>
+                </div>
+                {c.result !== undefined ? (
+                  <pre className={cn("cx-output cx-small max-h-[180px]", c.error && "text-danger")}>{c.result}</pre>
+                ) : (
+                  <div className="font-serif text-[14px] text-ink-3 italic">not answered</div>
+                )}
+              </div>
+            ))}
+          </li>
+        ))}
+      </ol>
+    </Fold>
   );
 }
 
@@ -84,6 +122,7 @@ function RunDetail({ r, onBack }: { r: RunRecord; onBack(): void }) {
             {o.ms !== undefined && `${(o.ms / 1000).toFixed(1)}s`}
             {o.usage?.prompt_tokens !== undefined && ` · ${o.usage.prompt_tokens} in / ${o.usage.completion_tokens ?? "?"} out`}
           </div>
+          {o.turns && <Transcript turns={o.turns} />}
         </>
       )}
       {r.misses && r.misses.length > 0 && (

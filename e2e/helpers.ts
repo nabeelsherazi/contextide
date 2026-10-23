@@ -57,3 +57,42 @@ export async function choose(page: Page, testid: string, value: string) {
   await page.getByTestId(testid).click();
   await page.locator(`[role=option][data-value="${value}"]`).click();
 }
+
+export const TOOL_DEMO = "projects/tool-demo";
+const P = TOOL_DEMO;
+
+/** A small workflow whose version offers a lookup tool over its own data. */
+export async function toolWorkflow(page: Page) {
+  const files: Record<string, string> = {
+    [`${P}/project.json`]: JSON.stringify({ run: { endpoint: "lmstudio", temperature: 0 } }),
+    [`${P}/data/units.jsonl`]: '{"handle":"u1","full":"The first unit, in full."}\n{"handle":"u2","full":"The second unit, in full."}\n',
+    [`${P}/blocks/tools/expand.md`]:
+      '---\nname: expand\ndescription: Read a unit in full\nhandler: lookup\nsource: units\nkey: handle\nreturn: "{full}"\nnotFound: "No unit {handle}."\n---\n```json\n{"type":"object","properties":{"handle":{"type":"string"}},"required":["handle"]}\n```\n',
+    [`${P}/versions/A.md`]: '---\ntitle: A\n---\nSummarize the units: {{ data("units") | template("{handle}") | join(", ") }}\n{% tool "expand" mode="api" %}\n',
+  };
+  for (const [p, t] of Object.entries(files)) await hook(page, "writeDisk", p, t);
+  await page.getByTestId("project-select").click();
+  await page.getByTestId("workflow-tool-demo").click();
+  await expect(page.getByTestId("version-tab-A")).toBeVisible();
+}
+
+/** Calls expand twice (one miss) on a fresh conversation, then answers from the tool results. */
+export async function mockToolLLM(page: Page) {
+  const calls: any[] = [];
+  await page.route("http://localhost:1234/v1/chat/completions", async (route) => {
+    const body = route.request().postDataJSON();
+    calls.push(body);
+    const results = body.messages.filter((m: any) => m.role === "tool");
+    const message = results.length
+      ? { content: `Summary from ${results.length} lookups: ${results.map((m: any) => m.content).join(" / ")}` }
+      : {
+          content: null,
+          tool_calls: [
+            { id: "c1", type: "function", function: { name: "expand", arguments: '{"handle":"u1"}' } },
+            { id: "c2", type: "function", function: { name: "expand", arguments: '{"handle":"u7"}' } },
+          ],
+        };
+    await route.fulfill({ status: 200, headers: { "access-control-allow-origin": "*", "content-type": "application/json" }, body: JSON.stringify({ choices: [{ message }] }) });
+  });
+  return calls;
+}

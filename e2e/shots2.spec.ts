@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-import { boot, choose } from "./helpers";
+import { boot, choose, toolWorkflow, mockToolLLM } from "./helpers";
 const dir = process.env.SHOTS!;
 test.skip(!dir, "screenshots only on demand");
 test.use({ deviceScaleFactor: Number(process.env.SCALE ?? 1) });
@@ -40,4 +40,24 @@ test("cards", async ({ page }) => {
   await page.getByTestId("new-data").click();
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${dir}/27-new-data-${theme}.png` });
+});
+test("tools", async ({ page }) => {
+  const theme = process.env.THEME ?? "dark";
+  await page.addInitScript((t) => localStorage.setItem("contextide:prefs", JSON.stringify({ theme: t })), theme);
+  await boot(page, "tools", { expand: false });
+  await toolWorkflow(page);
+  await mockToolLLM(page);
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/28-tool-run-${theme}.png` });
+  await page.getByTestId("run").click();
+  await page.getByTestId("last-output").waitFor();
+  await page.getByTestId("tab-outputs").click();
+  await page.getByTestId("transcript").waitFor();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/29-transcript-${theme}.png` });
+  await page.getByTestId("toggle-group-tool").click();
+  await page.getByTestId("block-tool:expand").click();
+  await page.getByTestId("tool-handler").waitFor();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/30-tool-block-${theme}.png` });
 });

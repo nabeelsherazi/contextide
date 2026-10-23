@@ -2,10 +2,11 @@
 import { type Message, walk, inlinePlain } from "../core/doc";
 import { render, promptText, type Rendered } from "../core/render";
 import { envFor } from "../core/env";
-import { buildRequest, readResponse, readStreamDelta, type BuiltRequest } from "../core/request";
+import { buildRequest, continueRequest, readResponse, readStreamDelta, mergeToolCallDeltas, finishToolCalls, toolCallsText, type BuiltRequest, type ParsedResponse, type WireMessage } from "../core/request";
+import { runTool, parseArgs } from "../core/tools";
 import { type Endpoint, type RunSettings, type Workspace, type Project, type Version, dataItems } from "../core/workspace";
 import { score, type ScoreResult } from "../core/scoring";
-import { type RunMode, type RunOutput, type RunRecord, serializeRun, runFileName } from "../core/runs";
+import { type RunMode, type RunOutput, type RunRecord, type RunTurn, serializeRun, runFileName, chunkIds } from "../core/runs";
 import { hashString } from "../core/random";
 import type { Item } from "../core/data";
 import { countTokens } from "../tokens/tokens";
@@ -86,7 +87,7 @@ export function friendlyFetchError(e: unknown, url: string): string {
   return msg;
 }
 
-async function call(req: BuiltRequest, plan: RunPlan, onDelta: (s: string) => void): Promise<{ text: string; usage?: RunOutput["usage"] }> {
+async function call(req: BuiltRequest, plan: RunPlan, onDelta: (s: string) => void): Promise<ParsedResponse> {
   const f = plan.fetchImpl ?? fetch;
   const res = await f(req.url, { method: "POST", headers: req.headers, body: JSON.stringify(req.body), signal: plan.signal });
   if (!res.ok) {
@@ -104,6 +105,7 @@ async function call(req: BuiltRequest, plan: RunPlan, onDelta: (s: string) => vo
     let buf = "";
     let text = "";
     let usage: RunOutput["usage"];
+    const calls: Parameters<typeof mergeToolCallDeltas>[0] = [];
     for (;;) {
       const { value, done } = await reader.read();
       if (done) break;
@@ -119,8 +121,9 @@ async function call(req: BuiltRequest, plan: RunPlan, onDelta: (s: string) => vo
           const j = JSON.parse(data);
           if (j.usage) usage = j.usage;
           const d = readStreamDelta(j);
-          if (d) {
-            text += d;
+          if (d.toolCalls) mergeToolCallDeltas(calls, d.toolCalls);
+          if (d.text) {
+            text += d.text;
             onDelta(text);
           }
         } catch {
@@ -128,10 +131,69 @@ async function call(req: BuiltRequest, plan: RunPlan, onDelta: (s: string) => vo
         }
       }
     }
-    return { text, usage };
+    return { text, usage, toolCalls: finishToolCalls(calls) };
   }
-  const r = readResponse(await res.json());
-  return { text: r.text, usage: r.usage };
+  return readResponse(await res.json());
+}
+
+const addUsage = (a: RunOutput["usage"], b: RunOutput["usage"]): RunOutput["usage"] =>
+  !b ? a : { prompt_tokens: (a?.prompt_tokens ?? 0) + (b.prompt_tokens ?? 0), completion_tokens: (a?.completion_tokens ?? 0) + (b.completion_tokens ?? 0) };
+
+/**
+ * One output: call the model and, while it calls tools that have handlers, answer them and call
+ * again, up to `toolRounds` rounds. With `finalNoTools` the answer always comes from one last turn
+ * sent without tools (and with the schema, if any).
+ */
+async function converse(plan: RunPlan, rendered: Rendered, data: (s: string) => Item[] | undefined, first: BuiltRequest, onLive: (live: string, round: number) => void): Promise<Pick<RunOutput, "text" | "usage" | "turns" | "error">> {
+  const cap = Math.max(0, plan.settings.toolRounds ?? 4);
+  const finalTurn = !!plan.settings.finalNoTools && rendered.tools.length > 0;
+  const history: WireMessage[] = [];
+  const turns: RunTurn[] = [];
+  let usage: RunOutput["usage"];
+  let req = first;
+  let rounds = 0;
+  const done = (o: Pick<RunOutput, "text" | "error">) => ({ ...o, usage, turns: turns.some((t) => t.calls?.length) || turns.length > 1 ? turns : undefined });
+  try {
+    for (;;) {
+      const withTools = "tools" in req.body;
+      const r = await call(req, plan, (live) => onLive(live, rounds));
+      usage = addUsage(usage, r.usage);
+      const turn: RunTurn = { text: r.text, ...(r.usage ? { usage: r.usage } : {}), ...(withTools || !rendered.tools.length ? {} : { noTools: true }) };
+      turns.push(turn);
+      const calls = withTools ? r.toolCalls : undefined;
+      if (!calls) {
+        // A reply given while tools were still offered is replaced by the final turn, which carries the schema.
+        if (finalTurn && withTools && rendered.responseFormat) {
+          req = continueRequest(first, rendered, plan.settings, history, { tools: false });
+          continue;
+        }
+        return done({ text: r.text });
+      }
+      turn.calls = calls.map((c) => ({ id: c.id, name: c.function.name, args: parseArgs(c.function.arguments) }));
+      if (calls.some((c) => !rendered.toolHandlers[c.function.name])) return done({ text: toolCallsText(r.text, calls) });
+      if (rounds >= cap) {
+        if (finalTurn) {
+          req = continueRequest(first, rendered, plan.settings, history, { tools: false });
+          continue;
+        }
+        return done({ text: r.text, error: r.text ? undefined : `the model was still calling tools after ${cap} round${cap === 1 ? "" : "s"}` });
+      }
+      rounds++;
+      onLive("", rounds);
+      const results: WireMessage[] = [];
+      for (let i = 0; i < calls.length; i++) {
+        const rec = turn.calls[i];
+        const res = await runTool(rendered.toolHandlers[rec.name], rec, { data, fetchImpl: plan.fetchImpl, signal: plan.signal });
+        rec.result = res.text;
+        if (res.error) rec.error = true;
+        results.push({ role: "tool", tool_call_id: calls[i].id, content: res.text });
+      }
+      history.push({ role: "assistant", content: r.text || null, tool_calls: calls }, ...results);
+      req = continueRequest(first, rendered, plan.settings, history, { tools: true });
+    }
+  } catch (e) {
+    return done({ text: "", error: friendlyFetchError(e, req.url) });
+  }
 }
 
 function scoreOutput(plan: RunPlan, rendered: Rendered, output: string): ScoreResult | undefined {
@@ -170,15 +232,9 @@ export async function executeRun(plan: RunPlan): Promise<{ record: Omit<RunRecor
       out.mutedLabel = va.mutedLabel;
     }
     if (prompt !== firstPrompt) out.prompt = prompt;
-    try {
-      const r = await call(req, plan, (live) => plan.onProgress?.({ done: i, total: variants.length, label: va.label, live }));
-      out.text = r.text;
-      out.usage = r.usage;
-    } catch (e) {
-      out.text = "";
-      out.error = friendlyFetchError(e, req.url);
-      if (out.error === "stopped") break;
-    }
+    const r = await converse(plan, rendered, env.data, req, (live, round) => plan.onProgress?.({ done: i, total: variants.length, label: round ? `${va.label} · tool round ${round}` : va.label, live }));
+    Object.assign(out, Object.fromEntries(Object.entries(r).filter(([, x]) => x !== undefined)));
+    if (out.error === "stopped") break;
     out.ms = Math.round(performance.now() - t0);
     if (!out.error) {
       const s = scoreOutput(plan, rendered, out.text);
@@ -187,7 +243,7 @@ export async function executeRun(plan: RunPlan): Promise<{ record: Omit<RunRecor
         if (plan.mode === "whole" || plan.mode === "fanout" || (plan.mode === "ablation" && i === 0) || (plan.mode === "repeat" && i === 0)) allRows.push(...s.rows);
       }
     }
-    if (va.dataOverride) out.items = Object.values(va.dataOverride)[0].map((x) => (typeof x === "string" ? x : String(x.name ?? x.id ?? JSON.stringify(x))));
+    if (va.dataOverride) out.items = chunkIds(Object.values(va.dataOverride)[0]);
     outputs.push(out);
     plan.onProgress?.({ done: i + 1, total: variants.length, label: va.label, live: out.text });
   }
