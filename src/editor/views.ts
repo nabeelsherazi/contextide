@@ -461,14 +461,9 @@ const MODES: Record<string, [string, string][]> = {
 };
 
 class ToolSchemaView extends ChipView {
-  constructor(
-    node: PMNode,
-    view: EditorView,
-    getPos: () => number | undefined,
-    ctx: EditorCtx,
-    private kind: "tool" | "schema",
-  ) {
-    super(node, view, getPos, ctx, kind);
+  // Read from the node: ChipView's constructor calls render() before a subclass field would be set.
+  private get kind() {
+    return this.node.type.name as "tool" | "schema";
   }
   render() {
     this.setMuted();
