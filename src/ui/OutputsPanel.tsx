@@ -157,6 +157,11 @@ function RunDetail({ r, onBack }: { r: RunRecord; onBack(): void }) {
         <Button variant="outline" size="sm" onClick={() => useStore.setState({ rightTab: "diff", diff: { a: r.id, b: null, what: "output", ai: 0, bi: 0 } })}>
           Diff against…
         </Button>
+        {r.mode === "fanout" && (
+          <Button variant="outline" size="sm" className="ml-1.5" onClick={() => openModal({ t: "save-outputs", run: r.id })} data-testid="save-outputs">
+            Save as data
+          </Button>
+        )}
         <span className="flex-1" />
         <Button
           variant="ghost"

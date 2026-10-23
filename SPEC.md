@@ -200,6 +200,15 @@ cover the whole loop. Headings inside fenced blocks are content, so prompts and 
 * **Tool loop** (chat endpoints): see below. Every mode loops per output.
 * **Scoring** is set up on the project page: an answer-key data source, its id and answer fields, the item id field, an output parser (`src/core/scoring.ts`), and a match rule (exact, ignore case, or loose). An answer key may list several acceptable answers.
 * **Outputs:** each run's outputs, score, misses, rendered prompt and request. You can rate, star and annotate a run.
+* **Save outputs as data** (fan-out runs, from the run's Outputs view) writes a `.jsonl` data source with one
+  record per input row, into this workflow or another one in the workspace, so one stage's outputs become the
+  next stage's data. Each record is the row's fields (a text row becomes `{"text": …}`) plus the output: when
+  the output is JSON (bare, or in one fenced block) and an object, its fields are merged in and win over the
+  row's; any other output goes under `output`. With several rows per call, an output that is a JSON array
+  with one element per row is split across them; otherwise each row of the chunk gets the whole output. Rows
+  whose call failed are left out (the dialog says how many). The rows are read from the fan-out source as it
+  is now, and the save refuses if they no longer match the ids the run recorded. Scripts can do the same with
+  `outputsAsData(workspace, workflow, runId)` from `src/core/outputs.ts`, which returns the `.jsonl` text.
 * **Diff:** word-level diff of outputs or prompts, side by side, repeat-run variance, and an ablation ranking (click a row to jump to that card).
 * **Copy as:** request JSON, curl, or a TypeScript literal.
 * **CORS.** The browser calls the endpoint directly, so the server must allow CORS. LM Studio has a toggle; llama-server allows it by default. When the app is served over https and calls `http://localhost`, Chrome asks for Local Network Access permission.

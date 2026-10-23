@@ -6,6 +6,7 @@ import { activeEditor } from "../editor/active";
 import { executeRun, type RunPlan } from "../run/runner";
 import type { RunMode } from "../core/runs";
 import { docFromPM } from "../editor/convert";
+import { outputsAsData } from "../core/outputs";
 
 const get = useStore.getState;
 
@@ -273,6 +274,23 @@ export async function updateRunMeta(id: string, patch: { rating?: "up" | "down" 
   if (patch.starred !== undefined) next.starred = patch.starred || undefined;
   if (patch.note !== undefined) next.note = patch.note || undefined;
   await writeFile(r.file, joinFront(next, body));
+}
+
+/** Write a fan-out run's outputs, joined onto their input rows, as a .jsonl data source of `target`. */
+export async function saveOutputsAsData(runId: string, target: string, name: string): Promise<string | null> {
+  const p = currentProject();
+  const n = slug(name);
+  if (!p || !n) return null;
+  try {
+    const r = outputsAsData(get().ws, p.name, runId);
+    const path = `projects/${target}/data/${n}.jsonl`;
+    await writeFile(path, r.text);
+    toast(`Saved ${r.records.length} row${r.records.length === 1 ? "" : "s"} to ${target === p.name ? "" : target + "/"}${n}${r.skipped ? ` (${r.skipped} skipped: their calls failed)` : ""}`);
+    return path;
+  } catch (e) {
+    toast((e as Error).message);
+    return null;
+  }
 }
 
 export async function deleteRun(id: string) {

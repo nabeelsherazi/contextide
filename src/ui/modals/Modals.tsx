@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useStore, closeModal, openModal, currentProject, currentVersion, setPrefs, setKey, getKey, closeWorkspace, type Modal } from "../../state/store";
-import { createVersion, updateVersionMeta, deleteVersion, createProject, saveBlock, createDataSource, patchWorkspace, updateBlockBody, nextVersionName, versionIdFor } from "../../state/actions";
+import { createVersion, updateVersionMeta, deleteVersion, createProject, saveBlock, createDataSource, patchWorkspace, updateBlockBody, nextVersionName, versionIdFor, saveOutputsAsData } from "../../state/actions";
+import { outputsAsData } from "../../core/outputs";
 import { activeEditor } from "../../editor/active";
 import { replaceWithRef, detachRef, setCardAttrs, selectedCards } from "../../editor/commands";
 import { nodeFromPM, pipeFromString, inlineFromPM } from "../../editor/convert";
@@ -380,6 +381,71 @@ function NewData() {
         />
       </FieldRow>
       <Textarea className="h-[240px] min-h-0 resize-none font-mono text-[12.5px] whitespace-pre [field-sizing:fixed]" placeholder="Paste data here (you can also do it later)" value={text} onChange={(e) => setText(e.target.value)} data-testid="new-data-text" />
+    </Dialog>
+  );
+}
+
+function SaveOutputs({ run }: { run: string }) {
+  const s = useStore();
+  const p = currentProject(s);
+  const r = p?.runs.find((x) => x.id === run);
+  const [target, setTarget] = useState(p?.name ?? "");
+  const [name, setName] = useState(() => slug(`${r?.version ?? "run"}-outputs`));
+  const preview = useMemo(() => {
+    try {
+      return p ? outputsAsData(s.ws, p.name, run) : null;
+    } catch (e) {
+      return { error: (e as Error).message };
+    }
+  }, [s.ws, p, run]);
+  const n = slug(name);
+  const exists = !!s.ws.projects.find((x) => x.name === target)?.data.some((d) => d.name === n);
+  const ok = preview && !("error" in preview) && n && target;
+  return (
+    <Dialog
+      title="Save outputs as data"
+      wide
+      testid="save-outputs-dialog"
+      footer={
+        <>
+          <Cancel />
+          <Button
+            disabled={!ok}
+            data-testid="save-outputs-ok"
+            onClick={async () => {
+              closeModal();
+              await saveOutputsAsData(run, target, name);
+            }}
+          >
+            {exists ? "Replace" : "Save"}
+          </Button>
+        </>
+      }
+    >
+      <div className="grid grid-cols-2 gap-4">
+        <FieldRow label="into workflow">
+          <Choice value={target} onChange={setTarget} options={s.ws.projects.map((x) => x.name)} className="w-full" testid="save-outputs-target" />
+        </FieldRow>
+        <FieldRow label="data source" hint={exists && <span className="text-danger not-italic">replaces the existing {n}.jsonl</span>}>
+          <Input value={name} onChange={(e) => setName(e.target.value)} className="font-mono text-[12.5px]" data-testid="save-outputs-name" />
+        </FieldRow>
+      </div>
+      {preview && "error" in preview ? (
+        <div className="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 font-serif text-[14.5px] text-danger">{preview.error}</div>
+      ) : (
+        preview && (
+          <>
+            <p className="font-serif text-[15px] text-ink-2 italic">
+              One record per input row: the row's fields plus the output, merged in when it's a JSON object and under <code className="font-mono text-[12px] not-italic">output</code> otherwise. {preview.records.length} rows
+              {preview.skipped > 0 && `, ${preview.skipped} left out because their call failed`}.
+            </p>
+            <pre className="cx-output cx-small" data-testid="save-outputs-preview">
+              {preview.records.slice(0, 3).map((x) => JSON.stringify(x)).join("\n")}
+              {preview.records.length > 3 && "\n…"}
+            </pre>
+          </>
+        )
+      )}
     </Dialog>
   );
 }
@@ -924,6 +990,8 @@ export function Modals() {
       return <RefEdit pos={m.pos} />;
     case "settings":
       return <Settings tab={m.tab} />;
+    case "save-outputs":
+      return <SaveOutputs run={m.run} />;
     case "confirm":
       return <Confirm m={m} />;
   }

@@ -42,6 +42,7 @@ export type Modal =
   | { t: "data-pipe"; pos: number }
   | { t: "insertion"; pos: number }
   | { t: "ref-edit"; pos: number }
+  | { t: "save-outputs"; run: string }
   | { t: "confirm"; title: string; body: string; ok: string; onOk: () => void };
 
 export type RightTab = "run" | "outputs" | "diff";

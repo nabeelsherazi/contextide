@@ -60,4 +60,14 @@ test("tools", async ({ page }) => {
   await page.getByTestId("tool-handler").waitFor();
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${dir}/30-tool-block-${theme}.png` });
+  await page.getByTestId("version-tab-A").click();
+  await page.getByTestId("tab-run").click();
+  await page.getByTestId("run-mode").locator("[data-value=fanout]").click();
+  await page.getByTestId("run").click();
+  await page.getByTestId("last-output").waitFor();
+  await page.getByTestId("tab-outputs").click();
+  await page.getByTestId("save-outputs").click();
+  await page.getByTestId("save-outputs-preview").waitFor();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${dir}/31-save-outputs-${theme}.png` });
 });

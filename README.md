@@ -31,7 +31,7 @@ origin storage, so a second URL would look like an empty app.
 
 | Path | What |
 |---|---|
-| `src/core/` | Pure, DOM-free model: file format (`doc.ts`), expressions (`expr.ts`), data + transforms (`data.ts`, `pipeline.ts`), insertions, renderer (`render.ts`), schema digest, request builder, tool handlers (`tools.ts`), scoring, run files, lint, workspace model (`workspace.ts`), render env (`env.ts`). |
+| `src/core/` | Pure, DOM-free model: file format (`doc.ts`), expressions (`expr.ts`), data + transforms (`data.ts`, `pipeline.ts`), insertions, renderer (`render.ts`), schema digest, request builder, tool handlers (`tools.ts`), scoring, run files, outputs as data (`outputs.ts`), lint, workspace model (`workspace.ts`), render env (`env.ts`). |
 | `src/editor/` | ProseMirror: `schema.ts`, AST ↔ doc (`convert.ts`), **pure commands** (`commands.ts`), plugins (`plugins.ts`: keymap, slash menu, drop/paste, `{{ }}` input rule, analysis decorations), card layout (`layout.ts`), markdown styling (`markdown.ts`), node views (`views.ts`), the active-editor registry (`active.ts`). |
 | `src/run/` | Run orchestration and the tool loop (`runner.ts`), and diff, variance and ablation helpers (`compare.ts`). |
 | `src/fs/` | A small virtual filesystem over a directory handle (a real folder or OPFS), the saved-handle store, and an in-memory vfs. |
